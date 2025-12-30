@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './auth.component.scss'
 })
 export class AuthComponent {
-
+  ime = "luka";
 }
