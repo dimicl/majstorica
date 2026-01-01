@@ -1,0 +1,178 @@
+@use '../../../assets/scss/variables' as *;
+
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+  background: $color-background-dark; // Ista boja kao desna strana
+}
+
+.video-section {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  opacity: 0.3; // Malo izbledjen video
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: 
+    linear-gradient(
+      to right,
+      rgba($color-background-dark, 0.4) 0%,
+      rgba($color-background-dark, 0.4) 60%,
+      rgba($color-background-dark, 0.6) 80%,
+      $color-background-dark 100%
+    );
+  pointer-events: none;
+}
+
+.form-section {
+  width: 400px;
+  min-width: 400px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: absolute;
+  right: 100px;
+  top: 50px;
+  background: $color-background-dark;
+  box-shadow: 0 0 4px 0 rgba(228, 224, 224, 0.504);
+  border-radius: 8px;
+  z-index: 1500;
+}
+
+.tab-switch {
+  position: relative;
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 30px;
+  gap: 4px;
+}
+
+.tab-indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 100%);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px $color-blue-glow;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.tab-switch.register-active .tab-indicator {
+  transform: translateX(calc(100% + 4px));
+}
+
+.tab-btn {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover:not(.active) {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  &.active {
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+form {
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message {
+  background: $color-red-glow;
+  border: 1px solid $color-red;
+  color: $color-red;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 100%);
+  border: none;
+  color: $color-white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px $color-blue-glow;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+/* @media (max-width: 1024px) {
+  .video-section {
+    display: none;
+  }
+
+  .form-section {
+    width: 100%;
+    min-width: unset;
+    padding: 20px;
+    padding-top: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-section {
+    padding: 16px;
+    padding-top: 24px;
+  }
+
+  .tab-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+} */

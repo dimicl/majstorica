@@ -1,0 +1,161 @@
+.input-wrapper {
+  width: 100%;
+}
+
+.input-container {
+  position: relative;
+  width: 100%;
+  
+}
+
+.input-field {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 14px;
+  border: none;
+  min-height: 26px;
+  border-radius: 4px;
+  background-color: #eeeeee;
+  color: #2f2f2f;
+  outline: none;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: transparent;
+  }
+
+  &:hover {
+    background-color: #dadada;
+  }
+
+  &:focus {
+    background-color: #424242;
+    color: #e7f1ff;
+  }
+}
+
+.input-label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: 400;
+  color: #6c757d;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+// Floating label - on focus or has value
+.input-field:focus + .input-label,
+.input-wrapper.has-value .input-label {
+  top: 0;
+  transform: translateY(-100%);
+  font-size: 11px;
+  font-weight: 700;
+  color: #424242;
+  padding-bottom: 4px;
+}
+
+// Focus state
+.input-wrapper.focused .input-label {
+  color: #424242;
+}
+
+// Valid state - PLAVI INPUT
+.input-wrapper.valid .input-field {
+  background-color: rgba(13, 110, 253, 0.15);
+  border-color: #0d6efd;
+}
+
+.input-wrapper.valid .input-label {
+  color: #0d6efd;
+}
+
+// Invalid state - CRVENI INPUT
+.input-wrapper.invalid .input-field {
+  background-color: rgba(220, 53, 69, 0.15);
+  border-color: #dc3545;
+}
+
+.input-wrapper.invalid .input-label {
+  color: #dc3545;
+}
+
+// Error text
+.error-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc3545;
+}
+
+// Disabled state
+.input-wrapper.disabled .input-field {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.input-wrapper.disabled .input-label {
+  opacity: 0.6;
+}
+
+// ============================================
+// DARK THEME
+// ============================================
+.input-wrapper.dark {
+  .input-field {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: none;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &:focus {
+      background-color: #1a1a1a;
+      color: #ffffff;
+    }
+  }
+
+  .input-label {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  // Floating label dark
+  .input-field:focus + .input-label,
+  &.has-value .input-label {
+    color: #ffffff;
+  }
+
+  &.focused .input-label {
+    color: #ffffff;
+  }
+
+  // Valid dark - PLAVI INPUT
+  &.valid .input-field {
+    background-color: rgba(62, 125, 215, 0.25);
+  }
+
+  &.valid .input-label {
+    color: #3e7dd7;
+  }
+
+  // Invalid dark - CRVENI INPUT
+  &.invalid .input-field {
+    background-color: rgba(255, 107, 107, 0.25);
+  }
+
+  &.invalid .input-label {
+    color: #ff6b6b;
+  }
+
+  .error-text {
+    color: #ff6b6b;
+  }
+}

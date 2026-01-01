@@ -1,1 +1,169 @@
-<p>auth works!</p>
+<div class="auth-page">
+  <!-- Video Background Section (Left) -->
+  <div class="video-section">
+    <video 
+      autoplay 
+      muted 
+      loop 
+      playsinline
+      class="background-video">
+      <source src="assets/videos/animation.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+  </div>
+
+  <!-- Form Section (Right) -->
+  <div class="form-section">
+    <div class="background-glass w-full b-r-8 p-28 outline-none border-none">
+      <!-- Tab Switch -->
+      <div class="tab-switch" [class.register-active]="!isLoginMode">
+        <div class="tab-indicator"></div>
+        <button 
+          type="button"
+          class="tab-btn" 
+          [class.active]="isLoginMode"
+          (click)="setMode(true)">
+          Prijava
+        </button>
+        <button 
+          type="button"
+          class="tab-btn" 
+          [class.active]="!isLoginMode"
+          (click)="setMode(false)">
+          Registracija
+        </button>
+      </div>
+
+      <!-- Error poruka -->
+      @if (error$ | async; as error) {
+        <div class="error-message p-18 m-b-3 rounded text-sm text-center">
+          {{ error }}
+        </div>
+      }
+
+      <!-- Login forma -->
+      @if (isLoginMode) {
+        <ng-container *ngTemplateOutlet="loginTemplate"></ng-container>
+        
+      } @else {
+        <!-- Register forma -->
+        <ng-container *ngTemplateOutlet="registerTemplate"></ng-container>
+    }
+    </div>
+  </div>
+</div>
+
+<ng-template #loginTemplate>
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <div class="m-b-18">
+          <app-input
+            id="email"
+            type="email"
+            label="Email"
+            theme="dark"
+            errorMessage="Unesite validan email"
+            formControlName="email">
+          </app-input>
+        </div>
+
+        <div class="m-b-24">
+          <app-input
+            id="password"
+            type="password"
+            label="Lozinka"
+            theme="dark"
+            errorMessage="Lozinka mora imati min 6 karaktera"
+            formControlName="password">
+          </app-input>
+        </div>
+
+        <button type="submit" class="btn-submit w-full p-12 m-t-2 rounded text-md font-semibold" [disabled]="loginForm.invalid || (loading$ | async)">
+         
+            Prijavi se
+          
+        </button>
+      </form>
+</ng-template>
+
+<ng-template #registerTemplate>
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+        <!-- Ime i Prezime u istom redu -->
+        <div class="d-flex align-items-center gap-4">
+          <div class="flex-1 m-b-24">
+            <app-input
+              id="name"
+              type="text"
+              label="Ime"
+              theme="dark"
+              errorMessage="Ime je obavezno"
+              formControlName="name">
+            </app-input>
+          </div>
+
+          <div class="flex-1 m-b-24">
+            <app-input
+              id="lastName"
+              type="text"
+              label="Prezime"
+              theme="dark"
+              errorMessage="Prezime je obavezno"
+              formControlName="lastName">
+            </app-input>
+          </div>
+        </div>
+
+        <div class="m-b-24">
+          <app-input
+            id="reg-email"
+            type="email"
+            label="Email"
+            theme="dark"
+            errorMessage="Unesite validan email"
+            formControlName="email">
+          </app-input>
+        </div>
+
+        <div class="m-b-24">
+          <app-input
+            id="phone"
+            type="tel"
+            label="Telefon"
+            theme="dark"
+            errorMessage="Unesite validan broj telefona"
+            formControlName="phone">
+          </app-input>
+        </div>
+
+        <div class="m-b-24">
+          <app-input
+            id="reg-password"
+            type="password"
+            label="Lozinka"
+            theme="dark"
+            errorMessage="Lozinka mora imati min 6 karaktera"
+            formControlName="password">
+          </app-input>
+        </div>
+
+        <div class="m-b-24">
+          <app-input
+            id="confirmPassword"
+            type="password"
+            label="Potvrdi lozinku"
+            theme="dark"
+            [errorMessage]="registerForm.get('confirmPassword')?.errors?.['passwordMismatch'] ? 'Lozinke se ne poklapaju' : 'Potvrdite lozinku'"
+            formControlName="confirmPassword">
+          </app-input>
+        </div>
+
+        <button type="submit" class="btn-submit w-full p-12 m-t-2 rounded text-md font-semibold" [disabled]="registerForm.invalid || (loading$ | async)">
+          @if (loading$ | async) {
+            Učitavanje...
+          } @else {
+            Registruj se
+          }
+        </button>
+      </form>
+    
+
+</ng-template>

@@ -1,0 +1,45 @@
+@use 'variables' as *;
+
+// ============================================
+// TEXT - Font Size, Weight, Color KLASE
+// ============================================
+
+// Font Sizes
+.text-xs { font-size: 0.75rem; }    // 12px
+.text-sm { font-size: 0.875rem; }   // 14px
+.text-md { font-size: 1rem; }       // 16px
+.text-lg { font-size: 1.125rem; }   // 18px
+.text-xl { font-size: 1.25rem; }    // 20px
+.text-2xl { font-size: 1.5rem; }    // 24px
+.text-3xl { font-size: 1.875rem; }  // 30px
+.text-4xl { font-size: 2.25rem; }   // 36px
+
+// Font Weights
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+// Text Colors - koriste varijable
+.text-color {
+  &-white { color: $color-white; }
+  &-black { color: $color-black; }
+  &-gray { color: $color-gray; }
+  &-gray-light { color: $color-gray-light; }
+  &-gray-dark { color: $color-gray-dark; }
+  &-red { color: $color-red; }
+  &-blue { color: $color-blue; }
+  &-green { color: $color-green; }
+  &-yellow { color: $color-yellow; }
+}
+
+// Text Alignment
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+// Text Transform
+.uppercase { text-transform: uppercase; }
+.lowercase { text-transform: lowercase; }
+.capitalize { text-transform: capitalize; }

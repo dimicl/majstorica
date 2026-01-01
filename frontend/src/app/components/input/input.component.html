@@ -1,0 +1,28 @@
+<div class="input-wrapper" 
+     [class.focused]="focused()" 
+     [class.has-value]="value()" 
+     [class.disabled]="disabled()"
+     [class.valid]="ngControl?.valid && ngControl?.touched"
+     [class.invalid]="ngControl?.invalid && ngControl?.touched"
+     [class.dark]="theme() === 'dark'">
+  
+  <div class="input-container">
+    <input
+      #inputRef
+      [id]="id()"
+      [type]="type()"
+      [disabled]="disabled()"
+      [value]="value()"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+      (blur)="dispatchOnBlur()"
+      placeholder=" "
+      class="input-field"
+    />
+    <label [for]="id()" class="input-label">{{ label() }}</label>
+  </div>
+  
+  @if (showError) {
+    <span class="error-text">{{ errorMessage() }}</span>
+  }
+</div>

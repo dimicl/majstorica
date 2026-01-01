@@ -1,0 +1,84 @@
+// ============================================
+// IMPORTS - Forward all utilities
+// ============================================
+@use 'variables' as *;
+@forward 'text';
+@forward 'background';
+@forward 'spacing';
+@forward 'display';
+@forward 'sizing';
+@forward 'border';
+@forward 'global';
+
+// ============================================
+// GOOGLE FONTS - Montserrat
+// ============================================
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+// ============================================
+// CSS RESET & GLOBAL STYLES
+// ============================================
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: $color-gray-dark;
+  background-color: $color-white;
+  min-height: 100vh;
+}
+
+// ============================================
+// TIPOGRAFIJA
+// ============================================
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 0.5em;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+// ============================================
+// LISTE
+// ============================================
+
+ul, ol {
+  list-style: none;
+}
+
+// ============================================
+// TABELE
+// ============================================
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}

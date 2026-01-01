@@ -1,0 +1,99 @@
+// ============================================
+// SPACING - Padding & Margin
+// ============================================
+
+$padding-sizes: 1, 2, 3, 4, 6, 8, 9, 10, 12, 14, 15, 18, 20, 24, 28, 30, 32, 40;
+$margin-sizes: 1, 2, 4, 5, 6, 7, 8, 10, 15,16,18, 22, 24;
+$gap-sizes: 1, 2, 4, 6, 8, 20;
+
+
+.p {
+    @each $size in $padding-sizes {
+        &-#{$size} { 
+            padding: #{$size}px; 
+        }
+        &-l-#{$size} {
+            padding-left: #{$size}px;
+        }
+
+        &-r-#{$size} {
+            padding-right: #{$size}px;
+        }
+
+        &-t-#{$size} {
+            padding-top: #{$size}px;
+        }
+        &-b-#{$size} {
+            padding-bottom: #{$size}px;
+        }
+
+        &-y {
+            @each $size in $padding-sizes {
+                &-#{$size} {
+                    padding-top: #{$size}px;
+                    padding-bottom: #{$size}px;
+                }
+            }
+        }
+    
+        &-x {
+            @each $size in $padding-sizes {
+                &-#{$size} {
+                    padding-left: #{$size}px;
+                    padding-right: #{$size}px;
+                }
+            }
+        }
+    }
+}
+
+
+
+// ============================================
+// MARGIN
+// ============================================
+
+
+.m {
+    @each $size in $margin-sizes {
+        &-#{$size} {
+            margin: #{$size}px;
+        }
+        &-y-#{$size} {
+            margin-top: #{$size}px;
+            margin-bottom: #{$size}px;
+        }
+        &-x-#{$size} {
+            margin-left: #{$size}px;
+            margin-right: #{$size}px;
+        }
+        &-t-#{$size} {
+            margin-top: #{$size}px;
+        }
+        &-r-#{$size} {
+            margin-right: #{$size}px;
+        }
+        &-b-#{$size} {
+            margin-bottom: #{$size}px;
+        }
+        &-l-#{$size} {
+            margin-left: #{$size}px;
+        }
+    }
+}
+
+
+// ============================================
+// GAP (za flexbox/grid)
+// ============================================
+
+.gap {
+    @each $size in $gap-sizes {
+        &-#{$size} {
+            gap: #{$size}px;
+        }
+    }
+    &-px-4 {
+        gap: 4px;
+    }
+}
