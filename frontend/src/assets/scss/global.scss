@@ -1,7 +1,11 @@
 .outline-none {
-    outline: none !important;
+    outline: none;
 }
 
 .border-none {
-    border: none !important;
+    border: none;
 }
+
+.disable-text-selection {
+    user-select: none;
+}   

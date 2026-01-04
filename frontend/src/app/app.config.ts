@@ -7,19 +7,17 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 // Reducers
-import { authReducer } from './store/auth/auth.reducer';
+import { authReducer } from './shared/store/auth/auth.reducer';
 
 // Effects
-import { AuthEffects } from './store/auth/auth.effects';
+import { AuthEffects } from './shared/store/auth/auth.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideClientHydration(withEventReplay()),
     provideHttpClient(withFetch()),
     
     // Angular SVG Icon

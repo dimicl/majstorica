@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { AuthActions, selectAuthError, selectAuthLoading } from '../../store';
+import { AuthActions, selectAuthError, selectAuthLoading } from '../../shared/store';
 import { InputComponent } from '../../components/input/input.component';
 
 @Component({

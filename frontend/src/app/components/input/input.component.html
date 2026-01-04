@@ -1,4 +1,4 @@
-<div class="input-wrapper" 
+<div class="input-wrapper disable-text-selection" 
      [class.focused]="focused()" 
      [class.has-value]="value()" 
      [class.disabled]="disabled()"
@@ -6,7 +6,7 @@
      [class.invalid]="ngControl?.invalid && ngControl?.touched"
      [class.dark]="theme() === 'dark'">
   
-  <div class="input-container">
+  <div class="input-container disable-text-selection">
     <input
       #inputRef
       [id]="id()"

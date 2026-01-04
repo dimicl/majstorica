@@ -1,2 +1,41 @@
-// Importuj globalne stilove
-@use 'assets/scss/styles';
+// ============================================
+// IMPORTS - Forward all utilities
+// ============================================
+@use './assets/scss/variables';
+@use './assets/scss/text';
+@use './assets/scss/background';
+@use './assets/scss/spacing';
+@use './assets/scss/display';
+@use './assets/scss/sizing';
+@use './assets/scss/border';
+@use './assets/scss/global';
+@use './assets/scss/icons';
+
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+body {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}

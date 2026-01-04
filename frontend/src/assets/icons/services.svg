@@ -1,0 +1,14 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width="1em"
+  height="1em"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M6 9c1.6569 0 3-1.3431 3-3S7.6569 3 6 3 3 4.3431 3 6s1.3431 3 3 3zM6 3V0M6 12V9M0 6h3m6 0h3M2 2l2 2m4 4 2 2m0-8-2 2M4 8 2 10M18 12c1.6569 0 3-1.3431 3-3s-1.3431-3-3-3-3 1.3431-3 3 1.3431 3 3 3zM18 6V3M18 15v-3m-6-3h3m6 0h3m-10-4 2 2m4 4 2 2m0-8-2 2m-4 4-2 2M9 21c1.6569 0 3-1.3431 3-3s-1.3431-3-3-3-3 1.3431-3 3 1.3431 3 3 3zM9 15v-3M9 24v-3M3 18h3m6 0h3M5 14l2 2m4 4 2 2m0-8-2 2m-4 4-2 2"/>
+</svg>

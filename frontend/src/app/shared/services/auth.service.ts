@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { User } from '../store/models/user.model';
+import { User } from '../models/user.model';
 
 export interface LoginRequest {
   email: string;
