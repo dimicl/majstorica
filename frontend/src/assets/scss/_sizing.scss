@@ -1,0 +1,45 @@
+// ============================================
+// SIZING - Width & Height
+// ============================================
+
+// Width
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.w-screen { width: 100vw; }
+.w-50 { width: 50%; }
+.w-25 { width: 25%; }
+.w-75 { width: 75%; }
+
+// Max Width
+.max-w-sm { max-width: 384px; }
+.max-w-md { max-width: 448px; }
+.max-w-lg { max-width: 512px; }
+.max-w-xl { max-width: 576px; }
+.max-w-2xl { max-width: 672px; }
+.max-w-full { max-width: 100%; }
+
+// Height
+.h-full { height: 100%; }
+.h-auto { height: auto; }
+.h-screen { height: 100vh; }
+.min-h-screen { min-height: 100vh; }
+
+// Border Radius
+.rounded-none { border-radius: 0; }
+.rounded-sm { border-radius: 4px; }
+.rounded { border-radius: 8px; }
+.rounded-lg { border-radius: 12px; }
+.rounded-xl { border-radius: 16px; }
+.rounded-full { border-radius: 9999px; }
+
+$sizes: 1, 2, 4, 10, 14, 15, 18, 22, 26, 31, 32, 36, 116, 120;
+
+@each $size in $sizes {
+    .w-#{$size} {
+        width: #{$size}px;
+    }
+
+    .h-#{$size} {
+        height: #{$size}px;
+    }
+}

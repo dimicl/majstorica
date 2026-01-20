@@ -1,0 +1,30 @@
+@use 'variables' as *;
+
+// ============================================
+// BACKGROUND - Klase za pozadinu
+// ============================================
+
+.background-color {
+  &-white { background-color: $color-white; }
+  &-black { background-color: $color-black; }
+  &-gray { background-color: $color-gray; }
+  &-gray-light { background-color: $color-gray-light; }
+  &-gray-dark { background-color: $color-gray-dark; }
+  &-red { background-color: $color-red; }
+  &-blue { background-color: $color-blue; }
+  &-green { background-color: $color-green; }
+  &-yellow { background-color: $color-yellow; }
+}
+
+// Glass effect backgrounds
+.background-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// Dark gradient background
+.background-dark-gradient {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+

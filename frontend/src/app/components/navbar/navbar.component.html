@@ -1,0 +1,31 @@
+<div #navbar  class="sidebar disable-text-selection"  [class.expanded]="isExpanded()" (click)="expandSidebar()">
+  <div class="sidebar-brand">
+    <span class="brand-icon">🔧</span>
+    <span class="brand-text">Majstorica</span>
+  </div>
+
+  <div class="sidebar-menu">
+    @for(item of menuItems; track item.id) {
+        <div class="menu-item" [class.active]="activeNavbarItem === item.id" (click)="onItemClick(item, $event)">
+            <svg-icon
+                [src]="item.icon"
+                [ngClass]="{'new-messages': item.id === NavbarItemString.MESSAGES && isNewMessages()}"
+                class="menu-icon d-flex align-items-center justify-content-center svg-size-30"
+            ></svg-icon>
+            <span class="menu-text">{{ item.label }}</span>
+        </div>
+    }
+  </div>
+
+  <div class="sidebar-footer">
+    @for(item of bottomItems; track item.id) {
+        <div class="menu-item" [class.active]="activeNavbarItem === item.id" (click)="onItemClick(item, $event)">
+            <svg-icon
+                [src]="item.icon"
+                class="menu-icon d-flex align-items-center justify-content-center svg-size-30"
+            ></svg-icon>
+            <span class="menu-text">{{ item.label }}</span>
+        </div>
+    }
+  </div>
+</div>

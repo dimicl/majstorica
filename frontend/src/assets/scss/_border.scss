@@ -1,0 +1,9 @@
+$border-radius-sizes: 1, 2, 4, 8, 12, 16, 18, 20;
+
+.b-r {
+    @each $size in $border-radius-sizes {
+        &-#{$size} { 
+            border-radius: #{$size}px !important; 
+        }
+    }
+}

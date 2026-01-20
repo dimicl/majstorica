@@ -1,0 +1,12 @@
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  background: #f5f7fa;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 85px; // prostor za collapsed navbar (70px width + 5px left + 10px padding)
+}

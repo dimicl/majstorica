@@ -1,0 +1,105 @@
+@import '../scss/variables';
+
+@mixin svg-fill($color) {
+    svg path,
+    svg circle {
+        fill: $color !important;
+    }
+}
+
+@mixin svg-hover($color) {
+    svg path {
+        transition: fill 0.3s ease-in-out;
+    }
+
+    &:hover {
+        svg path {
+            fill: $color !important;
+        }
+    }
+}
+
+
+@mixin svg-size($width, $height) {
+    svg {
+        width: $width;
+        height: $height;
+    }
+}
+
+.svg {
+    &-fill {
+        &-black {
+            @include svg-fill($color-black);
+        }
+        &-white {
+            @include svg-fill($color-white);
+        }
+        &-gray {
+            @include svg-fill($color-gray);
+        }
+        &-gray-light {
+            @include svg-fill($color-gray-light);
+        }
+    }
+    &-hover {
+        &-black {
+            @include svg-hover($color-black);
+        }
+        &-white {
+            @include svg-hover($color-white);
+        }
+        &-gray {
+            @include svg-hover($color-gray);
+        }
+    }
+    &-size {
+        &-10 {
+            @include svg-size(10px, 10px);
+        }
+
+        &-12 {
+            @include svg-size(12px, 12px);
+        }
+
+        &-13 {
+            @include svg-size(13px, 13px);
+        }
+
+        &-14 {
+            @include svg-size(14px, 14px);
+        }
+
+        &-16 {
+            @include svg-size(16px, 16px);
+        }
+
+        &-18 {
+            @include svg-size(18px, 18px);
+        }
+
+        &-20 {
+            @include svg-size(20px, 20px);
+        }
+
+        &-22 {
+            @include svg-size(22px, 22px);
+        }
+
+        &-24 {
+            @include svg-size(24px, 24px);
+        }
+
+        &-26 {
+            @include svg-size(26px, 26px);
+        }
+
+        &-30 {
+            @include svg-size(30px, 30px);
+        }
+
+        &-40 {
+            @include svg-size(40px, 40px);
+        }
+    }
+}
