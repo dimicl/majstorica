@@ -39,7 +39,7 @@ export class AuthComponent {
   }, { validators: this.passwordMatchValidator });
 
   // Custom validator za proveru da li se lozinke poklapaju
-  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
     
@@ -52,13 +52,17 @@ export class AuthComponent {
   }
 
   // Postavlja mod (login/register)
-  setMode(isLogin: boolean): void {
+  public setMode(isLogin: boolean): void {
     this.isLoginMode = isLogin;
     this.store.dispatch(AuthActions.clearError());
+    
+    // Reset formi kada se menja mod
+    this.loginForm.reset();
+    this.registerForm.reset();
   }
 
   // Submit login forme
-  onLogin(): void {
+  public onLogin(): void {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
       this.store.dispatch(AuthActions.login({ email, password }));
@@ -66,7 +70,7 @@ export class AuthComponent {
   }
 
   // Submit register forme
-  onRegister(): void {
+  public onRegister(): void {
     if (this.registerForm.valid) {
       const { name, lastName, email, phone, password } = this.registerForm.value;
       

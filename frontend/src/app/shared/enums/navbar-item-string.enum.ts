@@ -7,7 +7,6 @@ export enum NavbarItemString {
     MESSAGES = 'messages',
     PROFILE = 'profile',
 
-
     //label
     HOME_LABEL = 'Pocetna',
     SERVICES_LABEL = 'Usluge',

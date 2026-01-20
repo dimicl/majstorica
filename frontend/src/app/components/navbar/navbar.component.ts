@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, OnInit, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, ElementRef, HostListener, inject, input, OnInit, signal, ViewChild } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 import { NavbarItem } from '../../shared/types/navbar-item.type';
@@ -28,6 +28,18 @@ export class NavbarComponent implements OnInit {
   isNewMessages = input<boolean>(false);
   activeNavbarItem: string = NavbarItemString.HOME;
 
+  @ViewChild('navbar') navbar!: ElementRef<HTMLElement>;
+  
+  @HostListener('document:click', ['$event'])
+  onClick(event: MouseEvent): void {
+    if (!this.navbar.nativeElement.contains(event.target as Node) && this.isExpanded()) {
+      console.log('click outside');
+      this.isExpanded.set(false);
+    }
+  }
+
+  constructor(private router: Router) {}
+
   ngOnInit(): void {
     this.getNavbarItems();
   }
@@ -37,9 +49,11 @@ export class NavbarComponent implements OnInit {
     
   }
 
-  onItemClick(itemId: string): void {
-    this.activeNavbarItem = itemId;
-    this.isExpanded.set(false);
+  onItemClick(item: NavbarItem, event: MouseEvent): void {
+    event.stopPropagation(); 
+    this.activeNavbarItem = item.id;
+    this.isExpanded.set(true);
+    this.router.navigateByUrl(`/${item.id}`);
   }
 
   private getNavbarItems() {

@@ -1,15 +1,30 @@
 import { Routes } from '@angular/router';
+import { AuthComponent } from './pages/auth/auth.component';
+import { MainComponent } from './pages/main/main.component';
+import { ServicesComponent } from './pages/services/services.component';
+import { TechniciansComponent } from './pages/technicians/technicians.component';
+import { ProfilComponent } from './pages/profil/profil.component';
 
 export const routes: Routes = [
   {
     path: 'login',
-    loadComponent: () =>
-      import('./pages/auth/auth.component').then((m) => m.AuthComponent),
+    component: AuthComponent,
   },
   {
     path: 'home',
-    loadComponent: () =>
-      import('./pages/main/main.component').then((m) => m.MainComponent),
+    component: MainComponent,
+  },
+  {
+    path: 'services',
+    component: ServicesComponent,
+  },
+  {
+    path: 'technicians',
+    component: TechniciansComponent,
+  },
+  {
+    path: 'profile',
+    component: ProfilComponent,
   },
   {
     path: '',

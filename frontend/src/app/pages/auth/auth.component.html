@@ -55,7 +55,7 @@
 
 <ng-template #loginTemplate>
     <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-        <div class="m-b-18">
+        <div class="m-b-24">
           <app-input
             id="email"
             type="email"
@@ -88,7 +88,7 @@
 <ng-template #registerTemplate>
     <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
         <!-- Ime i Prezime u istom redu -->
-        <div class="d-flex align-items-center gap-4">
+        <div class="d-flex align-items-start gap-4">
           <div class="flex-1 m-b-24">
             <app-input
               id="name"

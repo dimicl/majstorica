@@ -33,6 +33,13 @@ export const NAVBAR_ITEMS : NavbarItem[] = [
         label: NavbarItemString.PROFILE_LABEL,
         userType: NavbarItemUserType.ALL,
         isBottomPinned: true
+      },
+      {
+        id: NavbarItemString.REQUESTS,
+        icon: '',
+        label: NavbarItemString.REQUESTS_LABEL,
+        userType: NavbarItemUserType.TECHNICIAN,
+        isBottomPinned: false
       }
 
 ]
