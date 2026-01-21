@@ -1,1 +1,21 @@
-<p>main works!</p>
+<section class="page">
+  <header class="header">
+    <h1>Home</h1>
+
+    <div class="signalr">
+      <div class="signalr-status">
+        <strong>SignalR:</strong> {{ signalrStatus() }}
+        @if (signalrError()) {
+          <span class="error">({{ signalrError() }})</span>
+        }
+      </div>
+
+      <div class="signalr-actions">
+        <button type="button" (click)="connectSignalr()">Poveži</button>
+        <button type="button" (click)="disconnectSignalr()">Prekini</button>
+      </div>
+    </div>
+  </header>
+
+  <app-map></app-map>
+</section>

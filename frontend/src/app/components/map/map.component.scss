@@ -1,0 +1,26 @@
+.map-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.map-header {
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin-top: 4px;
+    opacity: 0.8;
+  }
+}
+
+.map {
+  width: 100%;
+  height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
