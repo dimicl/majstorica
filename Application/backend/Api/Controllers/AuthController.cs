@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+/* using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using BCrypt.Net;
 using backend.Data;
@@ -45,4 +45,4 @@ public class AuthController : ControllerBase {
         await _users.InsertOneAsync(user);    
         return Ok(user);
     }
-}
+} */

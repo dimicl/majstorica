@@ -1,4 +1,4 @@
-using MongoDB.Bson;
+/* using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using backend.Enums;
 
@@ -23,4 +23,4 @@ public class User {
     
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; }
-}
+} */

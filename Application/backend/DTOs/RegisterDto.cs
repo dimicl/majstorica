@@ -1,4 +1,4 @@
-using backend.Enums;
+/* using backend.Enums;
 
 namespace backend.DTOs;
 
@@ -8,3 +8,4 @@ public class RegisterDto {
     public Role Role { get; set; }
 }
 
+ */
