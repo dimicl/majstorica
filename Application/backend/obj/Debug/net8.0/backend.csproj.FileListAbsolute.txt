@@ -40,3 +40,15 @@ C:\faks\AIPS\Majstorica\backend\bin\Debug\net8.0\MongoDB.Driver.dll
 C:\faks\AIPS\Majstorica\backend\bin\Debug\net8.0\SharpCompress.dll
 C:\faks\AIPS\Majstorica\backend\bin\Debug\net8.0\Snappier.dll
 C:\faks\AIPS\Majstorica\backend\bin\Debug\net8.0\ZstdSharp.dll
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.csproj.AssemblyReference.cache
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.GeneratedMSBuildEditorConfig.editorconfig
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.AssemblyInfoInputs.cache
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.AssemblyInfo.cs
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.csproj.CoreCompileInputs.cache
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.MvcApplicationPartsAssemblyInfo.cs
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.MvcApplicationPartsAssemblyInfo.cache
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.sourcelink.json
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.dll
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\refint\backend.dll
+C:\faks\AIPS\Majstorica\Application\backend\obj\Debug\net8.0\backend.pdb

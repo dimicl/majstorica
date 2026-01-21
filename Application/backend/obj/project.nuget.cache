@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "xXxRaUYVpAc=",
+  "dgSpecHash": "NwV/TIfmHW4=",
   "success": true,
-  "projectFilePath": "C:\\faks\\AIPS\\Majstorica\\backend\\backend.csproj",
+  "projectFilePath": "C:\\faks\\AIPS\\Majstorica\\Application\\backend\\backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\dimic\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\dimic\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
