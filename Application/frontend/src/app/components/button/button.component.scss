@@ -1,0 +1,60 @@
+@use '../../../assets/scss/variables' as *;
+
+.app-button {
+  border: none;
+  outline: none;
+  border-radius: 999px;
+  padding: 9px 12px;  
+  color: $color-white;
+  cursor: pointer;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 4px;
+  .button-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    line-height: 18px;
+    font-weight: 700;
+  }
+
+  &.dsb-btn {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &.positive-button {
+    background-color: #3b73ed;
+    color: $color-white;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    &:hover:not(.dsb-btn) {
+      background-color: #0b49d1;
+      color: $color-white;     
+    }
+  
+    &:active:not(.dsb-btn) {
+      background-color: #00179e;
+      color: $color-white;     
+    }
+  }
+
+  &.negative-button {
+    &:hover {
+      
+    }
+  
+    &:active {
+      
+    }
+  }
+
+  &.neutral-button {
+    &:hover {
+      
+    }
+  
+    &:active {
+      
+    }
+  }
+}

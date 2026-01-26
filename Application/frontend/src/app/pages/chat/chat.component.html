@@ -1,0 +1,100 @@
+<section class="chat-page">
+  <div class="chat-inner">
+    <header class="chat-top">
+      <div class="chat-top-copy">
+        <h1 class="chat-title">Chat</h1>
+        <p class="chat-subtitle">Dogovor sa majstorom, termin i cena — sve na jednom mestu.</p>
+      </div>
+    </header>
+
+    @if (realtimeError()) {
+      <div class="chat-alert" role="alert">
+        <strong>Chat trenutno nije dostupan.</strong> Pokušaj ponovo kasnije.
+      </div>
+    }
+
+    <div class="chat-grid">
+      <aside class="threads">
+        <div class="side-card side-card--tight">
+          <div class="side-title">Razgovori</div>
+          <div class="side-text">Izaberi razgovor sa majstorom.</div>
+
+          @if (isLoadingThreads()) {
+            <div class="threads-loading">Učitavanje...</div>
+          } @else {
+            @if (threads().length === 0) {
+              <div class="empty">
+                <div class="empty-title">No Results</div>
+                <div class="empty-subtitle">Trenutno nema razgovora. Pokreni pretragu i kontaktiraj majstora.</div>
+                <a class="btn btn-primary btn-compact" routerLink="/technicians">
+                  Istraži majstore
+                  <span class="btn-icon" aria-hidden="true">↗</span>
+                </a>
+              </div>
+            } @else {
+              <div class="thread-list" role="list">
+                @for (t of threads(); track t.id) {
+                  <button
+                    type="button"
+                    class="thread"
+                    role="listitem"
+                    (click)="selectThread(t.id)"
+                    [class.active]="selectedThreadId() === t.id"
+                  >
+                    <div class="thread-avatar" aria-hidden="true"></div>
+
+                    <div class="thread-main">
+                      <div class="thread-row">
+                        <div class="thread-title">{{ t.title }}</div>
+                        <div class="thread-time">{{ t.updatedAt }}</div>
+                      </div>
+                      <div class="thread-sub">{{ t.lastMessage }}</div>
+                      <div class="thread-meta">
+                        <span class="thread-pill" [class.thread-pill--typing]="t.presence === 'typing'">
+                          @if (t.presence === 'typing') { Kuca... } @else if (t.presence === 'online') { Online } @else {
+                            Offline
+                          }
+                        </span>
+
+                        @if (t.unreadCount > 0) {
+                          <span class="thread-unread">{{ t.unreadCount }}</span>
+                        }
+                      </div>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          }
+
+          <div class="threads-footer">
+            <a class="btn btn-link" routerLink="/services">Nazad na usluge</a>
+          </div>
+        </div>
+      </aside>
+
+      <div class="chat-panel-wrap">
+        @if (!selectedThread()) {
+          <div class="empty empty--panel">
+            <div class="empty-title">Izaberi razgovor</div>
+            <div class="empty-subtitle">Sa leve strane odaberi chat da bi video poruke.</div>
+          </div>
+        } @else if (isLoadingMessages() && !selectedMessages()) {
+          <div class="empty empty--panel">
+            <div class="empty-title">Učitavanje poruka...</div>
+            <div class="empty-subtitle">Samo trenutak.</div>
+          </div>
+        } @else {
+          <app-chat-panel
+            [presence]="selectedThread()!.presence"
+            [title]="selectedThread()!.title"
+            [subtitle]="selectedThread()!.subtitle"
+            [messages]="selectedMessages()"
+            (send)="onSendMessage($event)"
+          />
+        }
+      </div>
+    </div>
+  </div>
+</section>
+

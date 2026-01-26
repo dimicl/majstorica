@@ -3,10 +3,11 @@
     <a class="brand" routerLink="/home" aria-label="Majstorica - početna">Majstorica</a>
 
     <div class="topbar-actions">
-      <a class="btn btn-primary btn-compact" routerLink="/services">
+      <!-- <a class="btn btn-primary btn-compact" routerLink="/services">
         Započni
         <span class="btn-icon" aria-hidden="true">↗</span>
-      </a>
+      </a> -->
+      <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Započni'" [hasIcon]="true" [iconSrc]="sharedSvgRoutes.ARROW_RIGHT_ICON" [disabled]="true" (onButtonClick)="onButtonClick($event)"></app-button>
       <a class="btn btn-ghost btn-compact" routerLink="/login">Prijava</a>
     </div>
   </div>
@@ -14,7 +15,7 @@
   <div class="hero">
     <div class="hero-left">
       <h1 class="hero-title">
-        <span class="hero-title-muted">Gde</span>
+        <span class="hero-title-muted">Mesto gde</span>
         <span class="hero-title-accent">Klijent</span> &amp;
         <span class="hero-title-accent">Majstor</span>
         <br />
@@ -22,8 +23,8 @@
       </h1>
 
       <p class="hero-subtitle">
-        Zaboravi beskonačne pozive i “javljam se”. Na Majstorici brzo pronađeš proverenog
-        majstora, dogovoriš termin i dobiješ jasnu cenu — sve na jednom mestu.
+        Zaboravi beskonačne pozive i “javljam se”. Brzo pronađi proverenog
+        majstora, dogovori termin i dobij jasnu cenu — sve na jednom mestu.
       </p>
 
       <div class="hero-controls">
@@ -48,7 +49,7 @@
           Zatraži majstora
           <span class="btn-icon" aria-hidden="true">↗</span>
         </a>
-        <a class="btn btn-link" routerLink="/technicians">Postani majstor</a>
+        <div class="btn-link" routerLink="/technicians">Postani majstor</div>
       </div>
     </div>
 

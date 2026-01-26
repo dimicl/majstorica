@@ -1,62 +1,66 @@
-import { Component, inject, signal } from '@angular/core';
-import { MapComponent } from '../../components/map/map.component';
-import { SignalrService } from '../../shared/services/signalr.service';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ButtonComponent } from '../../components/button/button.component';
+import { ButtonType } from '../../shared/enums';
+import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
+import { ServiceCardModel } from '../../shared/models/service-card.model';
 
 
 @Component({
   selector: 'app-main',
-  imports: [MapComponent, RouterLink],
   templateUrl: './main.component.html',
-  styleUrl: './main.component.scss'
+  styleUrl: './main.component.scss',
+  imports: [
+    RouterLink,
+    ButtonComponent
+  ]
 })
 export class MainComponent {
-  private signalr = inject(SignalrService);
+  // Enums
+  public eButtonType = ButtonType;
+  // SVG Icons
+  public sharedSvgRoutes = SharedSvgRoutes;
 
-  // Prikaži status konekcije u UI-ju (ne ruši app ako backend/hub ne radi)
-  signalrStatus = this.signalr.status;
-  signalrError = this.signalr.lastError;
-
-  // Hub URL (primer) — prilagodi ako ti je druga ruta na backend-u
-  hubUrl = signal<string>('https://localhost:5001/hubs/notifications');
-
-  connectSignalr(): void {
-    void this.signalr.connect(this.hubUrl());
-  }
-
-  disconnectSignalr(): void {
-    void this.signalr.disconnect();
-  }
-  categories = [
+  categories: ServiceCardModel[] = [
     {
+      id: 1,
       icon: '⚡',
       title: 'Električar',
-      desc: 'Ugradnja, popravke, kratki spojevi, rasveta.'
+      description: 'Ugradnja, popravke, kratki spojevi, rasveta.'
     },
     {
+      id: 2,
       icon: '🚰',
       title: 'Vodoinstalater',
-      desc: 'Curanje, sifoni, ventili, sanitarije.'
+      description: 'Curanje, sifoni, ventili, sanitarije.'
     },
     {
+      id: 3,
       icon: '🧱',
       title: 'Keramičar',
-      desc: 'Kupatila, kuhinje, fugovanje i nivelacija.'
+      description: 'Kupatila, kuhinje, fugovanje i nivelacija.'
     },
     {
+      id: 4,
       icon: '🛠️',
       title: 'Majstor za sve',
-      desc: 'Montaže, sitne popravke, “po kući”.'
+      description: 'Montaže, sitne popravke, “po kući”.'
     },
     {
+      id: 5,
       icon: '🎨',
       title: 'Moler',
-      desc: 'Krečenje, gletovanje, priprema zidova.'
+      description: 'Krečenje, gletovanje, priprema zidova.'
     },
     {
+      id: 6,
       icon: '🪚',
       title: 'Stolar',
-      desc: 'Nameštaj po meri, popravke, vrata.'
+      description: 'Nameštaj po meri, popravke, vrata.'
     }
   ];
+
+  public onButtonClick(event: MouseEvent): void {
+    console.log('Button clicked', event);
+  }
 }

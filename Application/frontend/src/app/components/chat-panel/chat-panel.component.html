@@ -1,0 +1,68 @@
+<section class="chat-card" aria-label="Chat">
+  <header class="chat-header">
+    <div class="chat-avatar" aria-hidden="true"></div>
+
+    <div class="chat-title">
+      <div class="chat-title__row">
+        <div class="chat-title__name">{{ title() }}</div>
+
+        <div class="chat-badges">
+          @if (signalrStatus() !== null) {
+            <span class="chat-pill chat-pill--muted">
+              SignalR: <strong>{{ signalrStatus() }}</strong>
+            </span>
+          }
+
+          <span
+            class="chat-pill"
+            [class.chat-pill--online]="presence() === 'online'"
+            [class.chat-pill--typing]="presence() === 'typing'"
+            [class.chat-pill--offline]="presence() === 'offline'"
+          >
+            @if (presence() === 'online') { Online }
+            @if (presence() === 'typing') { Kuca... }
+            @if (presence() === 'offline') { Offline }
+          </span>
+        </div>
+      </div>
+
+      <div class="chat-title__sub">{{ subtitle() }}</div>
+    </div>
+  </header>
+
+  <div #scrollViewport class="chat-body" role="log" aria-live="polite">
+    @for (m of displayMessages(); track m.id) {
+      <div
+        class="msg"
+        [class.msg--me]="m.from === 'me'"
+        [class.msg--them]="m.from === 'them'"
+        [class.msg--system]="m.from === 'system'"
+      >
+        <div class="msg-bubble">
+          <div class="msg-text">{{ m.text }}</div>
+          <div class="msg-meta">{{ m.time }}</div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <footer class="chat-footer">
+    <div class="chat-compose">
+      <textarea
+        #draftInput
+        class="chat-input"
+        rows="1"
+        placeholder="Napiši poruku..."
+        [value]="draft()"
+        (input)="onDraftInput(draftInput.value)"
+        (keydown)="onKeyDown($event)"
+      ></textarea>
+
+      <button class="chat-send" type="button" (click)="onSend()" [disabled]="!draft().trim()">
+        Pošalji
+        <span class="chat-send__icon" aria-hidden="true">↗</span>
+      </button>
+    </div>
+  </footer>
+</section>
+

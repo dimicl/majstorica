@@ -1,0 +1,12 @@
+<button
+  type="button"
+  class="app-button"
+  [ngClass]="[buttonType + '-button', disabled ? 'dsb-btn' : '']"
+  [disabled]="disabled"
+  (click)="onClick($event)"
+>
+  <span class="button-label"> {{ label }} </span>
+  @if(hasIcon){
+  <svg-icon name="button-icon" class="d-flex align-items-center svg-size-18" [src]="iconSrc"></svg-icon>
+  }
+</button>

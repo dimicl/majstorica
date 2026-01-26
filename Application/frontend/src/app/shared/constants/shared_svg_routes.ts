@@ -1,5 +1,6 @@
 // SVG Icon paths
 export class SharedSvgRoutes {
+    static ARROW_RIGHT_ICON = '/assets/icons/arrow-right.svg';
     //navbar
     static PROFILE_ICON = '/assets/icons/profile.svg';
     static MESSAGE_ICON = '/assets/icons/chat.svg';

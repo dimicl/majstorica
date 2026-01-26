@@ -4,7 +4,7 @@
 
 .landing {
   position: relative;
-  padding: 24px 32px 18px;
+  padding: 24px 18px;
   background: radial-gradient(1200px 600px at 65% 10%, rgba(62, 125, 215, 0.12), transparent 60%),
     radial-gradient(900px 500px at 20% 30%, rgba(155, 81, 224, 0.08), transparent 55%),
     #f5f7fa;
@@ -51,7 +51,7 @@
   grid-template-columns: 1.05fr 0.95fr;
   gap: 30px;
   align-items: center;
-  min-height: 520px;
+  height: 80vh;
 }
 
 .hero-left {
@@ -208,12 +208,13 @@
   padding: 10px 4px;
   border-color: transparent;
   background: transparent;
-  color: rgba(17, 24, 39, 0.68);
+  color: #2f2f2f;
   font-weight: 800;
+  cursor: pointer;
+  transition: color 0.3s ease;
 
   &:hover {
-    color: rgba(17, 24, 39, 0.88);
-    text-decoration: underline;
+    color: #424242;
   }
 }
 
@@ -224,6 +225,7 @@
 
 .mock-stack {
   position: absolute;
+  top: 50%;
   inset: 0;
   display: grid;
   place-items: center;
@@ -236,7 +238,11 @@
   border: 1px solid rgba(17, 24, 39, 0.1);
   box-shadow: 0 28px 70px rgba(17, 24, 39, 0.12);
   padding: 16px 16px 14px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(500px);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;  
 }
 
 .mock-card--top {
