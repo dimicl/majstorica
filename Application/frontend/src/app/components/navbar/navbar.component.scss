@@ -1,10 +1,10 @@
-@use '../../assets/scss/variables' as *;
+@use '../../../assets/scss/variables' as *;
 
 .sidebar {
   display: flex;
   flex-direction: column;
   width: 70px;
-  background: linear-gradient(180deg, #1e3a5f 0%, #2c5282 100%);
+  background: linear-gradient(180deg, #424242 0%, #424242 100%);
   border-radius: 16px;
   padding: 8px 0;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
@@ -16,6 +16,10 @@
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   cursor: pointer;
+
+  // izgleda kao “floating dock” (ne deluje kao layout kolona)
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 
   &.expanded {
     width: 220px;

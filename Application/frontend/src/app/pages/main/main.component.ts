@@ -1,10 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { MapComponent } from '../../components/map/map.component';
 import { SignalrService } from '../../shared/services/signalr.service';
+import { RouterLink } from '@angular/router';
+
 
 @Component({
   selector: 'app-main',
-  imports: [MapComponent],
+  imports: [MapComponent, RouterLink],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss'
 })
@@ -25,4 +27,36 @@ export class MainComponent {
   disconnectSignalr(): void {
     void this.signalr.disconnect();
   }
+  categories = [
+    {
+      icon: '⚡',
+      title: 'Električar',
+      desc: 'Ugradnja, popravke, kratki spojevi, rasveta.'
+    },
+    {
+      icon: '🚰',
+      title: 'Vodoinstalater',
+      desc: 'Curanje, sifoni, ventili, sanitarije.'
+    },
+    {
+      icon: '🧱',
+      title: 'Keramičar',
+      desc: 'Kupatila, kuhinje, fugovanje i nivelacija.'
+    },
+    {
+      icon: '🛠️',
+      title: 'Majstor za sve',
+      desc: 'Montaže, sitne popravke, “po kući”.'
+    },
+    {
+      icon: '🎨',
+      title: 'Moler',
+      desc: 'Krečenje, gletovanje, priprema zidova.'
+    },
+    {
+      icon: '🪚',
+      title: 'Stolar',
+      desc: 'Nameštaj po meri, popravke, vrata.'
+    }
+  ];
 }

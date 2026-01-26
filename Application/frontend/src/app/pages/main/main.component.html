@@ -1,21 +1,128 @@
-<section class="page">
-  <header class="header">
-    <h1>Home</h1>
+<section class="landing">
+  <div class="topbar">
+    <a class="brand" routerLink="/home" aria-label="Majstorica - početna">Majstorica</a>
 
-    <div class="signalr">
-      <div class="signalr-status">
-        <strong>SignalR:</strong> {{ signalrStatus() }}
-        @if (signalrError()) {
-          <span class="error">({{ signalrError() }})</span>
-        }
+    <div class="topbar-actions">
+      <a class="btn btn-primary btn-compact" routerLink="/services">
+        Započni
+        <span class="btn-icon" aria-hidden="true">↗</span>
+      </a>
+      <a class="btn btn-ghost btn-compact" routerLink="/login">Prijava</a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-left">
+      <h1 class="hero-title">
+        <span class="hero-title-muted">Gde</span>
+        <span class="hero-title-accent">Klijent</span> &amp;
+        <span class="hero-title-accent">Majstor</span>
+        <br />
+        Saradjuju bez stresa
+      </h1>
+
+      <p class="hero-subtitle">
+        Zaboravi beskonačne pozive i “javljam se”. Na Majstorici brzo pronađeš proverenog
+        majstora, dogovoriš termin i dobiješ jasnu cenu — sve na jednom mestu.
+      </p>
+
+      <div class="hero-controls">
+        <label class="pill pill-select" aria-label="Lokacija">
+          <span class="pill-label">Lokacija</span>
+          <select>
+            <option selected>Novi Sad</option>
+            <option>Beograd</option>
+            <option>Niš</option>
+            <option>Kragujevac</option>
+          </select>
+        </label>
+
+        <div class="pill pill-disabled" aria-disabled="true">
+          <span class="pill-label">Uskoro</span>
+          <span class="pill-value">Još gradova</span>
+        </div>
       </div>
 
-      <div class="signalr-actions">
-        <button type="button" (click)="connectSignalr()">Poveži</button>
-        <button type="button" (click)="disconnectSignalr()">Prekini</button>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-large" routerLink="/services">
+          Zatraži majstora
+          <span class="btn-icon" aria-hidden="true">↗</span>
+        </a>
+        <a class="btn btn-link" routerLink="/technicians">Postani majstor</a>
       </div>
     </div>
-  </header>
 
-  <app-map></app-map>
+    <div class="hero-right" aria-hidden="true">
+      <div class="mock-stack">
+        <div class="mock-card mock-card--top">
+          <div class="mock-row">
+            <div class="mock-pill">Hitno</div>
+            <div class="mock-pill mock-pill--muted">Danas</div>
+          </div>
+          <div class="mock-title">Električar • Novi Sad</div>
+          <div class="mock-lines">
+            <div class="mock-line"></div>
+            <div class="mock-line mock-line--short"></div>
+          </div>
+          <div class="mock-meta">
+            <div class="mock-badge">★ 4.9</div>
+            <div class="mock-badge mock-badge--muted">od 120+ ocena</div>
+          </div>
+        </div>
+
+        <div class="mock-card mock-card--mid">
+          <div class="mock-row">
+            <div class="mock-avatar"></div>
+            <div class="mock-lines">
+              <div class="mock-line"></div>
+              <div class="mock-line mock-line--short"></div>
+            </div>
+          </div>
+          <div class="mock-stats">
+            <div class="mock-stat">
+              <div class="mock-stat__value">2h</div>
+              <div class="mock-stat__label">prosečan odziv</div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat__value">98%</div>
+              <div class="mock-stat__label">završenih poslova</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mock-card mock-card--back">
+          <div class="mock-graph">
+            <div class="mock-bar" style="--h: 45%"></div>
+            <div class="mock-bar" style="--h: 70%"></div>
+            <div class="mock-bar" style="--h: 52%"></div>
+            <div class="mock-bar" style="--h: 85%"></div>
+            <div class="mock-bar" style="--h: 62%"></div>
+          </div>
+          <div class="mock-badge mock-badge--muted">Transparentna ponuda i evidencija</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-mouse" aria-hidden="true"></div>
+    <span>Skroluj da istražiš</span>
+  </div>
+</section>
+
+<section class="features">
+  <div class="features-inner">
+    <h2 class="features-title">Najtraženije usluge</h2>
+    <p class="features-subtitle">Odaberite kategoriju i pošaljite zahtev za minut.</p>
+
+    <div class="features-grid">
+      @for (c of categories; track c.title) {
+        <a class="feature-card" routerLink="/services">
+          <div class="feature-icon" aria-hidden="true">{{ c.icon }}</div>
+          <div class="feature-title">{{ c.title }}</div>
+          <div class="feature-desc">{{ c.desc }}</div>
+        </a>
+      }
+    </div>
+  </div>
 </section>

@@ -8,5 +8,6 @@
 
 .main-content {
   flex: 1;
-  margin-left: 85px; // prostor za collapsed navbar (70px width + 5px left + 10px padding)
+  // Navbar je fixed (overlay) pa ne rezervišemo prostor levo.
+  margin-left: 0;
 }
