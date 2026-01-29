@@ -1,5 +1,7 @@
-import { Component, ElementRef, ViewChild, computed, input, output, signal } from '@angular/core';
+﻿import { Component, ElementRef, ViewChild, computed, input, output, signal } from '@angular/core';
 import type { SignalrStatus } from '../../shared/services/signalr.service';
+import { ButtonComponent } from '../button/button.component';
+import { BUTTON_TYPES } from '../../shared/types';
 
 type ChatPresence = 'online' | 'offline' | 'typing';
 
@@ -12,11 +14,13 @@ export type ChatMessage = {
 
 @Component({
   selector: 'app-chat-panel',
-  imports: [],
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',
+  imports: [ButtonComponent],
+
 })
 export class ChatPanelComponent {
+  eButtonType = BUTTON_TYPES;
   title = input<string>('Chat sa majstorom');
   subtitle = input<string>('Dogovorite termin i cenu u par poruka.');
 
@@ -100,5 +104,10 @@ export class ChatPanelComponent {
     const mm = String(d.getMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;
   }
+
+  public onButtonClick(event: MouseEvent): void {
+    this.onSend();
+  }
 }
+
 

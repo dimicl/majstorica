@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ButtonType } from '../../shared/enums';
+import { BUTTON_TYPES, type ButtonType } from '../../shared/types';
 import { CommonModule } from '@angular/common';
 import { SvgIconComponent } from 'angular-svg-icon';
 
@@ -16,7 +16,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
 export class ButtonComponent {
   //inputs
   @Input() label = '';
-  @Input() buttonType: ButtonType = ButtonType.NEUTRAL;
+  @Input() buttonType: ButtonType = BUTTON_TYPES.NEUTRAL;
   @Input() hasIcon = false;
   @Input() iconSrc = '';
   @Input() disabled = false;

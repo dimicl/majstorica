@@ -19,6 +19,10 @@ export interface AuthResponse {
   token: string;
 }
 
+export interface UserResponse {
+  user: User;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -43,6 +47,10 @@ export class AuthService {
 
   logout(): Observable<void> {
     return this.http.post<void>(`${this.API_URL}/auth/logout`, {});
+  }
+
+  getUser(): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.API_URL}/user/getUser`);
   }
 
   // Čuva token u localStorage

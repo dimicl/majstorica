@@ -4,7 +4,7 @@ export enum NavbarItemString {
     SERVICES = 'services',
     TECHNICIANS = 'technicians',
     REQUESTS = 'requests',
-    MESSAGES = 'messages',
+    MESSAGES = 'chat',
     PROFILE = 'profile',
 
     //label

@@ -1,7 +1,7 @@
 import { NavbarItemUserType } from "../enums";
 
 
-export type NavbarItem = {
+export interface NavbarItem {
     id: string,
     icon: string,
     label: string,

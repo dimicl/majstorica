@@ -1,5 +1,5 @@
 import { NavbarItemString, NavbarItemUserType } from "../enums";
-import { NavbarItem } from "../types/navbar-item.type";
+import { NavbarItem } from "../interfaces";
 import { SharedSvgRoutes } from "./shared_svg_routes";
 
 export const NAVBAR_ITEMS : NavbarItem[] = [

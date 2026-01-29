@@ -28,19 +28,6 @@
   gap: 16px;
 }
 
-.chat-title {
-  font-size: 1.6rem;
-  font-weight: 900;
-  color: rgba(17, 24, 39, 0.9);
-}
-
-.chat-subtitle {
-  margin-top: 6px;
-  color: rgba(17, 24, 39, 0.62);
-  font-weight: 600;
-  line-height: 1.5;
-  max-width: 620px;
-}
 
 .chat-top-actions {
   display: flex;
@@ -273,13 +260,6 @@
   font-weight: 900;
   font-size: 0.78rem;
   box-shadow: 0 16px 40px rgba(62, 125, 215, 0.22);
-}
-
-.threads-footer {
-  margin-top: 10px;
-  display: flex;
-  justify-content: flex-end;
-  margin-top: auto;
 }
 
 .empty {

@@ -21,7 +21,7 @@ export const routes: Routes = [
   },
   // Navbar koristi id "messages" (Poruke) → vodi na chat stranicu
   {
-    path: 'messages',
+    path: 'chat',
     component: ChatComponent,
   },
   {
@@ -35,6 +35,7 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfilComponent,
+    
   },
   {
     path: '',

@@ -1,7 +1,10 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
+  password: string;
+  username: string;
+  role: 'client' | 'master' | 'admin';
+
   // Dodaj ostala polja po potrebi
 }
 

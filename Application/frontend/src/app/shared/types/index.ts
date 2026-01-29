@@ -1,1 +1,1 @@
-export * from './navbar-item.type';
+export * from './button.type';

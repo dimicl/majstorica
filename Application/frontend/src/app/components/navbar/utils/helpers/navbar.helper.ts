@@ -1,6 +1,6 @@
 import { NAVBAR_ITEMS } from '../../../../shared/constants/navbar-items.constants';
 import { NavbarItemUserType } from '../../../../shared/enums';
-import { NavbarItem } from '../../../../shared/types/navbar-item.type';
+import { NavbarItem } from '../../../../shared/interfaces';
 export interface FilteredNavbarItems {
   menuItems: NavbarItem[];
   bottomItems: NavbarItem[];

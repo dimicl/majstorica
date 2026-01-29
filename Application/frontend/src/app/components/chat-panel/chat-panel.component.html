@@ -7,11 +7,11 @@
         <div class="chat-title__name">{{ title() }}</div>
 
         <div class="chat-badges">
-          @if (signalrStatus() !== null) {
+         <!--  @if (signalrStatus() !== null) {
             <span class="chat-pill chat-pill--muted">
               SignalR: <strong>{{ signalrStatus() }}</strong>
             </span>
-          }
+          } -->
 
           <span
             class="chat-pill"
@@ -50,18 +50,15 @@
     <div class="chat-compose">
       <textarea
         #draftInput
-        class="chat-input"
+        class="chat-input"        
         rows="1"
-        placeholder="Napiši poruku..."
+        placeholder="Unesite poruku..."
         [value]="draft()"
         (input)="onDraftInput(draftInput.value)"
         (keydown)="onKeyDown($event)"
       ></textarea>
-
-      <button class="chat-send" type="button" (click)="onSend()" [disabled]="!draft().trim()">
-        Pošalji
-        <span class="chat-send__icon" aria-hidden="true">↗</span>
-      </button>
+      
+      <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Pošalji'" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
     </div>
   </footer>
 </section>

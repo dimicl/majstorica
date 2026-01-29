@@ -3,8 +3,8 @@
 
 
 .landing {
+  min-height: 100vh;
   position: relative;
-  padding: 24px 18px;
   background: radial-gradient(1200px 600px at 65% 10%, rgba(62, 125, 215, 0.12), transparent 60%),
     radial-gradient(900px 500px at 20% 30%, rgba(155, 81, 224, 0.08), transparent 55%),
     #f5f7fa;
@@ -24,10 +24,7 @@
 
 .topbar {
   max-width: 1120px;
-  margin: 0 auto 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  margin: 0 auto;
   gap: 16px;
 }
 
@@ -54,46 +51,25 @@
   height: 80vh;
 }
 
-.hero-left {
-  padding: 10px 0;
-}
-
 .hero-title {
-  font-size: clamp(2.4rem, 3.6vw, 3.6rem);
+  font-size: clamp(2.4rem, 3.6vw + 1rem, 3.6rem);
   line-height: 1.03;
   letter-spacing: -0.02em;
   font-weight: 900;
-  color: #111827;
-}
-
-.hero-title-muted {
-  color: rgba(17, 24, 39, 0.75);
-}
-
-.hero-title-accent {
-  color: $color-blue;
+  color: #1d1d1d;
 }
 
 .hero-subtitle {
-  margin-top: 14px;
   max-width: 560px;
-  font-size: 1.05rem;
-  line-height: 1.55;
-  color: rgba(17, 24, 39, 0.65);
+  font-size: 18px;
+  color: $color-gray-dark;
 }
 
 .hero-controls {
-  margin-top: 18px;
-  display: flex;
-  flex-wrap: wrap;
   gap: 10px;
-  align-items: center;
 }
 
 .pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
   height: 36px;
   border-radius: 999px;
   padding: 0 12px;
@@ -101,21 +77,24 @@
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   box-shadow: 0 6px 20px rgba(17, 24, 39, 0.05);
+
+  .pill-label {
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 700;
+    color: rgba(17, 24, 39, 0.55);
+    text-transform: uppercase;
+  }
+  
+  .pill-value {
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 700;
+    color: rgba(17, 24, 39, 0.75);
+  }
 }
 
-.pill-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: rgba(17, 24, 39, 0.55);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
 
-.pill-value {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: rgba(17, 24, 39, 0.75);
-}
 
 .pill-select {
   padding-right: 8px;
@@ -147,11 +126,7 @@
 }
 
 .hero-cta {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
   gap: 14px;
-  flex-wrap: wrap;
 }
 
 .btn {
@@ -212,7 +187,7 @@
   font-weight: 800;
   cursor: pointer;
   transition: color 0.3s ease;
-
+  
   &:hover {
     color: #424242;
   }
@@ -246,18 +221,19 @@
 }
 
 .mock-card--top {
-  transform: translate(18px, -26px);
+  transform: translate(18px, 0);
 }
 
 .mock-card--mid {
   width: min(380px, 100%);
-  transform: translate(-14px, 24px);
+  transform: translate(-14px, 16px);
   opacity: 0.92;
 }
 
 .mock-card--back {
   width: min(360px, 100%);
-  transform: translate(38px, 138px);
+
+  transform: translate(67px, 58px);
   opacity: 0.72;
   filter: blur(0.2px);
 }
@@ -280,14 +256,17 @@
   gap: 8px;
 }
 
-.mock-line {
+.mock-line,
+.mock-line--short {
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(17, 24, 39, 0.12), rgba(17, 24, 39, 0.05));
+  background-color: rgba(241, 243, 247, 1);
+  animation: placeholderGlow 5s ease-in-out infinite;
 }
 
 .mock-line--short {
   width: 65%;
+  animation-duration: 4s;
 }
 
 .mock-pill {
@@ -388,10 +367,7 @@
 
 .scroll-hint {
   max-width: 1120px;
-  margin: 8px auto 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: 0 auto;
   gap: 10px;
   color: rgba(17, 24, 39, 0.55);
   font-weight: 800;
@@ -419,20 +395,6 @@
   }
 }
 
-@keyframes scrollDot {
-  0% {
-    opacity: 0.3;
-    transform: translate(-50%, 0);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, 8px);
-  }
-  100% {
-    opacity: 0.3;
-    transform: translate(-50%, 0);
-  }
-}
 
 .features {
   padding: 34px 32px 54px;
@@ -532,5 +494,30 @@
 
   .features-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes placeholderGlow {
+  0%,
+  100% {
+    background-color: rgba(241, 243, 247, 1);
+  }
+  50% {
+    background-color: rgba(196, 201, 214, 1);
+  }
+}
+
+@keyframes scrollDot {
+  0% {
+    opacity: 0.3;
+    transform: translate(-50%, 0);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, 8px);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translate(-50%, 0);
   }
 }

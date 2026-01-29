@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonComponent } from '../../components/button/button.component';
-import { ButtonType } from '../../shared/enums';
+import { BUTTON_TYPES } from '../../shared/types';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
-import { ServiceCardModel } from '../../shared/models/service-card.model';
+import { ServiceCardModel } from '../../shared/interfaces';
 
 
 @Component({
@@ -17,7 +17,7 @@ import { ServiceCardModel } from '../../shared/models/service-card.model';
 })
 export class MainComponent {
   // Enums
-  public eButtonType = ButtonType;
+  public eButtonType = BUTTON_TYPES;
   // SVG Icons
   public sharedSvgRoutes = SharedSvgRoutes;
 

@@ -39,22 +39,31 @@
   }
 
   &.negative-button {
+    background-color: #6c6c6c;
+    color: $color-white;
     &:hover {
-      
+      background-color: #2f2f2f;
+      color: $color-white;
     }
   
     &:active {
-      
+      background-color: #2f2f2f;
+      color: $color-white;
     }
   }
 
   &.neutral-button {
+    background-color: #6c6c6c;
+    color: $color-white;
+    transition: background-color 0.3s ease, color 0.3s ease;
     &:hover {
-      
+      background-color: #2f2f2f;
+      color: $color-white;
     }
   
     &:active {
-      
+      background-color: #1d1d1d;
+      color: $color-white;
     }
   }
 }

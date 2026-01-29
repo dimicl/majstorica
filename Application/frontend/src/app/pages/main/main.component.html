@@ -1,34 +1,31 @@
-<section class="landing">
-  <div class="topbar">
+<section class="landing p-y-24 p-x-18">
+  <div class="topbar d-flex align-items-center justify-content-between m-b-22">
     <a class="brand" routerLink="/home" aria-label="Majstorica - početna">Majstorica</a>
 
-    <div class="topbar-actions">
-      <!-- <a class="btn btn-primary btn-compact" routerLink="/services">
-        Započni
-        <span class="btn-icon" aria-hidden="true">↗</span>
-      </a> -->
-      <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Započni'" [hasIcon]="true" [iconSrc]="sharedSvgRoutes.ARROW_RIGHT_ICON" [disabled]="true" (onButtonClick)="onButtonClick($event)"></app-button>
-      <a class="btn btn-ghost btn-compact" routerLink="/login">Prijava</a>
+    <div class="topbar-actions">      
+      <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Započni'" [hasIcon]="true" [iconSrc]="sharedSvgRoutes.ARROW_RIGHT_ICON" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
+      <app-button [buttonType]="eButtonType.NEUTRAL" [label]="'Prijava'" [hasIcon]="false" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
     </div>
   </div>
 
   <div class="hero">
-    <div class="hero-left">
+    <div class="hero-left p-y-10">
       <h1 class="hero-title">
-        <span class="hero-title-muted">Mesto gde</span>
-        <span class="hero-title-accent">Klijent</span> &amp;
-        <span class="hero-title-accent">Majstor</span>
+        <span class="font-bold">Mesto gde</span>
+        <br />
+        <span class="text-color-blue">Klijent</span> &amp;
+        <span class="text-color-blue">Majstor</span>
         <br />
         Saradjuju bez stresa
       </h1>
 
-      <p class="hero-subtitle">
-        Zaboravi beskonačne pozive i “javljam se”. Brzo pronađi proverenog
+      <p class="hero-subtitle m-t-14">
+        Zaboravi beskonačne pozive i kašnjenja. Brzo pronađi proverenog
         majstora, dogovori termin i dobij jasnu cenu — sve na jednom mestu.
       </p>
 
-      <div class="hero-controls">
-        <label class="pill pill-select" aria-label="Lokacija">
+      <div class="hero-controls d-flex flex-wrap align-items-center m-t-18">
+        <label class="pill pill-select d-inline-flex align-items-center" aria-label="Lokacija">
           <span class="pill-label">Lokacija</span>
           <select>
             <option selected>Novi Sad</option>
@@ -38,13 +35,13 @@
           </select>
         </label>
 
-        <div class="pill pill-disabled" aria-disabled="true">
+        <div class="pill pill-disabled d-flex align-items-center gap-4" aria-disabled="true">
           <span class="pill-label">Uskoro</span>
           <span class="pill-value">Još gradova</span>
         </div>
       </div>
 
-      <div class="hero-cta">
+      <div class="hero-cta d-flex align-items-center flex-wrap m-t-18">
         <a class="btn btn-primary btn-large" routerLink="/services">
           Zatraži majstora
           <span class="btn-icon" aria-hidden="true">↗</span>
@@ -105,7 +102,7 @@
     </div>
   </div>
 
-  <div class="scroll-hint">
+  <div class="scroll-hint d-flex align-items-center justify-content-center m-t-8">
     <div class="scroll-mouse" aria-hidden="true"></div>
     <span>Skroluj da istražiš</span>
   </div>
@@ -121,7 +118,7 @@
         <a class="feature-card" routerLink="/services">
           <div class="feature-icon" aria-hidden="true">{{ c.icon }}</div>
           <div class="feature-title">{{ c.title }}</div>
-          <div class="feature-desc">{{ c.desc }}</div>
+          <div class="feature-desc">{{ c.description }}</div>
         </a>
       }
     </div>

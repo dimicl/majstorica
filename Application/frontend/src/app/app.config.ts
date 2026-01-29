@@ -10,9 +10,11 @@ import { routes } from './app.routes';
 
 // Reducers
 import { authReducer } from './shared/store/auth/auth.reducer';
+import { clientReducer } from './shared/store/client/client.reducer';
 
 // Effects
 import { AuthEffects } from './shared/store/auth/auth.effects';
+import { ClientEffects } from './shared/store/client/client.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,14 +28,11 @@ export const appConfig: ApplicationConfig = {
     // NgRx Store
     provideStore({
       auth: authReducer,
-      // Dodaj ostale reducere ovde
+      client: clientReducer,
     }),
 
     // NgRx Effects
-    provideEffects([
-      AuthEffects,
-      // Dodaj ostale effects ovde
-    ]),
+    provideEffects([AuthEffects, ClientEffects]),
 
     // NgRx DevTools - samo u development modu
     provideStoreDevtools({
