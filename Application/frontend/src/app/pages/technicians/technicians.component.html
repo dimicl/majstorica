@@ -1,1 +1,109 @@
-<p>technicians works!</p>
+<section class="technicians-page p-y-12 p-x-18">
+  <div class="technicians-shell">
+    <header class="technicians-header">
+      <div>
+        <h1>Technicians</h1>       
+      </div>
+      <div class="tab-bar" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          class="tab-button"
+          [class.is-active]="isListActive"
+          (click)="setTab(tabs.LIST)"
+        >
+          Lista majstora
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-button"
+          [class.is-active]="!isListActive"
+          (click)="setTab(tabs.MAP)"
+        >
+          Mapa
+        </button>
+      </div>
+    </header>
+
+    <div *ngIf="isListActive" class="technicians-list-mode">
+      <label class="technicians-search">
+        <input
+          type="search"
+          placeholder="Pretraži ime, grad ili veštinu"
+          (input)="onSearchInput($any($event.target).value)"
+        />
+        <span aria-hidden="true">🔍</span>
+      </label>
+      <div class="technicians-search__filters">
+        <button
+          type="button"
+          class="technicians-search__chip"
+          [class.is-active]="!activeSpecialty"
+          (click)="onToggleSpecialty('')"
+        >
+          Svi
+        </button>
+        <button
+          *ngFor="let strategy of specialtyFilters"
+          type="button"
+          class="technicians-search__chip"
+          [class.is-active]="activeSpecialty === strategy"
+          (click)="onToggleSpecialty(strategy)"
+        >
+          {{ strategy }}
+        </button>
+      </div>
+
+      <div class="technician-grid custom-scrollbar">
+        <article
+          *ngFor="let technician of filteredTechnicians"
+          class="technician-card card-hover"
+        >
+          <header>
+            <div>
+              <h3>{{ technician.name }}</h3>
+              <p class="technician-card__location">{{ technician.city }}</p>
+            </div>
+            <span class="technician-card__rating">★ {{ technician.rating }}</span>
+          </header>
+          <p class="technician-card__meta">
+            {{ technician.responseTime }} odziv · {{ technician.jobsCompleted }}
+          </p>
+          <div class="technician-card__tag">{{ technician.tag }}</div>
+          <div class="technician-card__skills">
+            <span *ngFor="let skill of technician.skills" class="skill-chip">
+              {{ skill }}
+            </span>
+          </div>
+        </article>
+        <p class="empty-state" *ngIf="!filteredTechnicians.length">
+          Nema dostupnih majstora za odabranu pretragu.
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="!isListActive" class="technicians-map-mode">
+      <app-map
+        class="technicians-map__leaflet"
+        [markers]="mapMarkers"
+        [center]="mapCenter"
+      ></app-map>
+      <aside class="technicians-panel">
+        <div class="technicians-panel__header">
+          <h2>Panel</h2>
+          <span>{{ filteredTechnicians.length }} profila</span>
+        </div>
+        <div class="technician-panel-list custom-scrollbar">
+          <article class="technician-card card-hover" *ngFor="let technician of filteredTechnicians">
+            <div>
+              <h3>{{ technician.name }}</h3>
+              <p>{{ technician.city }}</p>
+            </div>
+            <div class="technician-card__meta">{{ technician.tag }}</div>
+          </article>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>

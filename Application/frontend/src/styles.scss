@@ -12,6 +12,9 @@
 @use './assets/scss/icons';
 @use './assets/scss/scrollbar';
 
+@import 'leaflet/dist/leaflet.css';
+
+
 
 *, *::before, *::after {
   box-sizing: border-box;

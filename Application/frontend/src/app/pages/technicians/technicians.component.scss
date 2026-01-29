@@ -1,0 +1,268 @@
+@use '../../../assets/scss/variables' as *;
+
+.technicians-page {
+  min-height: 100vh;
+  background: #f6f8fc;
+  display: flex;
+  flex-direction: column;
+}
+
+.technicians-shell {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.technicians-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.technicians-title {
+  max-width: 560px;
+}
+
+.technicians-header h1 {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 900;
+  color: rgba(17, 24, 39, 0.95);
+  margin: 8px 0 0;
+}
+
+.technicians-header .lead {
+  margin: 6px 0 0;
+  color: rgba(17, 24, 39, 0.65);
+  font-weight: 600;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.06);
+  padding: 4px;
+}
+
+.tab-button {
+  border: none;
+  background: transparent;
+  padding: 6px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.65);
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.tab-button.is-active {
+  background: #fff;
+  color: $color-blue;
+  box-shadow: inset 0 0 0 1px rgba(62, 125, 215, 0.3);
+}
+
+.technicians-list-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.technicians-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 14px;
+  background: rgba(17, 24, 39, 0.04);
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  transition: border 0.2s ease;
+}
+
+.technicians-search input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.8);
+  outline: none;
+}
+
+.technicians-search__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.technicians-search__chip {
+  border: 1px solid rgba(17, 24, 39, 0.15);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 700;
+  background: #fff;
+  color: rgba(17, 24, 39, 0.72);
+  cursor: pointer;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+.technicians-search__chip.is-active {
+  border-color: $color-blue;
+  background: rgba(62, 125, 215, 0.12);
+  color: rgba(17, 24, 39, 0.95);
+}
+
+.technician-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.technician-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.technician-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.technician-card__rating {
+  font-weight: 800;
+  color: rgba(17, 24, 39, 0.7);
+}
+
+.technician-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.technician-card__location,
+.technician-card__meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.technician-card__tag {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: $color-blue;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.technician-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.08);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.6);
+}
+
+.technicians-map-mode {
+  position: relative;
+  min-height: 620px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #e2e7f0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.technicians-map-mode app-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.technicians-panel {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: clamp(270px, 26vw, 360px);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 3px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 18px 45px rgba(17, 24, 39, 0.18);
+  z-index: 50;
+  backdrop-filter: blur(10px);
+}
+
+.technicians-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.85);
+}
+
+.technician-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+}
+
+.empty-state {
+  text-align: center;
+  color: rgba(17, 24, 39, 0.6);
+  font-weight: 600;
+  grid-column: 1 / -1;
+}
+
+.card-hover {
+  transition: transform 0.25s ease;
+  will-change: transform;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 1050px) {
+  .technicians-map-mode {
+    min-height: 520px;
+  }
+
+  .technicians-panel {
+    position: static;
+    width: 100%;
+    margin: 0 auto;
+    box-shadow: 0 12px 30px rgba(17, 24, 39, 0.15);
+  }
+}
+
+@media (max-width: 640px) {
+  .technicians-search__filters {
+    justify-content: center;
+  }
+
+  .technicians-panel {
+    padding: 20px;
+  }
+}

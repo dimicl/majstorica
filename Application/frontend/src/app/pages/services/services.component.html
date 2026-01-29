@@ -1,1 +1,110 @@
-<p>services works!</p>
+<section class="services-page p-y-12 p-x-18">
+  <div class="services-shell">
+    <div class="services-hero card-glow">
+      <div class="services-hero__content">
+        <p class="eyebrow">Usluge</p>
+        <h1>
+          Za par klikova pronađi proverenog majstora i dogovori termin bez stresa.
+        </h1>
+        <p class="lead">
+          Pošalji opis zahteva, prati ponude i rezerviši termin sa majstorom koji ima
+          jasnu reputaciju i transparentne cene.
+        </p>
+
+        <div class="services-hero__actions">
+          <app-button
+            [buttonType]="eButtonType.POSITIVE"
+            [label]="'Pošalji zahtev'"
+            [hasIcon]="false"
+            (onButtonClick)="onHeroAction($event)"
+          ></app-button>
+          <a class="services-hero__link" routerLink="/technicians">Razgovaraj sa savetnikom</a>
+        </div>
+
+        <div class="services-hero__stats">
+          <article class="stat-card card-hover" *ngFor="let stat of heroStats">
+            <div class="stat-card__value">{{ stat.value }}</div>
+            <p class="stat-card__label">{{ stat.label }}</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="services-hero__panel">
+        <div class="panel-card card-hover">
+          <span class="panel-card__badge">Proveren majstor</span>
+          <h3 class="panel-card__title">Nikola • Električar</h3>
+          <p class="panel-card__description">
+            Radni nalozi, kamere, pametni sistemi i noćne intervencije u Novom Sadu.
+          </p>
+          <div class="panel-card__meta">
+            <span>Ocena 4.9</span>
+            <span>Odgovor za 22 min</span>
+          </div>
+          <div class="panel-card__note">Dostupan danas od 08:00 do 20:00</div>
+        </div>
+        <div class="panel-card panel-card--accent card-hover">
+          <p class="panel-card__title">Brza procena</p>
+          <p class="panel-card__description">
+            Podaci stizu u realnom vremenu. Odaberi majstora koji ti odgovara po ceni i
+            stilu komunikacije.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="services-section">
+      <div class="section-heading">
+        <div>
+          <h2>Najtraženije kategorije</h2>
+          <p>Filtriraj po tipu posla i proveri prosečne ocene, cene i brzinu odgovora.</p>
+        </div>
+        <div class="chip-list">
+          <span class="chip" *ngFor="let filter of quickFilters">{{ filter }}</span>
+        </div>
+      </div>
+
+      <div class="service-grid">
+        <article class="service-card card-hover" *ngFor="let service of featuredServices">
+          <div class="service-card__header">
+            <span class="service-card__icon" aria-hidden="true">{{ service.icon }}</span>
+            <div class="service-card__meta">
+              <span class="service-card__tag">{{ service.tag }}</span>
+              <span class="service-card__rating">{{ service.rating }}</span>
+            </div>
+          </div>
+          <h3>{{ service.title }}</h3>
+          <p>{{ service.description }}</p>
+          <a class="service-card__cta" routerLink="/technicians">Pogledaj majstore</a>
+        </article>
+      </div>
+    </div>
+
+    <div class="services-process">
+      <h3>Kako funkcioniše platforma</h3>
+      <div class="process-grid">
+        <article class="process-step" *ngFor="let step of processSteps">
+          <div class="process-step__index">{{ step.index }}</div>
+          <h4>{{ step.title }}</h4>
+          <p>{{ step.text }}</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="services-callout card-glow">
+      <div>
+        <p class="eyebrow">Poverenje</p>
+        <h3>Transparentna komunikacija i zaštita plaćanja</h3>
+        <p>
+          Plaćaš tek kada posao bude završen po dogovorenim parametrima. Uvek možeš
+          tražiti pomoć tima za podršku.
+        </p>
+      </div>
+      <app-button
+        [buttonType]="eButtonType.NEUTRAL"
+        [label]="'Saznaj više'"
+        [hasIcon]="false"
+        (onButtonClick)="onHeroAction($event)"
+      ></app-button>
+    </div>
+  </div>
+</section>
