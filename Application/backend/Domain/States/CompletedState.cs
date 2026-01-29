@@ -5,34 +5,16 @@ namespace backend.Domain.States;
 
 public class CompletedState : IJobState
 {
-    private readonly Job _job;
+    public CompletedState() { }
 
-    public CompletedState(Job job)
-    {
-        _job = job;
-    }
-    
-    public void AssignMaster(Job job, Guid masterId)
-    {
-        throw new DomainException(
-            "Završeni posao ne može da se menja.");
-    }
+    public void SendRequests(Job job) => throw new DomainException("Završeni posao se ne menja.");
+    public void Accept(Job job, Guid masterId) => throw new DomainException("Završeni posao se ne menja.");
+    public void Start(Job job) => throw new DomainException("Završeni posao se ne može pokrenuti.");
+    public void Complete(Job job) => throw new DomainException("Posao je već završen.");
 
     public void ChangeDescription(Job job, string description)
-    {
-        throw new DomainException(
-            "Završeni posao se ne može menjati.");
-    }
+        => throw new DomainException("Završeni posao se ne može menjati.");
 
-    public void Start(Job job)
-    {
-        throw new DomainException(
-            "Završeni posao se ne može ponovo pokrenuti.");
-    }
-
-    public void Complete(Job job)
-    {
-        throw new DomainException(
-            "Posao je već završen.");
-    }
+    public void ChangePrice(Job job, decimal? price)
+        => throw new DomainException("Završeni posao se ne može menjati.");
 }

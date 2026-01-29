@@ -2,7 +2,9 @@ namespace backend.Domain.Enums;
 
 public enum JobStatus
 {
-    Created,     
+    Created,   
+    Pending,
+    Accepted,  
     InProgress,   
     Completed     
 }
