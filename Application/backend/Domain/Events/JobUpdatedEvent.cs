@@ -1,5 +1,7 @@
 namespace backend.Domain.Events;
 
+
+//ovo nam kaze da je neki podatak na job-u primenjen, kreira se u job-u
 public class JobUpdatedEvent : IDomainEvent
 {
     public Guid JobId { get; }

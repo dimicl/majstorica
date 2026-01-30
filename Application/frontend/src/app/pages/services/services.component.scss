@@ -1,4 +1,4 @@
-@use '../../../assets/scss/variables' as *;
+@use "../../../assets/scss/variables" as *;
 
 .services-page {
   padding: clamp(28px, 5vw, 48px) clamp(16px, 3vw, 56px) clamp(48px, 6vw, 68px);
@@ -20,7 +20,11 @@
 }
 
 .services-hero {
-  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.92) 100%);
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.92) 100%
+  );
   border-radius: 28px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   padding: 36px;
@@ -59,7 +63,7 @@
   text-decoration: none;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     bottom: 0;
@@ -120,7 +124,11 @@
 }
 
 .panel-card--accent {
-  background: linear-gradient(180deg, rgba(62, 125, 215, 0.12), rgba(62, 125, 215, 0.02));
+  background: linear-gradient(
+    180deg,
+    rgba(62, 125, 215, 0.12),
+    rgba(62, 125, 215, 0.02)
+  );
 }
 
 .panel-card__badge {
@@ -337,7 +345,11 @@
   border-radius: 22px;
   border: 1px solid rgba(62, 125, 215, 0.2);
   padding: 30px 28px;
-  background: linear-gradient(135deg, rgba(62, 125, 215, 0.18), rgba(155, 81, 224, 0.22));
+  background: linear-gradient(
+    135deg,
+    rgba(62, 125, 215, 0.18),
+    rgba(155, 81, 224, 0.22)
+  );
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -366,7 +378,11 @@
 }
 
 .card-glow {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.8)
+  );
   border: 1px solid rgba(62, 125, 215, 0.2);
   border-radius: 28px;
 }
