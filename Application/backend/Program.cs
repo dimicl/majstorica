@@ -10,6 +10,7 @@ using backend.Infrastructure.Persistence.Neo4j;
 using backend.Infrastructure.Messaging.RabbitMQ;
 
 using backend.Api.Hubs;
+using backend.Api.Middleware;
 
 using Neo4j.Driver;
 
@@ -134,6 +135,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -1,7 +1,9 @@
+using backend.Api.DTOs.Auth;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Shared.Helpers;
+using backend.Shared.Exceptions;
 using Microsoft.Extensions.Configuration;
 
 namespace backend.Application.Services;
@@ -17,7 +19,7 @@ public class AuthService : IAuthService
         _config = config;
     }
 
-    public async Task<string> Register(
+    public async Task<AuthResponse> Register(
         string firstName,
         string lastName,
         string email,
@@ -26,9 +28,10 @@ public class AuthService : IAuthService
         UserRole role)
     {
         if (await _users.GetByEmail(email) != null)
-            throw new Exception("Email je već zauzet.");
+            throw new UserAlreadyExistsException("Email", email);
+        
         if (await _users.GetByUsername(username) != null)
-            throw new Exception("Username je već zauzet.");
+            throw new UserAlreadyExistsException("Username", username);
 
         var user = new User(
             firstName,
@@ -40,18 +43,48 @@ public class AuthService : IAuthService
 
         await _users.Save(user);
 
-        return JwtHelper.Generate(user, _config);
+        var token = JwtHelper.Generate(user, _config);
+        var expiresAt = DateTime.UtcNow.AddHours(1);
+
+        return new AuthResponse
+        {
+            Token = token,
+            ExpiresAt = expiresAt,
+            User = new UserRequest
+            {
+                Id = user.Id,
+                Username = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role
+            }
+        };
     }
 
-    public async Task<string> Login(string usernameOrEmail, string password)
+    public async Task<AuthResponse> Login(string usernameOrEmail, string password)
     {
         var user =
             await _users.GetByEmail(usernameOrEmail)
             ?? await _users.GetByUsername(usernameOrEmail);
 
         if (user == null || !PasswordHasher.Verify(password, user.PasswordHash))
-            throw new Exception("Pogrešni kredencijali.");
+            throw new InvalidCredentialsException();
 
-        return JwtHelper.Generate(user, _config);
+        var token = JwtHelper.Generate(user, _config);
+        var expiresAt = DateTime.UtcNow.AddHours(1);
+
+        return new AuthResponse
+        {
+            Token = token,
+            ExpiresAt = expiresAt,
+            User = new UserRequest
+            {
+                Id = user.Id,
+                Username = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role
+            }
+        };
     }
 }

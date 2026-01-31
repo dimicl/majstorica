@@ -1,10 +1,11 @@
+using backend.Api.DTOs.Auth;
 using backend.Domain.Enums;
 
 namespace backend.Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<string> Register(
+    Task<AuthResponse> Register(
         string firstName,
         string lastName,
         string email,
@@ -12,5 +13,5 @@ public interface IAuthService
         string password,
         UserRole role);
 
-    Task<string> Login(string usernameOrEmail, string password);
+    Task<AuthResponse> Login(string usernameOrEmail, string password);
 }
