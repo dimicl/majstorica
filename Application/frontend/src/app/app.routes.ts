@@ -5,6 +5,7 @@ import { MainComponent } from './pages/main/main.component';
 import { ServicesComponent } from './pages/services/services.component';
 import { TechniciansComponent } from './pages/technicians/technicians.component';
 import { ProfilComponent } from './pages/profil/profil.component';
+import { authGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -18,11 +19,13 @@ export const routes: Routes = [
   {
     path: 'chat',
     component: ChatComponent,
+    canActivate: [authGuard],
   },
   // Navbar koristi id "messages" (Poruke) → vodi na chat stranicu
   {
     path: 'chat',
     component: ChatComponent,
+    canActivate: [authGuard],
   },
   {
     path: 'services',
@@ -35,7 +38,7 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfilComponent,
-    
+    canActivate: [authGuard],
   },
   {
     path: '',

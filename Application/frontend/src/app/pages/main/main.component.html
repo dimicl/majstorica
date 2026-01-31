@@ -2,21 +2,29 @@
   <div class="topbar d-flex align-items-center justify-content-between m-b-22">
     <a class="brand" routerLink="/home" aria-label="Majstorica - početna">Majstorica</a>
 
-    <div class="topbar-actions">      
-      <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Započni'" [hasIcon]="true" [iconSrc]="sharedSvgRoutes.ARROW_RIGHT_ICON" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
-      <app-button [buttonType]="eButtonType.NEUTRAL" [label]="'Prijava'" [hasIcon]="false" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
+    <div class="topbar-actions">
+      @if (!(auth.isAuthenticated$ | async)) {
+        <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Započni'" [hasIcon]="true" [iconSrc]="sharedSvgRoutes.ARROW_RIGHT_ICON" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
+        <app-button [buttonType]="eButtonType.NEUTRAL" [label]="'Prijava'" [hasIcon]="false" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
+      }
     </div>
   </div>
 
   <div class="hero">
     <div class="hero-left p-y-10">
       <h1 class="hero-title">
-        <span class="font-bold">Mesto gde</span>
-        <br />
-        <span class="text-color-blue">Klijent</span> &amp;
-        <span class="text-color-blue">Majstor</span>
-        <br />
-        Saradjuju bez stresa
+        @if (auth.userSelector$ | async; as user) {
+          <span class="font-bold">Dobrodošli,</span>
+          <br />
+          <span class="text-color-blue">{{ user.firstName }} {{ user.lastName }}</span>
+        } @else {
+          <span class="font-bold">Mesto gde</span>
+          <br />
+          <span class="text-color-blue">Klijent</span> &amp;
+          <span class="text-color-blue">Majstor</span>
+          <br />
+          Saradjuju bez stresa
+        }
       </h1>
 
       <p class="hero-subtitle m-t-14">

@@ -1,17 +1,21 @@
 export enum NavbarItemString {
-    //id
-    HOME = 'home',
-    SERVICES = 'services',
-    TECHNICIANS = 'technicians',
-    REQUESTS = 'requests',
-    MESSAGES = 'chat',
-    PROFILE = 'profile',
+  //id
+  HOME = 'home',
+  SERVICES = 'services',
+  TECHNICIANS = 'technicians',
+  REQUESTS = 'requests',
+  MESSAGES = 'chat',
+  PROFILE = 'profile',
 
-    //label
-    HOME_LABEL = 'Pocetna',
-    SERVICES_LABEL = 'Usluge',
-    TECHNICIANS_LABEL = 'Majstori',
-    REQUESTS_LABEL = 'Zahtevi',
-    MESSAGES_LABEL = 'Poruke',
-    PROFILE_LABEL = 'Profil',
+  //label
+  HOME_LABEL = 'Pocetna',
+  SERVICES_LABEL = 'Usluge',
+  TECHNICIANS_LABEL = 'Majstori',
+  REQUESTS_LABEL = 'Zahtevi',
+  MESSAGES_LABEL = 'Poruke',
+  PROFILE_LABEL = 'Profil',
+  LOGOUT_LABEL = 'Odjava',
+
+  //string
+  LOGOUT = 'logout',
 }

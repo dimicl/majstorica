@@ -97,6 +97,18 @@ builder.Services.AddScoped<IUserService, UserService>();
 // RabbitMQ
 builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "http://localhost:4209")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // SignalIR
 builder.Services.AddSignalR();
 
@@ -139,6 +151,9 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
