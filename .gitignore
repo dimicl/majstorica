@@ -1,6 +1,9 @@
 # .NET build output
 **/bin/
 **/obj/
+*.dll
+*.exe
+*.pdb
 
 # Visual Studio / Rider
 .vs/
@@ -12,4 +15,7 @@
 
 # Logs
 *.log
+
+# Node modules
+**/node_modules/
 
