@@ -1,6 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
+import { AuthActions } from '../auth/auth.actions';
 import { ClientActions } from './client.actions';
-import { ClientState, initialClientState } from './client.state';
+import { initialClientState } from './client.state';
 
 export const clientReducer = createReducer(
   initialClientState,
@@ -21,5 +22,7 @@ export const clientReducer = createReducer(
     ...state,
     loading: false,
     error,
-  }))
+  })),
+
+  on(AuthActions.logoutSuccess, () => initialClientState)
 );

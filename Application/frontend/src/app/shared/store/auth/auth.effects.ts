@@ -15,28 +15,33 @@ export class AuthEffects {
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
-      exhaustMap(({ email, password }) =>
-        this.authService.login(email, password).pipe(
+      exhaustMap(({ request }) =>
+        this.authService.login(request).pipe(
           map((response) => {
             this.authService.saveToken(response.token);
-            return AuthActions.loginSuccess({ user: response.user });
+            return AuthActions.loginSuccess({
+              user: response.user,
+              token: response.token,
+            });
           }),
           catchError((error) =>
-            of(AuthActions.loginFailure({ error: error.error?.message || 'Greška pri prijavi' }))
+            of(
+              AuthActions.loginFailure({
+                error: error.error?.message || 'Greška pri prijavi',
+              })
+            )
           )
         )
       )
     )
   );
 
-  // Nakon uspešnog logina - redirect na home
+  // Nakon uspešnog logina: user u auth state, redirect na home (home će po user.id/role dispatch-ovati get)
   loginSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
-        tap(() => {
-          this.router.navigate(['/']);
-        })
+        tap(() => this.router.navigate(['/home']))
       ),
     { dispatch: false }
   );
@@ -45,53 +50,49 @@ export class AuthEffects {
   register$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.register),
-      exhaustMap(({ email, password, name }) =>
-        this.authService.register(email, password, name).pipe(
+      exhaustMap(({ request }) =>
+        this.authService.register(request).pipe(
           map((response) => {
             this.authService.saveToken(response.token);
-            return AuthActions.registerSuccess({ user: response.user });
+            return AuthActions.registerSuccess({
+              user: response.user,
+              token: response.token,
+            });
           }),
           catchError((error) =>
-            of(AuthActions.registerFailure({ error: error.error?.message || 'Greška pri registraciji' }))
+            of(
+              AuthActions.registerFailure({
+                error: error.error?.message || 'Greška pri registraciji',
+              })
+            )
           )
         )
       )
     )
   );
 
-  // Nakon uspešne registracije - redirect na home
+  // Nakon uspešne registracije: user u auth state, redirect na home
   registerSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.registerSuccess),
-        tap(() => {
-          this.router.navigate(['/']);
-        })
+        tap(() => this.router.navigate(['/home']))
       ),
     { dispatch: false }
   );
 
-  // Logout Effect
+  // Logout
   logout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.logout),
-      exhaustMap(() =>
-        this.authService.logout().pipe(
-          map(() => {
-            this.authService.removeToken();
-            return AuthActions.logoutSuccess();
-          }),
-          catchError(() => {
-            // Čak i ako API poziv ne uspe, obriši token lokalno
-            this.authService.removeToken();
-            return of(AuthActions.logoutSuccess());
-          })
-        )
-      )
+      map(() => {
+        this.authService.removeToken();
+        return AuthActions.logoutSuccess();
+      })
     )
   );
 
-  // Nakon logouta - redirect na login
+  // Logout Success - redirect na login
   logoutSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -102,5 +103,30 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
-}
 
+  // Load User
+  loadUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.loadUser),
+      exhaustMap(() => {
+        const token = this.authService.getToken();
+        if (!token) {
+          return of(AuthActions.loadUserFailure());
+        }
+
+        return this.authService.getUser().pipe(
+          map((response) =>
+            AuthActions.loadUserSuccess({
+              user: response.user,
+              token,
+            })
+          ),
+          catchError(() => {
+            this.authService.removeToken();
+            return of(AuthActions.loadUserFailure());
+          })
+        );
+      })
+    )
+  );
+}

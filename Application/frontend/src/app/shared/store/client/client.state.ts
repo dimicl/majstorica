@@ -1,10 +1,4 @@
-import { ClientProfile } from '../../models/client.model';
-
-export interface ClientState {
-  profile: ClientProfile | null;
-  loading: boolean;
-  error: string | null;
-}
+import { ClientState } from '../../interfaces/client-state.interface';
 
 export const initialClientState: ClientState = {
   profile: null,

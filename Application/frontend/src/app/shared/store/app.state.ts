@@ -1,8 +1,7 @@
-import { AuthState } from './auth/auth.state';
-import { ClientState } from './client/client.state';
+import { AuthState } from '../interfaces';
+import { ClientState } from '../interfaces/client-state.interface';
 
 export interface AppState {
   auth: AuthState;
   client: ClientState;
 }
-

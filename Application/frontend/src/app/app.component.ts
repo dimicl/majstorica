@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
 
@@ -6,9 +6,6 @@ import { NavbarComponent } from './components/navbar/navbar.component';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-  imports: [RouterOutlet, NavbarComponent]
+  imports: [RouterOutlet, NavbarComponent],
 })
-export class AppComponent {
-  title = 'frontend';
-  isLoggedIn = signal<boolean>(true);
-}
+export class AppComponent {}

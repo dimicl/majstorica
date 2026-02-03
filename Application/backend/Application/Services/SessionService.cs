@@ -19,12 +19,7 @@ public class SessionService : ISessionService
         string connectionId)
     {
         var session = await _repository.GetByUserId(userId)
-            ?? new UserSession
-            {
-                Id = userId.ToString(),
-                UserId = userId,
-                Role = role
-            };
+            ?? new UserSession(userId.ToString(), userId, role, connectionId);
 
         session.ConnectionId = connectionId;
         session.LastSeen = DateTime.UtcNow;

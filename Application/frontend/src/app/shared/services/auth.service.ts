@@ -2,22 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../models/user.model';
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  name: string;
-}
-
-export interface AuthResponse {
-  user: User;
-  token: string;
-}
+import { AuthResponse, LoginRequest, RegisterRequest } from '../interfaces';
 
 export interface UserResponse {
   user: User;
@@ -28,21 +13,14 @@ export interface UserResponse {
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'https://localhost:5001/api'; // Promeni prema tvom backend URL-u
+  private readonly API_URL = 'http://localhost:5187/api';
 
-  login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, {
-      email,
-      password,
-    });
+  login(request: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, request);
   }
 
-  register(email: string, password: string, name: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, {
-      email,
-      password,
-      name,
-    });
+  register(request: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, request);
   }
 
   logout(): Observable<void> {
@@ -73,4 +51,3 @@ export class AuthService {
     return !!this.getToken();
   }
 }
-

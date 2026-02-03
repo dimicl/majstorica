@@ -1,5 +1,4 @@
 namespace backend.Domain.Entities;
-using Neo4j.Driver;
 
 public class ChatConversation
 {
@@ -29,16 +28,21 @@ public class ChatConversation
         IsActive = false;
     }
 
-    public static ChatConversation Rehydrate(INode node)
+    public static ChatConversation Rehydrate(
+        Guid id,
+        Guid jobId,
+        Guid clientId,
+        Guid masterId,
+        bool isActive
+    )
     {
-        var conversation = new ChatConversation();
-
-        conversation.Id = Guid.Parse(node.Properties["id"].As<string>());
-        conversation.JobId = Guid.Parse(node.Properties["jobId"].As<string>());
-        conversation.ClientId = Guid.Parse(node.Properties["clientId"].As<string>());
-        conversation.MasterId = Guid.Parse(node.Properties["masterId"].As<string>());
-        conversation.IsActive = node.Properties["isActive"].As<bool>();
-
-        return conversation;
+        return new ChatConversation 
+        {
+            Id = id,
+            JobId = jobId,
+            ClientId = clientId,
+            MasterId = masterId,
+            IsActive = isActive
+        };
     }
 }

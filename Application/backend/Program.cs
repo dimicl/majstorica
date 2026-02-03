@@ -1,4 +1,3 @@
-
 using StackExchange.Redis;
 using Redis.OM;
 
@@ -7,9 +6,13 @@ using backend.Application.Services;
 
 using backend.Infrastructure.Persistence.Redis;
 using backend.Infrastructure.Persistence.Neo4j;
+using backend.Infrastructure.Persistence.MongoDb;
 using backend.Infrastructure.Messaging.RabbitMQ;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 using backend.Api.Hubs;
+using backend.Api.Middleware;
 
 using Neo4j.Driver;
 
@@ -79,11 +82,28 @@ builder.Services.AddSingleton<IDriver>(_ =>
     )
 );
 
-builder.Services.AddScoped<IJobRepository, Neo4jJobRepository>();
-builder.Services.AddScoped<IUserRepository, Neo4jUserRepository>();
-builder.Services.AddScoped<IConversationRepository, Neo4jConversationRepository>();
+// MongoDB
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var cs = builder.Configuration.GetConnectionString("DbConnection");
+    return new MongoClient(cs);
+});
+builder.Services.AddScoped(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase("Majstorica");
+});
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IMasterRepository, MasterRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<MongoJobRepository>();
+builder.Services.AddScoped<IJobGraphRepository, Neo4jJobGraphRepository>();
+builder.Services.AddScoped<IJobRepository, JobRepository>();
 
-
+// Neo4j (graph: minimal User/Job nodes, relationships)
+builder.Services.AddScoped<IUserGraphSync, Neo4jUserGraphRepository>();
 
 // Services
 builder.Services.AddScoped<IJobService, JobService>();
@@ -95,6 +115,18 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 // RabbitMQ
 builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "http://localhost:4209")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 // SignalIR
 builder.Services.AddSignalR();
@@ -135,7 +167,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

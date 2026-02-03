@@ -130,6 +130,33 @@ form {
   color: $color-red;
 }
 
+.input-label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: $color-white;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+
+  &:focus {
+    border-color: $color-blue;
+    box-shadow: 0 0 0 2px rgba($color-blue, 0.2);
+  }
+
+  option {
+    background: $color-background-dark;
+    color: $color-white;
+  }
+}
+
 .btn-submit {
   background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 100%);
   border: none;
