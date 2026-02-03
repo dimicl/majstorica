@@ -60,15 +60,19 @@ public class Job
     //uzima podatke iz baze i vraca job entitet bez da mu promeni nesto
     //poziva se u Infrastructure iz koje baze vracamo job
     //static da pripada klasi da mozemo da je pozovemo i napravimo objekat jer ne mozemo da je pozovemo nad nepostojecim objektom
-    public static Job Rehydrate(Guid id, Guid clientId, Guid? masterId, string description, decimal? price, string status)
+    public static Job Rehydrate(Guid id, Guid clientId, Guid? masterId, string description, decimal? price, bool isEmergency, string status)
     {
-        var job = new Job();
-        job.Id = id;
-        job.ClientId = clientId;
-        job.MasterId = masterId;
-        job.Description = description;
-        job.Price = price;
-        job.SetStateFromString(status);
+        var job = new Job
+        {
+            Id = id,
+            ClientId = clientId,
+            MasterId = masterId,
+            Description = description,
+            Price = price,
+            IsEmergency = isEmergency,
+            Status = Enum.Parse<JobStatus>(status)
+        };
+        //job.SetStateFromString(status);
         return job;
     }
 

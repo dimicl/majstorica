@@ -26,13 +26,7 @@ public class ChatService : IChatService
         if (conversation == null || !conversation.IsActive)
             throw new Exception("Chat je zatvoren.");
 
-        var message = new ChatMessage
-        {
-            ConversationId = conversationId,
-            JobId = jobId,
-            SenderId = senderId,
-            Content = content
-        };
+        var message = new ChatMessage(conversationId, jobId, senderId, content);
 
         await _messageRepository.Save(message);
         return message;

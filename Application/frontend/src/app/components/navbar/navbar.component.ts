@@ -62,7 +62,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Servis izlagan template-u – template koristi auth.dispatchLogout() itd. */
   readonly auth = inject(AuthSelectorService);
 
   constructor(private router: Router) {}

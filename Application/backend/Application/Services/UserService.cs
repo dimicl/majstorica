@@ -7,10 +7,12 @@ namespace backend.Application.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUserGraphSync _userGraphSync;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IUserGraphSync userGraphSync)
     {
         _userRepository = userRepository;
+        _userGraphSync = userGraphSync;
     }
 
     public async Task<User?> GetById(Guid userId)
@@ -30,6 +32,7 @@ public class UserService : IUserService
         user.UpdateProfile(firstName, lastName);
 
         await _userRepository.Save(user);
+        await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
 
     public async Task Deactivate(Guid userId)
@@ -40,6 +43,7 @@ public class UserService : IUserService
 
         user.Deactivate();
         await _userRepository.Save(user);
+        await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
 
     public async Task Activate(Guid userId)
@@ -50,6 +54,7 @@ public class UserService : IUserService
 
         user.Activate();
         await _userRepository.Save(user);
+        await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
 
     public async Task<List<User>> GetAllMasters()

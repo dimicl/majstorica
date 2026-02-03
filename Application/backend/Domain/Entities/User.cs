@@ -1,6 +1,5 @@
 using backend.Domain.Enums;
 using backend.Shared.Helpers;
-using Neo4j.Driver;
 
 namespace backend.Domain.Entities;
 
@@ -16,7 +15,7 @@ public class User
     public string PasswordHash { get; private set; } = default!;
 
     public UserRole Role { get; private set; }
-    //za soft delete, da ga ne brisemo iz baze jer ostaju viseci poslovi, puca statistika..., da ga deaktiviramo i da ne moze da se uloguje
+
     public bool IsActive { get; private set; }
 
     protected User() { }
@@ -73,19 +72,26 @@ public class User
         IsActive = true;
     }
 
-    public static User Rehydrate(INode node)
-    {
-        var user = new User();
-
-        user.Id = Guid.Parse(node.Properties["id"].As<string>());
-        user.FirstName = node.Properties["firstName"].As<string>();
-        user.LastName = node.Properties["lastName"].As<string>();
-        user.Email = node.Properties["email"].As<string>();
-        user.Username = node.Properties["username"].As<string>();
-        user.PasswordHash = node.Properties["passwordHash"].As<string>();
-        user.Role = Enum.Parse<UserRole>(node.Properties["role"].As<string>());
-        user.IsActive = node.Properties["isActive"].As<bool>();
-
-        return user;
+    public static User Rehydrate(
+        Guid id,
+        string firstName,
+        string lastName, 
+        string email,
+        string username,
+        string passwordHash,
+        UserRole role,
+        bool isActive
+    ){
+        return new User 
+        {
+            Id = id,
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            Username = username,
+            PasswordHash = passwordHash,
+            Role = role,
+            IsActive = isActive
+        };
     }
 }

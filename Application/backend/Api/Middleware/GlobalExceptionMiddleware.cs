@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using backend.Shared.Exceptions;
+using MongoDB.Driver;
 
 namespace backend.Api.Middleware;
 
@@ -36,7 +37,9 @@ public class GlobalExceptionMiddleware
             UserAlreadyExistsException => (HttpStatusCode.Conflict, exception.Message),
             UnauthorizedException => (HttpStatusCode.Unauthorized, exception.Message),
             DomainException => (HttpStatusCode.BadRequest, exception.Message),
-            _ => (HttpStatusCode.InternalServerError, "Došlo je do neočekivane greške.")
+            MongoConnectionException => (HttpStatusCode.ServiceUnavailable, "Nema konekcije sa MongoDB bazom. Proverite mrežu, firewall i MongoDB Atlas."),
+            TimeoutException => (HttpStatusCode.ServiceUnavailable, "Konekcija ka bazi je istekla. Proverite mrežu i MongoDB Atlas."),
+            _ => (HttpStatusCode.InternalServerError, $"{exception.Message} | {exception.GetType().Name}")
         };
 
         context.Response.ContentType = "application/json";

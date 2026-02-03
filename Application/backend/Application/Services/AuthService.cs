@@ -11,11 +11,13 @@ namespace backend.Application.Services;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _users;
+    private readonly IUserGraphSync _userGraphSync;
     private readonly IConfiguration _config;
 
-    public AuthService(IUserRepository users, IConfiguration config)
+    public AuthService(IUserRepository users, IUserGraphSync userGraphSync, IConfiguration config)
     {
         _users = users;
+        _userGraphSync = userGraphSync;
         _config = config;
     }
 
@@ -42,6 +44,7 @@ public class AuthService : IAuthService
             role);
 
         await _users.Save(user);
+        await _userGraphSync.SyncUserNode(user.Id, user.Role);
 
         var token = JwtHelper.Generate(user, _config);
         var expiresAt = DateTime.UtcNow.AddHours(1);
