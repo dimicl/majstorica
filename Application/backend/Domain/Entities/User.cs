@@ -18,6 +18,9 @@ public class User
 
     public bool IsActive { get; private set; }
 
+    public string? Phone { get; private set; }
+    public string? DeliveryAddress { get; private set; }
+
     protected User() { }
 
     public User(
@@ -26,7 +29,9 @@ public class User
         string email,
         string username,
         string plainPassword,
-        UserRole role)
+        UserRole role,
+        string? phone = null,
+        string? deliveryAddress = null)
     {
         Id = Guid.NewGuid();
 
@@ -39,6 +44,8 @@ public class User
 
         Role = role;
         IsActive = true;
+        Phone = phone;
+        DeliveryAddress = deliveryAddress;
     }
 
     // ---------------- DOMENSKE OPERACIJE ----------------
@@ -62,6 +69,12 @@ public class User
         LastName = lastName;
     }
 
+    public void UpdateContact(string? phone, string? deliveryAddress)
+    {
+        Phone = phone;
+        DeliveryAddress = deliveryAddress;
+    }
+
     public void Deactivate()
     {
         IsActive = false;
@@ -75,14 +88,16 @@ public class User
     public static User Rehydrate(
         Guid id,
         string firstName,
-        string lastName, 
+        string lastName,
         string email,
         string username,
         string passwordHash,
         UserRole role,
-        bool isActive
-    ){
-        return new User 
+        bool isActive,
+        string? phone = null,
+        string? deliveryAddress = null)
+    {
+        return new User
         {
             Id = id,
             FirstName = firstName,
@@ -91,7 +106,9 @@ public class User
             Username = username,
             PasswordHash = passwordHash,
             Role = role,
-            IsActive = isActive
+            IsActive = isActive,
+            Phone = phone,
+            DeliveryAddress = deliveryAddress
         };
     }
 }

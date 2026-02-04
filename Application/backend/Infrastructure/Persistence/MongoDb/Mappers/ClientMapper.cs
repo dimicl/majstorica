@@ -9,9 +9,8 @@ public static class ClientMapper
     {
         return new ClientDocument
         {
+            Id = client.Id,
             UserId = client.UserId,
-            Phone = client.Phone,
-            DeliveryAddress = client.DeliveryAddress,
             CreatedAt = client.CreatedAt,
             UpdatedAt = client.UpdatedAt
         };
@@ -20,9 +19,8 @@ public static class ClientMapper
     public static Client ToDomain(ClientDocument doc)
     {
         return Client.Rehydrate(
+            doc.Id,
             doc.UserId,
-            doc.Phone,
-            doc.DeliveryAddress,
             doc.CreatedAt,
             doc.UpdatedAt);
     }

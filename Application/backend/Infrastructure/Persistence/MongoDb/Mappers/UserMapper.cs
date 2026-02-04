@@ -16,7 +16,9 @@ public static class UserMapper
             Username = user.Username,
             PasswordHash = user.PasswordHash,
             Role = user.Role,
-            IsActive = user.IsActive
+            IsActive = user.IsActive,
+            Phone = user.Phone,
+            DeliveryAddress = user.DeliveryAddress
         };
     }
 
@@ -30,6 +32,8 @@ public static class UserMapper
             doc.Username,
             doc.PasswordHash,
             doc.Role,
-            doc.IsActive);
+            doc.IsActive,
+            doc.Phone,
+            doc.DeliveryAddress);
     }
 }

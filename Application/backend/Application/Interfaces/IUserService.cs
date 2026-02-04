@@ -11,6 +11,9 @@ public interface IUserService
         string firstName,
         string lastName);
 
+    Task UpdateContact(Guid userId, string? phone, string? deliveryAddress);
+
+
     Task Deactivate(Guid userId);
     Task Activate(Guid userId);
 

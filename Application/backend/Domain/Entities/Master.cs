@@ -1,6 +1,7 @@
 namespace backend.Domain.Entities;
 public class Master
 {
+    public Guid Id { get; internal set; }
     public Guid UserId { get; internal set; }
 
     public string? Bio { get; internal set; }
@@ -20,6 +21,7 @@ public class Master
 
     public Master(Guid userId, string? bio = null, IEnumerable<string>? categories = null, int? yearsExperience = null)
     {
+        Id = Guid.NewGuid();
         UserId = userId;
         Bio = bio;
         Categories = (categories?.ToList() ?? new List<string>()).AsReadOnly();
@@ -28,6 +30,7 @@ public class Master
     }
 
     public static Master Rehydrate(
+        Guid id,
         Guid userId,
         string? bio,
         IReadOnlyList<string> categories,
@@ -38,6 +41,7 @@ public class Master
     {
         return new Master
         {
+            Id = id,
             UserId = userId,
             Bio = bio,
             Categories = categories,

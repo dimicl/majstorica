@@ -16,21 +16,12 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register(
-        [FromBody] RegisterRequest request)
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
-        if (request.Role == Domain.Enums.UserRole.Admin) return BadRequest(new { message = "Ne možete se registrovati kao Admin." });
-        
+        if (request.Role == Domain.Enums.UserRole.Admin)
+            return BadRequest(new { message = "Ne možete se registrovati kao Admin." });
 
-        var response = await _authService.Register(
-            request.FirstName,
-            request.LastName,
-            request.Email,
-            request.Username,
-            request.Password,
-            request.Role
-        );
-
+        var response = await _authService.Register(request);
         return StatusCode(201, response);
     }
 
@@ -38,10 +29,7 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<AuthResponse>> Login(
         [FromBody] LoginRequest request)
     {
-        var response = await _authService.Login(
-            request.UsernameOrEmail,
-            request.Password
-        );
+        var response = await _authService.Login(request);
 
         return Ok(response);
     }

@@ -8,11 +8,16 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserGraphSync _userGraphSync;
+    private readonly IMasterRepository _masterRepository;
 
-    public UserService(IUserRepository userRepository, IUserGraphSync userGraphSync)
+    public UserService(
+        IUserRepository userRepository,
+        IUserGraphSync userGraphSync,
+        IMasterRepository masterRepository)
     {
         _userRepository = userRepository;
         _userGraphSync = userGraphSync;
+        _masterRepository = masterRepository;
     }
 
     public async Task<User?> GetById(Guid userId)
@@ -34,6 +39,17 @@ public class UserService : IUserService
         await _userRepository.Save(user);
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
+
+    public async Task UpdateContact(Guid userId, string? phone, string? deliveryAddress)
+    {
+        var user = await _userRepository.GetById(userId);
+        if (user == null)
+            throw new Exception("Korisnik nije pronađen.");
+
+        user.UpdateContact(phone, deliveryAddress);
+        await _userRepository.Save(user);
+    }
+
 
     public async Task Deactivate(Guid userId)
     {

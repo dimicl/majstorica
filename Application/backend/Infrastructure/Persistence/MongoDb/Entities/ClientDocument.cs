@@ -7,9 +7,8 @@ public class ClientDocument
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]
+    public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public string? Phone { get; set; }
-    public string? DeliveryAddress { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

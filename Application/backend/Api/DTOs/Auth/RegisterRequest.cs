@@ -15,8 +15,6 @@ public class RegisterRequest
 
     [Required(ErrorMessage = "Email je obavezan")]
     [EmailAddress(ErrorMessage = "Email adresa nije validna")]
-    [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", 
-        ErrorMessage = "Email format nije validan")]
     public string Email { get; set; } = default!;
 
     [Required(ErrorMessage = "Korisničko ime je obavezno")]
@@ -30,4 +28,11 @@ public class RegisterRequest
     [Required(ErrorMessage = "Uloga je obavezna")]
     [EnumDataType(typeof(UserRole), ErrorMessage = "Uloga nije validna")]
     public UserRole Role { get; set; }
+
+    [Phone(ErrorMessage = "Telefon nije u validnom formatu")]
+    [StringLength(20)]
+    public string? Phone { get; set; }
+
+    [StringLength(200)]
+    public string? DeliveryAddress { get; set; }
 }

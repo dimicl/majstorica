@@ -19,19 +19,20 @@ public class ClientRepository : IClientRepository
     {
         var doc = ClientMapper.ToDocument(client);
         await _collection.ReplaceOneAsync(
-            x => x.UserId == doc.UserId,
+            x => x.Id == doc.Id,
             doc,
             new ReplaceOptions { IsUpsert = true });
     }
 
     public async Task<Client?> GetById(Guid id)
     {
-        var doc = await _collection.Find(x => x.UserId == id).FirstOrDefaultAsync();
+        var doc = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         return doc == null ? null : ClientMapper.ToDomain(doc);
     }
 
     public async Task<Client?> GetByUserId(Guid userId)
     {
-        return await GetById(userId);
+        var doc = await _collection.Find(x => x.UserId == userId).FirstOrDefaultAsync();
+        return doc == null ? null : ClientMapper.ToDomain(doc);
     }
 }

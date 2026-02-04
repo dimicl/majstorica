@@ -8,7 +8,7 @@ public static class MasterMapper
     {
         return new MasterDocument
         {
-            Id = master.UserId,
+            Id = master.Id,
             UserId = master.UserId,
             Bio = master.Bio,
             Categories = master.Categories.ToList(),
@@ -22,6 +22,7 @@ public static class MasterMapper
     public static Master ToDomain(MasterDocument doc)
     {
         return Master.Rehydrate(
+            doc.Id,
             doc.UserId,
             doc.Bio,
             doc.Categories,
