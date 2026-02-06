@@ -13,10 +13,6 @@ public class Neo4jUserGraphRepository : IUserGraphSync
         _driver = driver;
     }
 
-    /// <summary>
-    /// Kreira User čvor, zatim Client ili Master čvor (inicijalno prazan) i povezuje ga sa User-om.
-    /// Ostala svojstva na Client/Master će se dodavati kasnije na profilu.
-    /// </summary>
     public async Task SyncUserNode(Guid userId, UserRole role)
     {
         var id = userId.ToString();

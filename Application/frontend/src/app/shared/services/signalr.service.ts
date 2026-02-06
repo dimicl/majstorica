@@ -6,8 +6,7 @@ import {
   IHttpConnectionOptions,
   LogLevel,
 } from '@microsoft/signalr';
-
-export type SignalrStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
+import { SIGNALR_STATUS, SignalrStatus } from '../types';
 
 @Injectable({
   providedIn: 'root',
@@ -15,16 +14,22 @@ export type SignalrStatus = 'disconnected' | 'connecting' | 'connected' | 'error
 export class SignalrService {
   private connection?: HubConnection;
 
-  status = signal<SignalrStatus>('disconnected');
+  status = signal<SignalrStatus>(SIGNALR_STATUS.DISCONNECTED);
   lastError = signal<string | null>(null);
 
-  async connect(hubUrl: string, options?: IHttpConnectionOptions): Promise<void> {
+  async connect(
+    hubUrl: string,
+    options?: IHttpConnectionOptions
+  ): Promise<void> {
     // Ako već postoji konekcija, pokušaj da je ugasiš pre nove
-    if (this.connection && this.connection.state !== HubConnectionState.Disconnected) {
+    if (
+      this.connection &&
+      this.connection.state !== HubConnectionState.Disconnected
+    ) {
       await this.disconnect();
     }
 
-    this.status.set('connecting');
+    this.status.set(SIGNALR_STATUS.CONNECTING);
     this.lastError.set(null);
 
     const builder = new HubConnectionBuilder()
@@ -32,29 +37,32 @@ export class SignalrService {
       .configureLogging(LogLevel.Information);
 
     // withUrl ima overload-e; pozovi odgovarajući u zavisnosti od options
-    this.connection = (options ? builder.withUrl(hubUrl, options) : builder.withUrl(hubUrl)).build();
+    this.connection = (
+      options ? builder.withUrl(hubUrl, options) : builder.withUrl(hubUrl)
+    ).build();
 
     this.connection.onreconnecting((err) => {
-      this.status.set('connecting');
+      this.status.set(SIGNALR_STATUS.CONNECTING);
       this.lastError.set(err?.message ?? null);
     });
 
     this.connection.onreconnected(() => {
-      this.status.set('connected');
+      this.status.set(SIGNALR_STATUS.CONNECTED);
       this.lastError.set(null);
     });
 
     this.connection.onclose((err) => {
-      this.status.set('disconnected');
+      this.status.set(SIGNALR_STATUS.DISCONNECTED);
       this.lastError.set(err?.message ?? null);
     });
 
     try {
       await this.connection.start();
-      this.status.set('connected');
+      this.status.set(SIGNALR_STATUS.CONNECTED);
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'SignalR konekcija nije uspela';
-      this.status.set('error');
+      const message =
+        e instanceof Error ? e.message : 'SignalR konekcija nije uspela';
+      this.status.set(SIGNALR_STATUS.ERROR);
       this.lastError.set(message);
       // Ne bacamo dalje — UI može da prikaže status umesto da ruši aplikaciju
     }
@@ -65,7 +73,7 @@ export class SignalrService {
     try {
       await this.connection.stop();
     } finally {
-      this.status.set('disconnected');
+      this.status.set(SIGNALR_STATUS.DISCONNECTED);
     }
   }
 
@@ -84,9 +92,10 @@ export class SignalrService {
 
   invoke<T = unknown>(methodName: string, ...args: unknown[]): Promise<T> {
     if (!this.connection) {
-      return Promise.reject(new Error('SignalR konekcija nije inicijalizovana'));
+      return Promise.reject(
+        new Error('SignalR konekcija nije inicijalizovana')
+      );
     }
     return this.connection.invoke<T>(methodName, ...args);
   }
 }
-

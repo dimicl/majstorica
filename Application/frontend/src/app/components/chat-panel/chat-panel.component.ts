@@ -1,5 +1,13 @@
-﻿import { Component, ElementRef, ViewChild, computed, input, output, signal } from '@angular/core';
-import type { SignalrStatus } from '../../shared/services/signalr.service';
+﻿import {
+  Component,
+  ElementRef,
+  ViewChild,
+  computed,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import type { SignalrStatus } from '../../shared/types';
 import { ButtonComponent } from '../button/button.component';
 import { BUTTON_TYPES } from '../../shared/types';
 
@@ -17,7 +25,6 @@ export type ChatMessage = {
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',
   imports: [ButtonComponent],
-
 })
 export class ChatPanelComponent {
   eButtonType = BUTTON_TYPES;
@@ -37,9 +44,24 @@ export class ChatPanelComponent {
   draft = signal<string>('');
 
   private internalMessages = signal<ChatMessage[]>([
-    { id: 'm1', from: 'them', text: 'Zdravo! Šta treba da se popravi?', time: '12:18' },
-    { id: 'm2', from: 'me', text: 'Treba da zamenim utičnicu, stalno varniči.', time: '12:19' },
-    { id: 'm3', from: 'them', text: 'Može. Pošalji sliku i adresu — mogu danas posle 17h.', time: '12:20' },
+    {
+      id: 'm1',
+      from: 'them',
+      text: 'Zdravo! Šta treba da se popravi?',
+      time: '12:18',
+    },
+    {
+      id: 'm2',
+      from: 'me',
+      text: 'Treba da zamenim utičnicu, stalno varniči.',
+      time: '12:19',
+    },
+    {
+      id: 'm3',
+      from: 'them',
+      text: 'Može. Pošalji sliku i adresu — mogu danas posle 17h.',
+      time: '12:20',
+    },
   ]);
 
   displayMessages = computed(() => this.messages() ?? this.internalMessages());
@@ -109,5 +131,3 @@ export class ChatPanelComponent {
     this.onSend();
   }
 }
-
-

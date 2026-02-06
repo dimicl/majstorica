@@ -7,11 +7,11 @@
         <div class="chat-title__name">{{ title() }}</div>
 
         <div class="chat-badges">
-         <!--  @if (signalrStatus() !== null) {
-            <span class="chat-pill chat-pill--muted">
-              SignalR: <strong>{{ signalrStatus() }}</strong>
-            </span>
-          } -->
+          @if (signalrStatus() !== null) {
+          <span class="chat-pill chat-pill--muted">
+            SignalR: <strong>{{ signalrStatus() }}</strong>
+          </span>
+          }
 
           <span
             class="chat-pill"
@@ -19,9 +19,8 @@
             [class.chat-pill--typing]="presence() === 'typing'"
             [class.chat-pill--offline]="presence() === 'offline'"
           >
-            @if (presence() === 'online') { Online }
-            @if (presence() === 'typing') { Kuca... }
-            @if (presence() === 'offline') { Offline }
+            @if (presence() === 'online') { Online } @if (presence() ===
+            'typing') { Kuca... } @if (presence() === 'offline') { Offline }
           </span>
         </div>
       </div>
@@ -32,17 +31,17 @@
 
   <div #scrollViewport class="chat-body" role="log" aria-live="polite">
     @for (m of displayMessages(); track m.id) {
-      <div
-        class="msg"
-        [class.msg--me]="m.from === 'me'"
-        [class.msg--them]="m.from === 'them'"
-        [class.msg--system]="m.from === 'system'"
-      >
-        <div class="msg-bubble">
-          <div class="msg-text">{{ m.text }}</div>
-          <div class="msg-meta">{{ m.time }}</div>
-        </div>
+    <div
+      class="msg"
+      [class.msg--me]="m.from === 'me'"
+      [class.msg--them]="m.from === 'them'"
+      [class.msg--system]="m.from === 'system'"
+    >
+      <div class="msg-bubble">
+        <div class="msg-text">{{ m.text }}</div>
+        <div class="msg-meta">{{ m.time }}</div>
       </div>
+    </div>
     }
   </div>
 
@@ -50,16 +49,20 @@
     <div class="chat-compose">
       <textarea
         #draftInput
-        class="chat-input"        
+        class="chat-input"
         rows="1"
         placeholder="Unesite poruku..."
         [value]="draft()"
         (input)="onDraftInput(draftInput.value)"
         (keydown)="onKeyDown($event)"
       ></textarea>
-      
-      <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Pošalji'" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
+
+      <app-button
+        [buttonType]="eButtonType.POSITIVE"
+        [label]="'Pošalji'"
+        [disabled]="false"
+        (onButtonClick)="onButtonClick($event)"
+      ></app-button>
     </div>
   </footer>
 </section>
-

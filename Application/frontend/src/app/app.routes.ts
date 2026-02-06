@@ -6,6 +6,7 @@ import { ServicesComponent } from './pages/services/services.component';
 import { TechniciansComponent } from './pages/technicians/technicians.component';
 import { ProfilComponent } from './pages/profil/profil.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { profileLoadUserResolver } from './shared/resolvers/profile-load-user.resolver';
 
 export const routes: Routes = [
   {
@@ -15,6 +16,7 @@ export const routes: Routes = [
   {
     path: 'home',
     component: MainComponent,
+    resolve: { _: profileLoadUserResolver },
   },
   {
     path: 'chat',
@@ -39,6 +41,7 @@ export const routes: Routes = [
     path: 'profile',
     component: ProfilComponent,
     canActivate: [authGuard],
+    resolve: { _: profileLoadUserResolver },
   },
   {
     path: '',
