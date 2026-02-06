@@ -8,7 +8,7 @@ import { ClientProfile } from '../models/client.model';
 })
 export class ClientService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'https://localhost:5001/api';
+  private readonly API_URL = 'http://localhost:5187/api';
 
   getClient(): Observable<ClientProfile> {
     return this.http.get<ClientProfile>(`${this.API_URL}/client/getClient`);

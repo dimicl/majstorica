@@ -1,7 +1,13 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ChatPanelComponent, type ChatMessage } from '../../components/chat-panel/chat-panel.component';
-import { ChatService, type ChatThread } from '../../shared/services/chat.service';
+import {
+  ChatPanelComponent,
+  type ChatMessage,
+} from '../../components/chat-panel/chat-panel.component';
+import {
+  ChatService,
+  type ChatThread,
+} from '../../shared/services/chat.service';
 import { SignalrService } from '../../shared/services/signalr.service';
 
 @Component({
@@ -18,8 +24,8 @@ export class ChatComponent {
   // Ne prikazujemo “SignalR” korisniku — samo generičan indikator ako chat nije dostupan
   realtimeError = this.signalr.lastError;
 
-  // Hub URL (primer) — prilagodi ako ti je druga ruta na backend-u
-  hubUrl = signal<string>('https://localhost:5001/hubs/notifications');
+  // Hub URL ka backend DocumentHub
+  hubUrl = signal<string>('http://localhost:5187/hubs/document');
 
   // ============================
   // “Backend-like” state (mock)
@@ -79,7 +85,10 @@ export class ChatComponent {
     this.isLoadingMessages.set(true);
     try {
       const messages = await this.chat.getMessages(threadId);
-      this.messagesByThread.set({ ...this.messagesByThread(), [threadId]: messages });
+      this.messagesByThread.set({
+        ...this.messagesByThread(),
+        [threadId]: messages,
+      });
     } finally {
       this.isLoadingMessages.set(false);
     }
@@ -91,11 +100,13 @@ export class ChatComponent {
 
     const msg = await this.chat.sendMessage(threadId, text);
     const current = this.messagesByThread()[threadId] ?? [];
-    this.messagesByThread.set({ ...this.messagesByThread(), [threadId]: [...current, msg] });
+    this.messagesByThread.set({
+      ...this.messagesByThread(),
+      [threadId]: [...current, msg],
+    });
 
     // refresh preview (lastMessage/updatedAt) iz mock “backend-a”
     const fresh = await this.chat.getThreads();
     this.threads.set(fresh);
   }
 }
-

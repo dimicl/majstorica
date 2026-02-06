@@ -1,11 +1,30 @@
 <section class="landing p-y-24 p-x-18">
   <div class="topbar d-flex align-items-center justify-content-between m-b-22">
-    <a class="brand" routerLink="/home" aria-label="Majstorica - početna">Majstorica</a>
+    <a class="brand" routerLink="/home" aria-label="Majstorica - početna"
+      >Majstorica</a
+    >
 
     <div class="topbar-actions">
       @if (!(auth.isAuthenticated$ | async)) {
-        <app-button [buttonType]="eButtonType.POSITIVE" [label]="'Započni'" [hasIcon]="true" [iconSrc]="sharedSvgRoutes.ARROW_RIGHT_ICON" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
-        <app-button [buttonType]="eButtonType.NEUTRAL" [label]="'Prijava'" [hasIcon]="false" [disabled]="false" (onButtonClick)="onButtonClick($event)"></app-button>
+      <div routerLink="/register">
+        <app-button
+          [buttonType]="eButtonType.POSITIVE"
+          [label]="'Započni'"
+          [hasIcon]="true"
+          [iconSrc]="sharedSvgRoutes.ARROW_RIGHT_ICON"
+          [disabled]="false"
+          (onButtonClick)="onButtonClick($event)"
+        ></app-button>
+      </div>
+      <div routerLink="/login">
+        <app-button
+          [buttonType]="eButtonType.NEUTRAL"
+          [label]="'Prijava'"
+          [hasIcon]="false"
+          [disabled]="false"
+          (onButtonClick)="onButtonClick($event)"
+        ></app-button>
+      </div>
       }
     </div>
   </div>
@@ -14,17 +33,18 @@
     <div class="hero-left p-y-10">
       <h1 class="hero-title">
         @if (auth.userSelector$ | async; as user) {
-          <span class="font-bold">Dobrodošli,</span>
-          <br />
-          <span class="text-color-blue">{{ user.firstName }} {{ user.lastName }}</span>
+        <span class="font-bold">Dobrodošli,</span>
+        <br />
+        <span class="text-color-blue"
+          >{{ user.firstName }} {{ user.lastName }}</span
+        >
         } @else {
-          <span class="font-bold">Mesto gde</span>
-          <br />
-          <span class="text-color-blue">Klijent</span> &amp;
-          <span class="text-color-blue">Majstor</span>
-          <br />
-          Saradjuju bez stresa
-        }
+        <span class="font-bold">Mesto gde</span>
+        <br />
+        <span class="text-color-blue">Klijent</span> &amp;
+        <span class="text-color-blue">Majstor</span>
+        <br />
+        Saradjuju bez stresa }
       </h1>
 
       <p class="hero-subtitle m-t-14">
@@ -33,7 +53,10 @@
       </p>
 
       <div class="hero-controls d-flex flex-wrap align-items-center m-t-18">
-        <label class="pill pill-select d-inline-flex align-items-center" aria-label="Lokacija">
+        <label
+          class="pill pill-select d-inline-flex align-items-center"
+          aria-label="Lokacija"
+        >
           <span class="pill-label">Lokacija</span>
           <select>
             <option selected>Novi Sad</option>
@@ -43,7 +66,10 @@
           </select>
         </label>
 
-        <div class="pill pill-disabled d-flex align-items-center gap-4" aria-disabled="true">
+        <div
+          class="pill pill-disabled d-flex align-items-center gap-4"
+          aria-disabled="true"
+        >
           <span class="pill-label">Uskoro</span>
           <span class="pill-value">Još gradova</span>
         </div>
@@ -104,13 +130,17 @@
             <div class="mock-bar" style="--h: 85%"></div>
             <div class="mock-bar" style="--h: 62%"></div>
           </div>
-          <div class="mock-badge mock-badge--muted">Transparentna ponuda i evidencija</div>
+          <div class="mock-badge mock-badge--muted">
+            Transparentna ponuda i evidencija
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="scroll-hint d-flex align-items-center justify-content-center m-t-8">
+  <div
+    class="scroll-hint d-flex align-items-center justify-content-center m-t-8"
+  >
     <div class="scroll-mouse" aria-hidden="true"></div>
     <span>Skroluj da istražiš</span>
   </div>
@@ -119,15 +149,17 @@
 <section class="features">
   <div class="features-inner">
     <h2 class="features-title">Najtraženije usluge</h2>
-    <p class="features-subtitle">Odaberite kategoriju i pošaljite zahtev za minut.</p>
+    <p class="features-subtitle">
+      Odaberite kategoriju i pošaljite zahtev za minut.
+    </p>
 
     <div class="features-grid">
       @for (c of categories; track c.title) {
-        <a class="feature-card" routerLink="/services">
-          <div class="feature-icon" aria-hidden="true">{{ c.icon }}</div>
-          <div class="feature-title">{{ c.title }}</div>
-          <div class="feature-desc">{{ c.description }}</div>
-        </a>
+      <a class="feature-card" routerLink="/services">
+        <div class="feature-icon" aria-hidden="true">{{ c.icon }}</div>
+        <div class="feature-title">{{ c.title }}</div>
+        <div class="feature-desc">{{ c.description }}</div>
+      </a>
       }
     </div>
   </div>

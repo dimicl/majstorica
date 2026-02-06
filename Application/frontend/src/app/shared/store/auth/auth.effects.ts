@@ -3,12 +3,14 @@ import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, exhaustMap, of, tap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { SignalrService } from '../../services/signalr.service';
 import { AuthActions } from './auth.actions';
 
 @Injectable()
 export class AuthEffects {
   private actions$ = inject(Actions);
   private authService = inject(AuthService);
+  private signalr = inject(SignalrService);
   private router = inject(Router);
 
   // Login Effect - poziva API i vraća success ili failure
@@ -36,12 +38,18 @@ export class AuthEffects {
     )
   );
 
-  // Nakon uspešnog logina: user u auth state, redirect na home (home će po user.id/role dispatch-ovati get)
+  // Nakon uspešnog logina: user u auth state, konekcija na SignalR, redirect na home
   loginSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
-        tap(() => this.router.navigate(['/home']))
+        tap(() => {
+          void this.signalr.connect('http://localhost:5187/hubs/document', {
+            accessTokenFactory: () => this.authService.getToken() ?? '',
+          });
+          this.router.navigate(['/home']);
+          console.log('Signalr status:', this.signalr.status());
+        })
       ),
     { dispatch: false }
   );
@@ -71,12 +79,17 @@ export class AuthEffects {
     )
   );
 
-  // Nakon uspešne registracije: user u auth state, redirect na home
+  // Nakon uspešne registracije: user u auth state, konekcija na SignalR, redirect na home
   registerSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.registerSuccess),
-        tap(() => this.router.navigate(['/home']))
+        tap(() => {
+          void this.signalr.connect('http://localhost:5187/hubs/document', {
+            accessTokenFactory: () => this.authService.getToken() ?? '',
+          });
+          this.router.navigate(['/home']);
+        })
       ),
     { dispatch: false }
   );
@@ -92,13 +105,30 @@ export class AuthEffects {
     )
   );
 
-  // Logout Success - redirect na login
+  // Logout Success - prekid SignalR konekcije i redirect na login
   logoutSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.logoutSuccess),
         tap(() => {
+          void this.signalr.disconnect();
           this.router.navigate(['/login']);
+        })
+      ),
+    { dispatch: false }
+  );
+
+  saveUserIdToStorage$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(
+          AuthActions.loginSuccess,
+          AuthActions.registerSuccess,
+          AuthActions.loadUserSuccess
+        ),
+        tap((action) => {
+          const { user } = action;
+          if (user?.id) this.authService.saveUserId(user.id);
         })
       ),
     { dispatch: false }
@@ -110,21 +140,19 @@ export class AuthEffects {
       ofType(AuthActions.loadUser),
       exhaustMap(() => {
         const token = this.authService.getToken();
-        if (!token) {
+        const userId = this.authService.getUserIdFromStorage();
+        if (!token || !userId) {
           return of(AuthActions.loadUserFailure());
         }
 
-        return this.authService.getUser().pipe(
+        return this.authService.getUserById(userId).pipe(
           map((response) =>
             AuthActions.loadUserSuccess({
               user: response.user,
               token,
             })
           ),
-          catchError(() => {
-            this.authService.removeToken();
-            return of(AuthActions.loadUserFailure());
-          })
+          catchError(() => of(AuthActions.loadUserFailure()))
         );
       })
     )

@@ -4,6 +4,9 @@ import { Observable } from 'rxjs';
 import { User } from '../models/user.model';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../interfaces';
 
+const AUTH_TOKEN_KEY = 'auth_token';
+const AUTH_USER_ID_KEY = 'auth_user_id';
+
 export interface UserResponse {
   user: User;
 }
@@ -20,30 +23,40 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, request);
+    return this.http.post<AuthResponse>(
+      `${this.API_URL}/auth/register`,
+      request
+    );
   }
 
   logout(): Observable<void> {
     return this.http.post<void>(`${this.API_URL}/auth/logout`, {});
   }
 
-  getUser(): Observable<UserResponse> {
-    return this.http.get<UserResponse>(`${this.API_URL}/user/getUser`);
+  getUserById(id: string): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.API_URL}/user/${id}`);
   }
 
-  // Čuva token u localStorage
   saveToken(token: string): void {
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
   }
 
-  // Uzima token iz localStorage
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem(AUTH_TOKEN_KEY);
   }
 
-  // Briše token iz localStorage
   removeToken(): void {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_ID_KEY);
+  }
+
+  /** Čuva samo id – da možeš proveriti "postoji token + id → zovi /me, setuj user" */
+  saveUserId(userId: string): void {
+    localStorage.setItem(AUTH_USER_ID_KEY, userId);
+  }
+
+  getUserIdFromStorage(): string | null {
+    return localStorage.getItem(AUTH_USER_ID_KEY);
   }
 
   // Proverava da li je korisnik ulogovan

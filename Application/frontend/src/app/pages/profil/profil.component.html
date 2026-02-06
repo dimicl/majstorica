@@ -1,0 +1,12 @@
+<div *ngIf="user$ | async as user; else noUser" class="profile-wrapper">
+  <h2>Profil</h2>
+  <p><strong>Korisničko ime:</strong> {{ user.username }}</p>
+  <p>
+    <strong>Ime i prezime:</strong> {{ user.firstName }} {{ user.lastName }}
+  </p>
+  <p><strong>Uloga:</strong> {{ user.role }}</p>
+</div>
+
+<ng-template #noUser>
+  <p>Nema učitanog korisnika.</p>
+</ng-template>
