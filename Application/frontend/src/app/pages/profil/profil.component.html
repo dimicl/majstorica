@@ -1,12 +1,61 @@
-<div *ngIf="user$ | async as user; else noUser" class="profile-wrapper">
-  <h2>Profil</h2>
-  <p><strong>Korisničko ime:</strong> {{ user.username }}</p>
-  <p>
-    <strong>Ime i prezime:</strong> {{ user.firstName }} {{ user.lastName }}
-  </p>
-  <p><strong>Uloga:</strong> {{ user.role }}</p>
-</div>
+<section class="profile-page p-y-12 p-x-18">
+  <div class="profile-shell">
+    @if (user$ | async; as user) {
+    <div class="profile-hero card-glow">
+      <div class="profile-hero__content">
+        <p class="eyebrow">Profil</p>
+        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+        <p class="lead">
+          Korisničko ime: <strong>{{ user.username }}</strong>
+        </p>
+        <div class="profile-hero__meta">
+          <span
+            class="profile-role"
+            [class.role-client]="user.role === userRole.Client"
+            [class.role-master]="user.role === userRole.Master"
+          >
+            {{
+              user.role === userRole.Client
+                ? "Klijent"
+                : user.role === userRole.Master
+                ? "Majstor"
+                : "Admin"
+            }}
+          </span>
+        </div>
+      </div>
+    </div>
 
-<ng-template #noUser>
-  <p>Nema učitanog korisnika.</p>
+    @switch (user.role) { @case (userRole.Client) {
+    <ng-container *ngTemplateOutlet="clientBlock"></ng-container>
+    } @case (userRole.Master) {
+    <ng-container *ngTemplateOutlet="masterBlock"></ng-container>
+    } } }
+  </div>
+</section>
+
+<ng-template #clientBlock>
+  <div class="profile-section card-glow">
+    <div class="section-heading">
+      <h2>Rezervacije</h2>
+      <p>Vaše zakazane i prošle rezervacije sa majstorima.</p>
+    </div>
+    <div class="profile-placeholder">
+      <p>Trenutno nema aktivnih rezervacija.</p>
+      <a class="profile-cta" routerLink="/services">Zatraži majstora</a>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #masterBlock>
+  <div class="profile-section card-glow">
+    <div class="section-heading">
+      <h2>Zahtevi i poslovi</h2>
+      <p>Zahtevi od klijenata i vaši aktivni poslovi.</p>
+    </div>
+    <div class="profile-placeholder">
+      <p>Trenutno nema novih zahteva.</p>
+      <a class="profile-cta" routerLink="/technicians">Pogledaj profil</a>
+    </div>
+  </div>
 </ng-template>

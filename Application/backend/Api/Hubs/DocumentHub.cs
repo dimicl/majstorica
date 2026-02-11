@@ -52,7 +52,7 @@ public class DocumentHub : Hub
         var userId = GetUserId();
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, JobGroup(jobId));
-        await _sessionService.MarkUserInJob(userId, Guid.Empty);
+        await _sessionService.MarkUserInJob(userId, Guid.Empty); //ovamo obrati paznju
 
         var next = await _lockService.ReleaseWriteAccess(jobId, userId);
         if (next != null)
