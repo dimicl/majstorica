@@ -72,7 +72,7 @@ public class Job
             IsEmergency = isEmergency,
             Status = Enum.Parse<JobStatus>(status)
         };
-        //job.SetStateFromString(status);
+        job.SetStateFromString(status);
         return job;
     }
 

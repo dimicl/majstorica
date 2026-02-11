@@ -17,6 +17,8 @@ using backend.Api.Middleware;
 using Neo4j.Driver;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -157,8 +159,16 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-var rabbitConsumer = new RabbitMqConsumer();
-rabbitConsumer.Start();
+try
+{
+    var rabbitConsumer = new RabbitMqConsumer();
+    rabbitConsumer.Start();
+}
+catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogWarning(ex, "RabbitMQ nije dostupan – messaging consumer nije pokrenut. Aplikacija nastavlja bez njega.");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

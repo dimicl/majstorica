@@ -8,6 +8,9 @@
 
 .main-content {
   flex: 1;
-  // Navbar je fixed (overlay) pa ne rezervišemo prostor levo.
   margin-left: 0;
+
+  .app-layout.has-navbar & {
+    margin-left: 90px;
+  }
 }
