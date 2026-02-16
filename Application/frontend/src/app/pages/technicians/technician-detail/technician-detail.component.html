@@ -1,0 +1,26 @@
+<div class="technician-detail">
+  <a routerLink="/technicians" class="technician-detail__back">← Nazad na listu</a>
+
+  @if (isLoading()) {
+    <p class="technician-detail__loading">Učitavanje...</p>
+  } @else if (error()) {
+    <p class="technician-detail__error" role="alert">{{ error() }}</p>
+  } @else {
+    @if (master(); as m) {
+    <div class="technician-detail__card">
+      <h1 class="technician-detail__name">{{ fullName() }}</h1>
+      <p class="technician-detail__username">{{ usernameWithAt(m.user.username) }}</p>
+      <p class="technician-detail__role">Majstor</p>
+
+      <div class="technician-detail__actions">
+        <app-button
+          [buttonType]="eButtonType.POSITIVE"
+          [label]="isStartingChat() ? 'Otvaranje...' : 'Napiši poruku'"
+          [disabled]="isStartingChat()"
+          (onButtonClick)="onWriteMessage()"
+        />
+      </div>
+    </div>
+    }
+  }
+</div>

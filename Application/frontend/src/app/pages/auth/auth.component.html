@@ -165,7 +165,7 @@
     <div class="m-b-24">
       <label class="input-label">Tip naloga</label>
       <select formControlName="role" class="form-select w-full p-12 rounded">
-        <option *ngFor="let option of roleOptions" [value]="option.value">
+        <option *ngFor="let option of roleOptions" [ngValue]="option.value">
           {{ option.label }}
         </option>
       </select>

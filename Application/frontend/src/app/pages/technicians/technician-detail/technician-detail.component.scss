@@ -1,0 +1,63 @@
+@use "../../../../assets/scss/variables" as *;
+
+.technician-detail {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 18px;
+}
+
+.technician-detail__back {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.7);
+  text-decoration: none;
+}
+
+.technician-detail__back:hover {
+  color: $color-blue;
+}
+
+.technician-detail__loading,
+.technician-detail__error {
+  padding: 24px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.technician-detail__error {
+  color: #c53030;
+}
+
+.technician-detail__card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  padding: 28px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.technician-detail__name {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: rgba(17, 24, 39, 0.95);
+}
+
+.technician-detail__username {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: rgba(17, 24, 39, 0.6);
+}
+
+.technician-detail__role {
+  margin: 0 0 24px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $color-blue;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.technician-detail__actions {
+  margin-top: 20px;
+}

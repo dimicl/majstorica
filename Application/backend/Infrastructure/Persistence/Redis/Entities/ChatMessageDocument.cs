@@ -19,5 +19,6 @@ public class ChatMessageDocument
 
     public string Content { get; set; } = default!;
 
+    [Indexed(Sortable = true)]
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
 }

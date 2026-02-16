@@ -21,6 +21,7 @@ public class UserSessionDocument
     [Indexed]
     public Guid? CurrentConversationId { get; set; }
 
+    [Indexed]
     public string ConnectionId { get; set; } = default!;
 
     public DateTime LastSeen { get; set; } = DateTime.UtcNow;

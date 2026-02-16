@@ -21,12 +21,22 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
 
+
+// MongoDB: registruj Guid serializer da ne baca BsonSerializationException (Unspecified)
+MongoDB.Bson.Serialization.BsonSerializer.RegisterSerializer(
+    new MongoDB.Bson.Serialization.Serializers.GuidSerializer(MongoDB.Bson.GuidRepresentation.Standard));
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -72,7 +82,7 @@ builder.Services.AddScoped<IRedisLockService, RedisLockService>();
 
 // Redis OM 
 builder.Services.AddSingleton<RedisConnectionProvider>();
-builder.Services.AddScoped<IMessageRepository, RedisMessageRepository>();
+builder.Services.AddScoped<IMessageRepository, MongoMessageRepository>();
 builder.Services.AddScoped<ISessionRepository, RedisSessionRepository>();
 
 
@@ -113,6 +123,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
 
 
 // RabbitMQ
@@ -153,11 +164,47 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
         )
     };
+    // SignalR: negotiate šalje token u Authorization headeru, WebSocket u query stringu (access_token)
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var path = context.HttpContext.Request.Path;
+            if (!path.StartsWithSegments("/hubs/document", StringComparison.OrdinalIgnoreCase))
+                return Task.CompletedTask;
+
+            var token = context.Request.Query["access_token"].FirstOrDefault()
+                ?? context.Request.Query["token"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? token.Substring(7) : token;
+                return Task.CompletedTask;
+            }
+            // WebSocket nema header; za negotiate klijent šalje Bearer u headeru – pročitaj ga
+            var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
+            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                context.Token = authHeader.Substring(7);
+            return Task.CompletedTask;
+        }
+    };
 });
 
 
 
 var app = builder.Build();
+
+// Redis OM: kreiraj indekse da ne baca "no such index" pri upitima
+try
+{
+    var redisProvider = app.Services.GetRequiredService<RedisConnectionProvider>();
+    redisProvider.Connection.CreateIndex(typeof(backend.Infrastructure.Persistence.Redis.Entities.ChatMessageDocument));
+    redisProvider.Connection.CreateIndex(typeof(backend.Infrastructure.Persistence.Redis.Entities.UserSessionDocument));
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogWarning(ex, "Redis indeksi nisu kreirani (možda već postoje). Nastavljam.");
+}
 
 try
 {

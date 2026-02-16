@@ -11,4 +11,10 @@ public interface IChatService
         string content);
 
     Task<List<ChatMessage>> GetConversationMessages(Guid conversationId);
+
+    /// <summary>
+    /// Vrati ili kreira konverzaciju klijent–majstor bez posla (slobodan chat).
+    /// Koristi JobId = Guid.Empty.
+    /// </summary>
+    Task<ChatConversation> EnsureOrCreateConversationWithMaster(Guid clientId, Guid masterId);
 }

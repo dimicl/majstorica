@@ -1,117 +1,57 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { MapComponent, MapMarkerData, Coordinates } from '../../components/map/map.component';
-
-interface TechnicianProfile {
-  name: string;
-  city: string;
-  rating: string;
-  responseTime: string;
-  jobsCompleted: string;
-  skills: string[];
-  tag: string;
-  availability: string;
-}
+import { firstValueFrom } from 'rxjs';
+import { MasterService, type MasterListItem } from '../../shared/services/master.service';
 
 type TechnicianTab = 'list' | 'map';
 
 @Component({
   selector: 'app-technicians',
-  imports: [CommonModule, MapComponent],
+  imports: [CommonModule, MapComponent, RouterLink],
   templateUrl: './technicians.component.html',
-  styleUrl: './technicians.component.scss'
+  styleUrl: './technicians.component.scss',
 })
-export class TechniciansComponent {
+export class TechniciansComponent implements OnInit {
+  private masterService = inject(MasterService);
+
   public tabs: Record<'LIST' | 'MAP', TechnicianTab> = {
     LIST: 'list',
-    MAP: 'map'
-  };
-  private readonly cityCoordinates: Record<string, Coordinates> = {
-    'Novi Sad': { lat: 45.2671, lng: 19.8335 },
-    'Beograd': { lat: 44.7866, lng: 20.4489 },
-    'Niš': { lat: 43.3209, lng: 21.8958 },
-    'Kragujevac': { lat: 44.0120, lng: 20.9110 },
-    'Subotica': { lat: 46.1000, lng: 19.6667 }
+    MAP: 'map',
   };
   private readonly defaultCenter: Coordinates = { lat: 45.2671, lng: 19.8335 };
+
   public activeTab: TechnicianTab = this.tabs.LIST;
   public searchQuery = '';
-  public activeSpecialty = '';
-  public specialtyFilters = [
-    'Električar',
-    'Vodoinstalater',
-    'Keramičar',
-    'Moler',
-    'Grejanje',
-    'Hitni pozivi'
-  ];
+  public technicians: MasterListItem[] = [];
+  public isLoading = true;
+  public loadError: string | null = null;
 
-  public technicianProfiles: TechnicianProfile[] = [
-    {
-      name: 'Nikola Jović',
-      city: 'Novi Sad',
-      rating: '4.9',
-      responseTime: '22m',
-      jobsCompleted: '340 poslova',
-      skills: ['Elektrika', 'Pametni sistemi', 'Hitne intervencije'],
-      tag: 'Top izbor',
-      availability: 'Danima 08:00 – 22:00'
-    },
-    {
-      name: 'Maja Petrović',
-      city: 'Beograd',
-      rating: '4.8',
-      responseTime: '30m',
-      jobsCompleted: '215 poslova',
-      skills: ['Vodoinstalacije', 'Sanitarije', 'Hitni popravci'],
-      tag: 'Hitni pozivi',
-      availability: 'Danas do 18:00'
-    },
-    {
-      name: 'Luka Šarić',
-      city: 'Niš',
-      rating: '4.7',
-      responseTime: '45m',
-      jobsCompleted: '180 poslova',
-      skills: ['Keramičarski radovi', 'Nivelacija', 'Kupatila'],
-      tag: 'Preporučeno',
-      availability: 'Slobodan vikendom'
-    },
-    {
-      name: 'Tatjana Dimić',
-      city: 'Kragujevac',
-      rating: '4.8',
-      responseTime: '18m',
-      jobsCompleted: '410 poslova',
-      skills: ['Moleraj', 'Gletovanje', 'Spoljna fasada'],
-      tag: 'Master',
-      availability: 'Dostupna svakog dana'
-    },
-    {
-      name: 'Marko Ilić',
-      city: 'Subotica',
-      rating: '4.6',
-      responseTime: '52m',
-      jobsCompleted: '165 poslova',
-      skills: ['Grejanje', 'Boileri', 'Klimatske instalacije'],
-      tag: 'Sezonski rad',
-      availability: 'Radnim danima popodne'
+  public get filteredTechnicians(): MasterListItem[] {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return this.technicians;
+    return this.technicians.filter(
+      (t) =>
+        `${t.firstName} ${t.lastName} ${t.username}`.toLowerCase().includes(q)
+    );
+  }
+
+  ngOnInit(): void {
+    this.loadMasters();
+  }
+
+  async loadMasters(): Promise<void> {
+    this.isLoading = true;
+    this.loadError = null;
+    try {
+      this.technicians = await firstValueFrom(this.masterService.getMasters());
+    } catch {
+      this.loadError = 'Nije moguće učitati listu majstora.';
+      this.technicians = [];
+    } finally {
+      this.isLoading = false;
     }
-  ];
-
-  public get filteredTechnicians(): TechnicianProfile[] {
-    const query = this.searchQuery.trim().toLowerCase();
-    return this.technicianProfiles.filter((tech) => {
-      const matchesSpecialty = this.activeSpecialty
-        ? tech.skills.some((skill) => skill.toLowerCase().includes(this.activeSpecialty.toLowerCase()))
-        : true;
-      const matchesQuery = query
-        ? `${tech.name} ${tech.city} ${tech.skills.join(' ')} ${tech.tag}`
-            .toLowerCase()
-            .includes(query)
-        : true;
-      return matchesSpecialty && matchesQuery;
-    });
   }
 
   public setTab(tab: TechnicianTab): void {
@@ -122,27 +62,29 @@ export class TechniciansComponent {
     this.searchQuery = value;
   }
 
-  public onToggleSpecialty(value: string): void {
-    this.activeSpecialty = this.activeSpecialty === value ? '' : value;
-  }
-
   public get isListActive(): boolean {
     return this.activeTab === this.tabs.LIST;
   }
 
   public get mapMarkers(): MapMarkerData[] {
-    return this.filteredTechnicians.map((tech) => ({
-      position: this.cityCoordinates[tech.city] ?? this.defaultCenter,
-      title: `${tech.name} • ${tech.tag}`,
-      color: '#f04f4c'
+    return this.filteredTechnicians.map((_, i) => ({
+      position: this.defaultCenter,
+      title: this.filteredTechnicians[i]
+        ? `${this.filteredTechnicians[i].firstName} ${this.filteredTechnicians[i].lastName}`
+        : '',
+      color: '#f04f4c',
     }));
   }
 
   public get mapCenter(): Coordinates {
-    if (!this.filteredTechnicians.length) {
-      return this.defaultCenter;
-    }
+    return this.defaultCenter;
+  }
 
-    return this.cityCoordinates[this.filteredTechnicians[0].city] ?? this.defaultCenter;
+  fullName(t: MasterListItem): string {
+    return `${t.firstName} ${t.lastName}`.trim() || t.username;
+  }
+
+  atUsername(t: MasterListItem): string {
+    return '@' + t.username;
   }
 }

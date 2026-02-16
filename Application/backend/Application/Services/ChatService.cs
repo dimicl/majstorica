@@ -27,13 +27,28 @@ public class ChatService : IChatService
             throw new Exception("Chat je zatvoren.");
 
         var message = new ChatMessage(conversationId, jobId, senderId, content);
-
         await _messageRepository.Save(message);
+
+        var recipientId = conversation.ClientId == senderId ? conversation.MasterId : conversation.ClientId;
+        await _conversationRepository.IncrementUnreadAsync(conversationId, recipientId);
+
         return message;
     }
 
     public Task<List<ChatMessage>> GetConversationMessages(Guid conversationId)
     {
         return _messageRepository.GetByConversationId(conversationId);
+    }
+
+    public async Task<ChatConversation> EnsureOrCreateConversationWithMaster(Guid clientId, Guid masterId)
+    {
+        var jobId = Guid.Empty;
+        var existing = await _conversationRepository.GetByClientAndMasterAndJob(clientId, masterId, jobId);
+        if (existing != null && existing.IsActive)
+            return existing;
+
+        var conversation = new ChatConversation(jobId, clientId, masterId);
+        await _conversationRepository.Save(conversation);
+        return conversation;
     }
 }

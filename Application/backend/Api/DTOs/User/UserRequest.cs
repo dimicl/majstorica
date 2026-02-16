@@ -1,5 +1,5 @@
 using backend.Domain.Enums;
-
+namespace backend.Api.DTOs.User;
 public class UserRequest
 {
     public Guid Id { get; set; }

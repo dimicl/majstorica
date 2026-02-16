@@ -4,6 +4,7 @@ import { ChatComponent } from './pages/chat/chat.component';
 import { MainComponent } from './pages/main/main.component';
 import { ServicesComponent } from './pages/services/services.component';
 import { TechniciansComponent } from './pages/technicians/technicians.component';
+import { TechnicianDetailComponent } from './pages/technicians/technician-detail/technician-detail.component';
 import { ProfilComponent } from './pages/profil/profil.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { profileLoadUserResolver } from './shared/resolvers/profile-load-user.resolver';
@@ -36,6 +37,12 @@ export const routes: Routes = [
   {
     path: 'technicians',
     component: TechniciansComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'technicians/:id',
+    component: TechnicianDetailComponent,
+    canActivate: [authGuard],
   },
   {
     path: 'profile',

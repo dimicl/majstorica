@@ -35,6 +35,13 @@ export const NAVBAR_ITEMS: NavbarItem[] = [
     isBottomPinned: true,
   },
   {
+    id: NavbarItemString.LOGOUT,
+    icon: SharedSvgRoutes.LOGOUT_ICON,
+    label: NavbarItemString.LOGOUT_LABEL,
+    userType: NavbarItemUserType.ALL,
+    isBottomPinned: true,
+  },
+  {
     id: NavbarItemString.REQUESTS,
     icon: '',
     label: NavbarItemString.REQUESTS_LABEL,

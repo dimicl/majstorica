@@ -17,4 +17,6 @@ public interface ISessionService
     Task<List<UserSession>> GetOnlineMasters();
 
     Task HandleDisconnect(string connectionId);
+
+    Task<bool> IsUserOnlineAsync(Guid userId);
 }

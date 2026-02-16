@@ -1,4 +1,4 @@
-﻿import {
+import {
   Component,
   ElementRef,
   ViewChild,
@@ -43,26 +43,7 @@ export class ChatPanelComponent {
 
   draft = signal<string>('');
 
-  private internalMessages = signal<ChatMessage[]>([
-    {
-      id: 'm1',
-      from: 'them',
-      text: 'Zdravo! Šta treba da se popravi?',
-      time: '12:18',
-    },
-    {
-      id: 'm2',
-      from: 'me',
-      text: 'Treba da zamenim utičnicu, stalno varniči.',
-      time: '12:19',
-    },
-    {
-      id: 'm3',
-      from: 'them',
-      text: 'Može. Pošalji sliku i adresu — mogu danas posle 17h.',
-      time: '12:20',
-    },
-  ]);
+  private internalMessages = signal<ChatMessage[]>([]);
 
   displayMessages = computed(() => this.messages() ?? this.internalMessages());
   usingExternalMessages = computed(() => this.messages() !== null);
@@ -95,22 +76,8 @@ export class ChatPanelComponent {
         time: this.formatTime(new Date()),
       };
       this.internalMessages.set([...this.internalMessages(), msg]);
-      this.scrollToBottomSoon();
-
-      // Demo “reply” da UI deluje življe (možeš da obrišeš kad povežeš backend)
-      window.setTimeout(() => {
-        const reply: ChatMessage = {
-          id: `m_${Date.now() + 1}`,
-          from: 'them',
-          text: 'Važi — mogu da donesem novu utičnicu, cena zavisi od modela.',
-          time: this.formatTime(new Date()),
-        };
-        this.internalMessages.set([...this.internalMessages(), reply]);
-        this.scrollToBottomSoon();
-      }, 650);
-    } else {
-      this.scrollToBottomSoon();
     }
+    this.scrollToBottomSoon();
   }
 
   private scrollToBottomSoon(): void {
