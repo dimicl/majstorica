@@ -61,4 +61,10 @@ public class SessionService : ISessionService
 
         await _repository.Remove(session.Id);
     }
+
+    public async Task<bool> IsUserOnlineAsync(Guid userId)
+    {
+        var session = await _repository.GetByUserId(userId);
+        return session != null;
+    }
 }

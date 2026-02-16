@@ -30,4 +30,14 @@ public class RedisMessageRepository : IMessageRepository
             .ToList();
         return Task.FromResult(docs.Select(ChatMessageMapper.ToDomain).ToList());
     }
+
+    public Task<ChatMessage?> GetLastByConversationId(Guid conversationId)
+    {
+        var doc = _messages
+            .Where(m => m.ConversationId == conversationId)
+            .OrderByDescending(m => m.SentAt)
+            .FirstOrDefault();
+        return Task.FromResult(doc != null ? ChatMessageMapper.ToDomain(doc) : null);
+    }
+
 }

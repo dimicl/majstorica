@@ -1,4 +1,5 @@
 using backend.Api.DTOs.Auth;
+using backend.Api.DTOs.User;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;

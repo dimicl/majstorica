@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 
 namespace backend.Api.Hubs;
@@ -21,6 +23,13 @@ public class DocumentHub : Hub
         _chatService = chatService;
         _sessionService = sessionService;
         _lockService = lockService;
+    }
+
+    public override async Task OnConnectedAsync()
+    {
+        var (userId, role) = GetUserIdAndRole();
+        await _sessionService.CreateOrUpdateSession(userId, role, Context.ConnectionId);
+        await base.OnConnectedAsync();
     }
 
     private static string JobGroup(Guid jobId) => $"job:{jobId}";
@@ -67,8 +76,8 @@ public class DocumentHub : Hub
 
     public async Task JoinConversation(Guid conversationId)
     {
-        var userId = GetUserId();
-
+        var (userId, role) = GetUserIdAndRole();
+        await _sessionService.CreateOrUpdateSession(userId, role, Context.ConnectionId);
         await _sessionService.MarkUserInConversation(userId, conversationId);
 
         await Groups.AddToGroupAsync(
@@ -99,10 +108,21 @@ public class DocumentHub : Hub
 
     private Guid GetUserId()
     {
-        var claim = Context.User?.FindFirst("sub");
-        if (claim == null)
+        var (userId, _) = GetUserIdAndRole();
+        return userId;
+    }
+
+    private (Guid userId, UserRole role) GetUserIdAndRole()
+    {
+        var userIdStr = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? Context.User?.FindFirstValue("sub");
+        if (string.IsNullOrEmpty(userIdStr))
             throw new HubException("Unauthorized");
 
-        return Guid.Parse(claim.Value);
+        var roleStr = Context.User?.FindFirstValue(ClaimTypes.Role) ?? nameof(UserRole.Client);
+        if (!Enum.TryParse<UserRole>(roleStr, ignoreCase: true, out var role))
+            role = UserRole.Client;
+
+        return (Guid.Parse(userIdStr), role);
     }
 }

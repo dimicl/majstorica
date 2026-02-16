@@ -1,4 +1,4 @@
-@use '../../../assets/scss/variables' as *;
+@use "../../../assets/scss/variables" as *;
 
 .sidebar {
   display: flex;
@@ -91,8 +91,6 @@
   cursor: pointer;
   white-space: nowrap;
 
-
-
   .menu-icon {
     display: flex;
     align-items: center;
@@ -123,7 +121,11 @@
   }
 
   &.active {
-    background: linear-gradient(90deg, rgba(66, 153, 225, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+    background: linear-gradient(
+      90deg,
+      rgba(66, 153, 225, 0.3) 0%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
     color: #fff;
     box-shadow: inset 4px 0 0 #4299e1;
     font-weight: 500;

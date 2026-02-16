@@ -33,10 +33,9 @@ public class ChatConversation
         Guid jobId,
         Guid clientId,
         Guid masterId,
-        bool isActive
-    )
+        bool isActive)
     {
-        return new ChatConversation 
+        return new ChatConversation
         {
             Id = id,
             JobId = jobId,

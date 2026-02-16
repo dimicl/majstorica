@@ -126,13 +126,16 @@ export class AuthComponent {
     if (this.registerForm.valid) {
       const { firstName, lastName, email, username, password, role } =
         this.registerForm.value;
+      // role iz selecta dolazi kao string – backend očekuje number (UserRole enum)
+      const roleValue =
+        typeof role === 'string' ? Number(role) : (role as UserRole);
       const registerRequest: RegisterRequest = {
         firstName,
         lastName,
         email,
         username,
         password,
-        role,
+        role: roleValue,
       };
 
       this.auth.dispatchRegister(registerRequest);

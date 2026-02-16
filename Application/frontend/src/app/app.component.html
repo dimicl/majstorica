@@ -1,5 +1,5 @@
 <div class="app-layout" [class.has-navbar]="showNavbar()">
-  <app-navbar *ngIf="showNavbar()"></app-navbar>
+  <app-navbar *ngIf="showNavbar()" [isNewMessages]="hasNewMessages()"></app-navbar>
   <main class="main-content">
     <router-outlet></router-outlet>
   </main>

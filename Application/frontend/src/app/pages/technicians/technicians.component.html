@@ -2,7 +2,7 @@
   <div class="technicians-shell">
     <header class="technicians-header">
       <div>
-        <h1>Technicians</h1>       
+        <h1>Majstori</h1>
       </div>
       <div class="tab-bar" role="tablist">
         <button
@@ -30,57 +30,37 @@
       <label class="technicians-search">
         <input
           type="search"
-          placeholder="Pretraži ime, grad ili veštinu"
+          placeholder="Pretraži po imenu ili korisničkom imenu"
           (input)="onSearchInput($any($event.target).value)"
         />
         <span aria-hidden="true">🔍</span>
       </label>
-      <div class="technicians-search__filters">
-        <button
-          type="button"
-          class="technicians-search__chip"
-          [class.is-active]="!activeSpecialty"
-          (click)="onToggleSpecialty('')"
-        >
-          Svi
-        </button>
-        <button
-          *ngFor="let strategy of specialtyFilters"
-          type="button"
-          class="technicians-search__chip"
-          [class.is-active]="activeSpecialty === strategy"
-          (click)="onToggleSpecialty(strategy)"
-        >
-          {{ strategy }}
-        </button>
-      </div>
 
-      <div class="technician-grid custom-scrollbar">
-        <article
-          *ngFor="let technician of filteredTechnicians"
-          class="technician-card card-hover"
-        >
-          <header>
-            <div>
-              <h3>{{ technician.name }}</h3>
-              <p class="technician-card__location">{{ technician.city }}</p>
-            </div>
-            <span class="technician-card__rating">★ {{ technician.rating }}</span>
-          </header>
-          <p class="technician-card__meta">
-            {{ technician.responseTime }} odziv · {{ technician.jobsCompleted }}
+      @if (isLoading) {
+        <div class="technicians-loading">Učitavanje majstora...</div>
+      } @else if (loadError) {
+        <div class="technicians-error" role="alert">{{ loadError }}</div>
+      } @else {
+        <div class="technician-grid custom-scrollbar">
+          <a
+            *ngFor="let technician of filteredTechnicians"
+            [routerLink]="['/technicians', technician.id]"
+            class="technician-card card-hover"
+          >
+            <header>
+              <div>
+                <h3>{{ fullName(technician) }}</h3>
+                <p class="technician-card__location">{{ atUsername(technician) }}</p>
+              </div>
+            </header>
+            <p class="technician-card__meta">Majstor</p>
+            <span class="technician-card__link">Pogledaj profil →</span>
+          </a>
+          <p class="empty-state" *ngIf="!filteredTechnicians.length">
+            Nema majstora za odabranu pretragu.
           </p>
-          <div class="technician-card__tag">{{ technician.tag }}</div>
-          <div class="technician-card__skills">
-            <span *ngFor="let skill of technician.skills" class="skill-chip">
-              {{ skill }}
-            </span>
-          </div>
-        </article>
-        <p class="empty-state" *ngIf="!filteredTechnicians.length">
-          Nema dostupnih majstora za odabranu pretragu.
-        </p>
-      </div>
+        </div>
+      }
     </div>
 
     <div *ngIf="!isListActive" class="technicians-map-mode">
@@ -95,13 +75,16 @@
           <span>{{ filteredTechnicians.length }} profila</span>
         </div>
         <div class="technician-panel-list custom-scrollbar">
-          <article class="technician-card card-hover" *ngFor="let technician of filteredTechnicians">
+          <a
+            *ngFor="let technician of filteredTechnicians"
+            [routerLink]="['/technicians', technician.id]"
+            class="technician-card card-hover"
+          >
             <div>
-              <h3>{{ technician.name }}</h3>
-              <p>{{ technician.city }}</p>
+              <h3>{{ fullName(technician) }}</h3>
+              <p>{{ atUsername(technician) }}</p>
             </div>
-            <div class="technician-card__meta">{{ technician.tag }}</div>
-          </article>
+          </a>
         </div>
       </aside>
     </div>

@@ -7,4 +7,5 @@ export class SharedSvgRoutes {
     static TECHNICIAN_ICON = '/assets/icons/technician.svg';
     static HOME_ICON = '/assets/icons/home.svg';
     static SERVICES_ICON = '/assets/icons/services.svg';
+    static LOGOUT_ICON = '/assets/icons/logout.svg';
 }

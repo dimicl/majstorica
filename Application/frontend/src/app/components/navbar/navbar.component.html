@@ -19,6 +19,7 @@
 
   <div class="sidebar-footer">
     @for(item of bottomItems; track item.id) {
+        @if (item.id !== NavbarItemString.LOGOUT || (auth.isAuthenticated$ | async)) {
         <div class="menu-item" [class.active]="activeNavbarItem === item.id" (click)="onItemClick(item, $event)">
             <svg-icon
                 [src]="item.icon"
@@ -26,6 +27,7 @@
             ></svg-icon>
             <span class="menu-text">{{ item.label }}</span>
         </div>
+        }
     }
   </div>
 </div>
