@@ -8,4 +8,5 @@ public class ChatMessageResponse
     public Guid SenderId { get; init; }
     public string Content { get; init; } = string.Empty;
     public DateTime SentAt { get; init; }
+    public bool IsSystemMessage { get; init; }
 }

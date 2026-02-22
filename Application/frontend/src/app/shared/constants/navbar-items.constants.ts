@@ -10,15 +10,9 @@ export const NAVBAR_ITEMS: NavbarItem[] = [
     userType: NavbarItemUserType.ALL,
   },
   {
-    id: NavbarItemString.SERVICES,
-    icon: SharedSvgRoutes.SERVICES_ICON,
-    label: NavbarItemString.SERVICES_LABEL,
-    userType: NavbarItemUserType.CLIENT,
-  },
-  {
-    id: NavbarItemString.TECHNICIANS,
-    icon: SharedSvgRoutes.TECHNICIAN_ICON,
-    label: NavbarItemString.TECHNICIANS_LABEL,
+    id: NavbarItemString.MASTERS,
+    icon: SharedSvgRoutes.MASTER_ICON,
+    label: NavbarItemString.MASTERS_LABEL,
     userType: NavbarItemUserType.CLIENT,
   },
   {
@@ -45,7 +39,7 @@ export const NAVBAR_ITEMS: NavbarItem[] = [
     id: NavbarItemString.REQUESTS,
     icon: '',
     label: NavbarItemString.REQUESTS_LABEL,
-    userType: NavbarItemUserType.TECHNICIAN,
+    userType: NavbarItemUserType.MASTER,
     isBottomPinned: false,
   },
 ];

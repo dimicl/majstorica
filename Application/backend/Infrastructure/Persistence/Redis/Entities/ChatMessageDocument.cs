@@ -21,4 +21,6 @@ public class ChatMessageDocument
 
     [Indexed(Sortable = true)]
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsSystemMessage { get; set; }
 }

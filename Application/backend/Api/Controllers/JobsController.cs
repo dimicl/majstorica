@@ -1,8 +1,8 @@
-/* using backend.Api.DTOs.Jobs;
+using backend.Api.DTOs.Jobs;
+using backend.Api.Extensions;
 using backend.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace backend.Api.Controllers;
 
@@ -18,23 +18,23 @@ public class JobsController : ControllerBase
         _jobService = jobService;
     }
 
-
     [HttpPost]
     public async Task<ActionResult<Guid>> CreateJob(
         [FromBody] CreateJobRequest request)
     {
-        var clientId = GetUserId();
+        var clientId = User.GetUserId();
 
         var jobId = await _jobService.CreateJob(
             clientId,
+            request.Title ?? string.Empty,
             request.Description,
+            request.ScheduledDate,
             request.Price,
             request.IsEmergency
         );
 
         return Ok(jobId);
     }
-
 
     [HttpPost("{jobId:guid}/send-requests")]
     public async Task<IActionResult> SendRequests(
@@ -45,16 +45,29 @@ public class JobsController : ControllerBase
         return Ok();
     }
 
+    [HttpGet("has-sent-request-to/{masterId:guid}")]
+    public async Task<ActionResult<object>> HasSentRequestToMaster(Guid masterId)
+    {
+        var clientId = User.GetUserId();
+        var hasSent = await _jobService.HasClientSentRequestToMaster(clientId, masterId);
+        return Ok(new { hasSentRequest = hasSent });
+    }
+
+    [HttpGet("~/api/jobs/requests")]
+    public async Task<ActionResult<List<JobRequestListItemResponse>>> GetMyRequests()
+    {
+        var masterId = User.GetUserId();
+        var list = await _jobService.GetPendingRequestsForMaster(masterId);
+        return Ok(list);
+    }
 
     [HttpPost("{jobId:guid}/accept")]
     public async Task<IActionResult> AcceptJob(Guid jobId)
     {
-        var masterId = GetUserId();
-
+        var masterId = User.GetUserId();
         await _jobService.AcceptJob(jobId, masterId);
         return Ok();
     }
-
 
     [HttpPost("{jobId:guid}/start")]
     public async Task<IActionResult> StartJob(Guid jobId)
@@ -63,7 +76,6 @@ public class JobsController : ControllerBase
         return Ok();
     }
 
-
     [HttpPost("{jobId:guid}/complete")]
     public async Task<IActionResult> CompleteJob(Guid jobId)
     {
@@ -71,14 +83,12 @@ public class JobsController : ControllerBase
         return Ok();
     }
 
-
     [HttpPut("{jobId:guid}/description")]
     public async Task<IActionResult> ChangeDescription(
         Guid jobId,
         [FromBody] ChangeDescriptionRequest request)
     {
-        var userId = GetUserId();
-
+        var userId = User.GetUserId();
         await _jobService.ChangeDescription(
             jobId,
             userId,
@@ -93,8 +103,7 @@ public class JobsController : ControllerBase
         Guid jobId,
         [FromBody] ChangePriceRequest request)
     {
-        var userId = GetUserId();
-
+        var userId = User.GetUserId();
         await _jobService.ChangePrice(
             jobId,
             userId,
@@ -103,16 +112,4 @@ public class JobsController : ControllerBase
 
         return Ok();
     }
-
-
-    private Guid GetUserId()
-    {
-        var userId =
-            User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue(ClaimTypes.Name)
-            ?? User.FindFirstValue("sub");
-
-        return Guid.Parse(userId!);
-    }
 }
- */

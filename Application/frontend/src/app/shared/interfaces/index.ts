@@ -14,3 +14,4 @@ export * from './conversation-list-item-api.interface';
 export * from './chat-message-api.interface';
 export * from './map-marker-data.interface';
 export * from './filtered-navbar-items.interface';
+export * from './new-job-request-payload.interface';

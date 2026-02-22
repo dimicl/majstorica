@@ -4,6 +4,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, exhaustMap, of, tap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { SignalrService } from '../../services/signalr.service';
+import { ChatService } from '../../services/chat.service';
 import { AuthActions } from './auth.actions';
 import { HUB_CHAT_URL } from '../../constants/api.constants';
 
@@ -12,6 +13,7 @@ export class AuthEffects {
   private actions$ = inject(Actions);
   private authService = inject(AuthService);
   private signalr = inject(SignalrService);
+  private chatService = inject(ChatService);
   private router = inject(Router);
 
   // Login Effect - poziva API i vraća success ili failure
@@ -45,11 +47,12 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(() => {
-          void this.signalr.connect(HUB_CHAT_URL, {
-            accessTokenFactory: () => this.authService.getToken() ?? '',
-          });
+          void this.signalr
+            .connect(HUB_CHAT_URL, {
+              accessTokenFactory: () => this.authService.getToken() ?? '',
+            })
+            .then(() => this.chatService.registerRealtimeHandlers());
           this.router.navigate(['/home']);
-          console.log('Signalr status:', this.signalr.status());
         })
       ),
     { dispatch: false }
@@ -86,9 +89,11 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.registerSuccess),
         tap(() => {
-          void this.signalr.connect(HUB_CHAT_URL, {
-            accessTokenFactory: () => this.authService.getToken() ?? '',
-          });
+          void this.signalr
+            .connect(HUB_CHAT_URL, {
+              accessTokenFactory: () => this.authService.getToken() ?? '',
+            })
+            .then(() => this.chatService.registerRealtimeHandlers());
           this.router.navigate(['/home']);
         })
       ),
@@ -112,6 +117,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.logoutSuccess),
         tap(() => {
+          this.chatService.clearRealtimeHandlers();
           void this.signalr.disconnect();
           this.router.navigate(['/login']);
         })
@@ -130,6 +136,22 @@ export class AuthEffects {
         tap((action) => {
           const { user } = action;
           if (user?.id) this.authService.saveUserId(user.id);
+        })
+      ),
+    { dispatch: false }
+  );
+
+  // Kada je korisnik već ulogovan (npr. osvežio stranicu) – konektuj SignalR da ostaneš online
+  loadUserSuccessConnect$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.loadUserSuccess),
+        tap(() => {
+          void this.signalr
+            .connect('http://localhost:5187/hubs/document', {
+              accessTokenFactory: () => this.authService.getToken() ?? '',
+            })
+            .then(() => this.chatService.registerRealtimeHandlers());
         })
       ),
     { dispatch: false }

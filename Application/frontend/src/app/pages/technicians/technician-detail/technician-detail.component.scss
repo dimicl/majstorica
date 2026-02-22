@@ -1,63 +1,209 @@
 @use "../../../../assets/scss/variables" as *;
 
-.technician-detail {
-  max-width: 560px;
+.profile {
+  max-width: 640px;
   margin: 0 auto;
-  padding: 24px 18px;
+  padding: 24px 20px 48px;
 }
 
-.technician-detail__back {
-  display: inline-block;
+.profile-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 20px;
-  font-weight: 700;
-  color: rgba(17, 24, 39, 0.7);
-  text-decoration: none;
+
+  .profile-back-text {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: rgba(17, 24, 39, 0.65);
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $color-blue;
+    }
+  }
 }
 
-.technician-detail__back:hover {
-  color: $color-blue;
-}
-
-.technician-detail__loading,
-.technician-detail__error {
-  padding: 24px;
+.profile__loading,
+.profile__error {
+  padding: 32px 24px;
   text-align: center;
   font-weight: 600;
+  font-size: 1rem;
 }
 
-.technician-detail__error {
+.profile__error {
   color: #c53030;
 }
 
-.technician-detail__card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 18px;
-  padding: 28px;
+// —— Jedna kartica profila ——
+.profile__card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 0;
   border: 1px solid rgba(17, 24, 39, 0.08);
+  box-shadow: 0 8px 32px rgba(17, 24, 39, 0.08);
+  overflow: hidden;
 }
 
-.technician-detail__name {
-  margin: 0 0 6px;
-  font-size: 1.6rem;
+// —— Header: avatar + ime, username, badge ——
+.profile__header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 28px 24px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.profile__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(
+    145deg,
+    rgba(62, 125, 215, 0.25),
+    rgba(155, 81, 224, 0.2)
+  );
+  border: 2px solid rgba(17, 24, 39, 0.08);
+  flex-shrink: 0;
+}
+
+.profile__head {
+  min-width: 0;
+}
+
+.profile__name {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
   font-weight: 900;
   color: rgba(17, 24, 39, 0.95);
+  line-height: 1.2;
 }
 
-.technician-detail__username {
-  margin: 0 0 4px;
+.profile__username {
+  margin: 0 0 14px;
   font-size: 1rem;
-  color: rgba(17, 24, 39, 0.6);
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.55);
 }
 
-.technician-detail__role {
-  margin: 0 0 24px;
+.profile__actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.profile__badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(62, 125, 215, 0.12);
+  color: $color-blue;
+  border: 1px solid rgba(62, 125, 215, 0.2);
+}
+
+// —— Sekcije ——
+.profile__section-title {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(17, 24, 39, 0.5);
+}
+
+.profile__contact,
+.profile__about {
+  padding: 24px 28px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.profile__about {
+  border-bottom: none;
+}
+
+.profile__meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile__meta-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.profile__meta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(17, 24, 39, 0.5);
+  flex-shrink: 0;
+}
+
+.profile__meta-icon svg {
+  display: block;
+}
+
+.profile__meta-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.9);
+
+  &--address {
+    white-space: pre-line;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.profile__link {
+  color: $color-blue;
+  text-decoration: none;
   font-size: 0.9rem;
   font-weight: 700;
-  color: $color-blue;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
-.technician-detail__actions {
-  margin-top: 20px;
+.profile__about-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(17, 24, 39, 0.8);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .profile__header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile__head {
+    width: 100%;
+  }
+
+  .profile__username {
+    margin-bottom: 8px;
+  }
 }

@@ -18,20 +18,10 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<UserRequest>> GetById(Guid id)
+    public async Task<ActionResult<object>> GetById(Guid id)
     {
-        var _user = await _userService.GetById(id);
-        if (_user == null) return NotFound();
-    
-        var user = new UserRequest
-        {
-            Id = _user.Id,
-            Username = _user.Username,
-            FirstName = _user.FirstName,
-            LastName = _user.LastName,
-            Role = _user.Role
-        };
-
+        var user = await _userService.GetProfile(id);
+        if (user == null) return NotFound();
         return Ok(new { user });
     }
 }

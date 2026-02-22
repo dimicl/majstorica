@@ -1,159 +1,255 @@
 @use "../../../assets/scss/variables" as *;
 
-.profile-page {
-  padding: clamp(28px, 5vw, 48px) clamp(16px, 3vw, 56px) clamp(48px, 6vw, 68px);
+.profil-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: #f6f8fc;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  padding: 26px 32px 48px;
 }
 
-.profile-shell {
+.profil-shell {
   width: 100%;
   max-width: 1120px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  padding: 0 clamp(16px, 3vw, 56px);
+  gap: 24px;
 }
 
-.profile-hero {
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    rgba(255, 255, 255, 0.92) 100%
-  );
-  border-radius: 28px;
+.profil-header h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  font-weight: 900;
+  color: rgba(17, 24, 39, 0.95);
+}
+
+// —— Kartice (isti jezik kao chat/technicians) ——
+.profil-card {
+  background: #fff;
+  border-radius: 18px;
   border: 1px solid rgba(17, 24, 39, 0.08);
-  padding: 36px;
+  box-shadow: 0 4px 20px rgba(17, 24, 39, 0.06);
+  padding: 28px 32px;
 }
 
-.profile-hero__content h1 {
-  font-size: clamp(2rem, 3vw, 2.8rem);
-  line-height: 1.12;
-  color: rgba(17, 24, 39, 0.9);
-  margin-top: 6px;
+.profil-hero {
+  padding: 0;
 }
 
-.lead {
-  margin-top: 12px;
-  color: rgba(17, 24, 39, 0.68);
-  font-weight: 600;
-}
-
-.profile-hero__meta {
-  margin-top: 18px;
-}
-
-.profile-role {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-
-  &.role-client {
-    background: rgba(62, 125, 215, 0.14);
-    color: $color-blue;
-    border: 1px solid rgba(62, 125, 215, 0.25);
-  }
-
-  &.role-master {
-    background: rgba(155, 81, 224, 0.14);
-    color: #7c3aed;
-    border: 1px solid rgba(155, 81, 224, 0.25);
-  }
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.32em;
+.profil-eyebrow {
+  margin: 0 0 8px;
   font-size: 0.75rem;
   font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: rgba(17, 24, 39, 0.5);
 }
 
-.card-glow {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0.8)
-  );
-  border: 1px solid rgba(62, 125, 215, 0.2);
-  border-radius: 28px;
+.profil-name {
+  margin: 0 0 8px;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 900;
+  color: rgba(17, 24, 39, 0.95);
+  line-height: 1.2;
 }
 
-.profile-section {
-  padding: 32px;
-  border-radius: 24px;
+.profil-username {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.65);
 }
 
-.profile-section .section-heading {
+.profil-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profil-badge--client {
+  background: rgba(62, 125, 215, 0.12);
+  color: $color-blue;
+  border: 1px solid rgba(62, 125, 215, 0.25);
+}
+
+.profil-badge--master {
+  background: rgba(155, 81, 224, 0.12);
+  color: #7c3aed;
+  border: 1px solid rgba(155, 81, 224, 0.25);
+}
+
+// —— Sekcije (Rezervacije / Zahtevi) ——
+.profil-section-head {
   margin-bottom: 20px;
 }
 
-.profile-section .section-heading h2 {
-  font-size: 1.6rem;
+.profil-section-title {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
   font-weight: 900;
   color: rgba(17, 24, 39, 0.9);
 }
 
-.profile-section .section-heading p {
-  color: rgba(17, 24, 39, 0.6);
-  margin-top: 6px;
-  max-width: 460px;
-}
-
-.profile-placeholder {
-  padding: 24px;
-  border-radius: 18px;
-  background: rgba(17, 24, 39, 0.03);
-  border: 1px dashed rgba(17, 24, 39, 0.12);
-  color: rgba(17, 24, 39, 0.65);
+.profil-section-desc {
+  margin: 0;
+  font-size: 0.95rem;
   font-weight: 600;
+  color: rgba(17, 24, 39, 0.6);
 }
 
-.profile-cta {
+.profil-empty {
+  padding: 24px 0 0;
+  border-top: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.profil-empty p {
+  margin: 0 0 16px;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.profil-cta {
   display: inline-flex;
-  margin-top: 16px;
-  padding: 10px 18px;
+  align-items: center;
+  padding: 10px 20px;
   border-radius: 999px;
+  font-size: 0.95rem;
   font-weight: 800;
   color: #fff;
   background: $color-blue;
   text-decoration: none;
-  transition: transform 0.2s ease, background 0.2s ease;
-
-  &:hover {
-    background: $color-blue-dark;
-    transform: translateY(-1px);
-  }
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.profile-empty {
-  padding: 36px;
-  text-align: center;
+.profil-cta:hover {
+  background: $color-blue-dark;
+  transform: translateY(-1px);
 }
 
-.profile-empty h2 {
-  font-size: 1.5rem;
-  font-weight: 900;
+.profil-error {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.1);
+}
+
+.profil-loading {
+  margin: 0;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.6);
+}
+
+.profil-requests-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 14px;
+  background: #fafbfc;
+}
+
+.profil-requests-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.profil-requests-table thead {
+  border-bottom: 2px solid rgba(17, 24, 39, 0.1);
+}
+
+.profil-requests-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.6);
+}
+
+.profil-request-row {
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+  transition: background 0.15s ease;
+}
+
+.profil-request-row:last-child {
+  border-bottom: none;
+}
+
+.profil-request-row:hover {
+  background: rgba(17, 24, 39, 0.02);
+}
+
+.profil-requests-table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  font-weight: 500;
   color: rgba(17, 24, 39, 0.85);
 }
 
-.profile-empty p {
-  margin-top: 12px;
-  color: rgba(17, 24, 39, 0.6);
+.profil-request-desc-cell {
+  max-width: 220px;
+  font-weight: 500;
+  color: rgba(17, 24, 39, 0.75);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.profil-request-status {
+  font-size: 0.85rem;
   font-weight: 600;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.profil-request-actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.profil-request-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.profil-request-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.profil-request-badge--emergency {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.profil-request-badge--normal {
+  background: rgba(17, 24, 39, 0.08);
+  color: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(17, 24, 39, 0.12);
 }
 
 @media (max-width: 600px) {
-  .profile-page {
+  .profil-page {
     padding-left: 18px;
     padding-right: 18px;
+  }
+
+  .profil-card {
+    padding: 20px 20px;
   }
 }

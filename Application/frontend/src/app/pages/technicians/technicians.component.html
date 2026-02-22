@@ -33,33 +33,35 @@
           placeholder="Pretraži po imenu ili korisničkom imenu"
           (input)="onSearchInput($any($event.target).value)"
         />
-        <span aria-hidden="true">🔍</span>
       </label>
 
       @if (isLoading) {
-        <div class="technicians-loading">Učitavanje majstora...</div>
+      <div class="technicians-loading">Učitavanje majstora...</div>
       } @else if (loadError) {
-        <div class="technicians-error" role="alert">{{ loadError }}</div>
+      <div class="technicians-error" role="alert">{{ loadError }}</div>
       } @else {
-        <div class="technician-grid custom-scrollbar">
-          <a
-            *ngFor="let technician of filteredTechnicians"
-            [routerLink]="['/technicians', technician.id]"
-            class="technician-card card-hover"
-          >
-            <header>
-              <div>
-                <h3>{{ fullName(technician) }}</h3>
-                <p class="technician-card__location">{{ atUsername(technician) }}</p>
-              </div>
-            </header>
-            <p class="technician-card__meta">Majstor</p>
-            <span class="technician-card__link">Pogledaj profil →</span>
-          </a>
-          <p class="empty-state" *ngIf="!filteredTechnicians.length">
-            Nema majstora za odabranu pretragu.
-          </p>
-        </div>
+      <div class="technician-grid custom-scrollbar">
+        <button
+          *ngFor="let technician of filteredTechnicians"
+          type="button"
+          class="technician-card card-hover"
+          (click)="openDetail(technician.id)"
+        >
+          <header>
+            <div>
+              <h3>{{ fullName(technician) }}</h3>
+              <p class="technician-card__location">
+                {{ atUsername(technician) }}
+              </p>
+            </div>
+          </header>
+          <p class="technician-card__meta">Majstor</p>
+          <span class="technician-card__link">Pogledaj profil →</span>
+        </button>
+        <p class="empty-state" *ngIf="!filteredTechnicians.length">
+          Nema majstora za odabranu pretragu.
+        </p>
+      </div>
       }
     </div>
 
@@ -75,18 +77,35 @@
           <span>{{ filteredTechnicians.length }} profila</span>
         </div>
         <div class="technician-panel-list custom-scrollbar">
-          <a
+          <button
             *ngFor="let technician of filteredTechnicians"
-            [routerLink]="['/technicians', technician.id]"
-            class="technician-card card-hover"
+            type="button"
+            class="technician-card"
+            (click)="openDetail(technician.id)"
           >
             <div>
               <h3>{{ fullName(technician) }}</h3>
               <p>{{ atUsername(technician) }}</p>
             </div>
-          </a>
+          </button>
         </div>
       </aside>
     </div>
   </div>
+
+  @if (selectedMasterIdForDetail) {
+  <app-technician-detail-modal
+    [masterId]="selectedMasterIdForDetail"
+    (closed)="closeDetail()"
+    (openCreateJob)="onOpenCreateJob($event)"
+  />
+  }
+
+  @if (showCreateJobModal && createJobMaster) {
+  <app-create-job-modal
+    [master]="createJobMaster"
+    (closed)="closeCreateJobModal()"
+    (created)="onJobCreated($event)"
+  />
+  }
 </section>

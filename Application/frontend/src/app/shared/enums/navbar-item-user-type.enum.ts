@@ -1,6 +1,6 @@
 export enum NavbarItemUserType {
-    ALL = 'all',
-    ADMIN = 'admin',
-    TECHNICIAN = 'technician',
-    CLIENT = 'client',
+  ALL = 'all',
+  ADMIN = 'admin',
+  MASTER = 'master',
+  CLIENT = 'client',
 }

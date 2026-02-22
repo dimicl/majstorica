@@ -6,4 +6,5 @@ export interface ChatMessageApi {
   senderId: string;
   content: string;
   sentAt: string;
+  isSystemMessage?: boolean;
 }

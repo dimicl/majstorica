@@ -21,7 +21,6 @@ import { BUTTON_TYPES } from '../../shared/types';
 export class ChatPanelComponent {
   eButtonType = BUTTON_TYPES;
   title = input<string>('Chat sa majstorom');
-  subtitle = input<string>('Dogovorite termin i cenu u par poruka.');
 
   // Ako želiš da vežeš na SignalR status iz parent-a:
   signalrStatus = input<SignalrStatus | null>(null);
@@ -38,6 +37,33 @@ export class ChatPanelComponent {
   private internalMessages = signal<ChatMessage[]>([]);
 
   displayMessages = computed(() => this.messages() ?? this.internalMessages());
+
+  /** Grupe poruka po datumu: iznad svake grupe prikaže se datum, ispod poruke sa vremenom */
+  messageGroups = computed(() => {
+    const list = this.displayMessages();
+    if (!list.length) return [];
+    const now = new Date();
+    const todayKey = this.toDateKey(now);
+    const groups = new Map<
+      string,
+      { dateKey: string; dateLabel: string; messages: ChatMessage[] }
+    >();
+    for (const m of list) {
+      const iso = m.sentAt ?? new Date().toISOString();
+      const d = new Date(iso);
+      const dateKey = this.toDateKey(d);
+      if (!groups.has(dateKey)) {
+        groups.set(dateKey, {
+          dateKey,
+          dateLabel: this.formatDateLabel(d, now),
+          messages: [],
+        });
+      }
+      groups.get(dateKey)!.messages.push(m);
+    }
+    return Array.from(groups.values());
+  });
+
   usingExternalMessages = computed(() => this.messages() !== null);
 
   @ViewChild('scrollViewport') scrollViewport?: ElementRef<HTMLElement>;
@@ -61,11 +87,13 @@ export class ChatPanelComponent {
     this.send.emit(text);
 
     if (!this.usingExternalMessages()) {
+      const sentAt = new Date().toISOString();
       const msg: ChatMessage = {
         id: `m_${Date.now()}`,
         from: 'me',
         text,
-        time: this.formatTime(new Date()),
+        time: this.formatTimeOnly(sentAt),
+        sentAt,
       };
       this.internalMessages.set([...this.internalMessages(), msg]);
     }
@@ -80,7 +108,24 @@ export class ChatPanelComponent {
     });
   }
 
-  private formatTime(d: Date): string {
+  private toDateKey(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  /** Zaglavlje iznad grupe poruka: dd.MM.yyyy. */
+  private formatDateLabel(d: Date, now: Date): string {
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}.`;
+  }
+
+  /** Samo vreme (HH:mm) na balonu poruke */
+  private formatTimeOnly(iso: string): string {
+    const d = new Date(iso);
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;

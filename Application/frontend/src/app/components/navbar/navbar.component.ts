@@ -68,15 +68,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.getNavbarItems(NavbarItemUserType.CLIENT);
-    this.auth.userSelector$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((user) => {
-        const userType = user?.role === UserRole.Master
-          ? NavbarItemUserType.TECHNICIAN
+    this.initItems();
+  }
+
+  private initItems(): void {
+    this.auth.userSelector$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
+      const userType =
+        user?.role === UserRole.Master
+          ? NavbarItemUserType.MASTER
           : NavbarItemUserType.CLIENT;
-        this.getNavbarItems(userType);
-      });
+      this.getNavbarItems(userType);
+      this.syncNavbarWithRoute(this.router.url);
+    });
     this.syncNavbarWithRoute(this.router.url);
     this.router.events
       .pipe(

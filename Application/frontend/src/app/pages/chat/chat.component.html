@@ -34,8 +34,7 @@
           } @else {
           <div class="thread-list" role="list">
             @for (t of threads(); track t.id) {
-            <button
-              type="button"
+            <div
               class="thread"
               role="listitem"
               (click)="selectThread(t.id)"
@@ -69,7 +68,7 @@
                   }
                 </div>
               </div>
-            </button>
+            </div>
             }
           </div>
           } }
@@ -93,7 +92,6 @@
         <app-chat-panel
           [presence]="selectedThread()!.presence"
           [title]="selectedThread()!.title"
-          [subtitle]="selectedThread()!.subtitle"
           [messages]="selectedMessages()"
           (send)="onSendMessage($event)"
         />

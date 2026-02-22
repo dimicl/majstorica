@@ -1,4 +1,5 @@
 using backend.Api.DTOs.Conversation;
+using backend.Application.Helpers;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 
@@ -59,10 +60,9 @@ public class ConversationService : IConversationService
             {
                 Id = conv.Id,
                 JobId = conv.JobId,
+                ClientId = conv.ClientId,
                 JobDescription = job?.Description,
-                OtherPartyName = otherUser != null
-                    ? $"{otherUser.FirstName} {otherUser.LastName}".Trim()
-                    : "Korisnik",
+                OtherPartyName = UserDisplayNameHelper.GetDisplayName(otherUser, "Korisnik"),
                 OtherPartyId = otherPartyId,
                 LastMessageText = lastMessage?.Content,
                 LastMessageAt = lastMessage?.SentAt,
@@ -107,9 +107,7 @@ public class ConversationService : IConversationService
             Id = conversation.Id,
             JobId = conversation.JobId,
             JobDescription = job?.Description,
-            OtherPartyName = otherUser != null
-                ? $"{otherUser.FirstName} {otherUser.LastName}".Trim()
-                : "Korisnik",
+            OtherPartyName = UserDisplayNameHelper.GetDisplayName(otherUser, "Korisnik"),
             OtherPartyId = otherPartyId,
             LastMessageText = lastMessage?.Content,
             LastMessageAt = lastMessage?.SentAt,
@@ -135,7 +133,8 @@ public class ConversationService : IConversationService
             JobId = m.JobId,
             SenderId = m.SenderId,
             Content = m.Content,
-            SentAt = m.SentAt
+            SentAt = m.SentAt,
+            IsSystemMessage = m.IsSystemMessage
         }).ToList();
     }
 
@@ -154,6 +153,35 @@ public class ConversationService : IConversationService
     {
         var conversation = await _chatService.EnsureOrCreateConversationWithMaster(clientId, masterId);
         return new ConversationCreatedResponse { Id = conversation.Id };
+    }
+
+    public async Task DeclineRequest(Guid masterId, Guid conversationId)
+    {
+        var conversation = await _conversationRepository.GetById(conversationId);
+        if (conversation == null)
+            throw new KeyNotFoundException("Konverzacija nije pronađena.");
+        if (conversation.MasterId != masterId)
+            throw new UnauthorizedAccessException("Samo majstor može da odbije zahtev.");
+
+        var master = await _userRepository.GetById(masterId);
+        var masterName = UserDisplayNameHelper.GetDisplayName(master, "Majstor");
+        var systemMessage = new ChatMessage(
+            conversationId,
+            conversation.JobId,
+            masterId,
+            $"{masterName} je odbio zahtev za posao.",
+            isSystemMessage: true);
+        await _messageRepository.Save(systemMessage);
+
+        conversation.Close();
+        await _conversationRepository.Save(conversation);
+    }
+
+    public async Task<Guid?> GetRecipientId(Guid conversationId, Guid currentUserId)
+    {
+        var conversation = await _conversationRepository.GetById(conversationId);
+        if (conversation == null) return null;
+        return conversation.ClientId == currentUserId ? conversation.MasterId : conversation.ClientId;
     }
 }
 

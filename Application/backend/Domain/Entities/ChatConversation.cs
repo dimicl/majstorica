@@ -28,6 +28,18 @@ public class ChatConversation
         IsActive = false;
     }
 
+    /// <summary>Ponovo otvara konverzaciju (npr. kad klijent pošalje novi zahtev za posao).</summary>
+    public void Reopen()
+    {
+        IsActive = true;
+    }
+
+    /// <summary>Povezuje konverzaciju (nastalu npr. iz "Napiši poruku") sa poslom.</summary>
+    public void AssignJob(Guid jobId)
+    {
+        JobId = jobId;
+    }
+
     public static ChatConversation Rehydrate(
         Guid id,
         Guid jobId,

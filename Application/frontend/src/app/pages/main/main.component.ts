@@ -25,6 +25,7 @@ import { UserRole } from '../../shared/enums';
 export class MainComponent implements OnInit {
   readonly auth = inject(AuthSelectorService);
   private store = inject(Store);
+  readonly userRole = UserRole;
 
   public eButtonType = BUTTON_TYPES;
   public sharedSvgRoutes = SharedSvgRoutes;

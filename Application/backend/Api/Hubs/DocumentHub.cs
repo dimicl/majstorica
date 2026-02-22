@@ -1,7 +1,7 @@
-using System.Security.Claims;
+using backend.Api.Extensions;
 using backend.Application.Interfaces;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Shared.Exceptions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace backend.Api.Hubs;
@@ -10,17 +10,20 @@ public class DocumentHub : Hub
 {
     private readonly IJobService _jobService;
     private readonly IChatService _chatService;
+    private readonly IConversationService _conversationService;
     private readonly ISessionService _sessionService;
     private readonly IRedisLockService _lockService;
 
     public DocumentHub(
         IJobService jobService,
         IChatService chatService,
+        IConversationService conversationService,
         ISessionService sessionService,
         IRedisLockService lockService)
     {
         _jobService = jobService;
         _chatService = chatService;
+        _conversationService = conversationService;
         _sessionService = sessionService;
         _lockService = lockService;
     }
@@ -98,6 +101,10 @@ public class DocumentHub : Hub
 
         await Clients.Group(ConversationGroup(conversationId))
             .SendAsync("ReceiveMessage", message);
+
+        var recipientId = await _conversationService.GetRecipientId(conversationId, userId);
+        if (recipientId.HasValue)
+            await Clients.User(recipientId.Value.ToString()).SendAsync("ReceiveMessage", message);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -108,21 +115,25 @@ public class DocumentHub : Hub
 
     private Guid GetUserId()
     {
-        var (userId, _) = GetUserIdAndRole();
-        return userId;
+        try
+        {
+            return Context.User!.GetUserId();
+        }
+        catch (UnauthorizedException ex)
+        {
+            throw new HubException(ex.Message);
+        }
     }
 
     private (Guid userId, UserRole role) GetUserIdAndRole()
     {
-        var userIdStr = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? Context.User?.FindFirstValue("sub");
-        if (string.IsNullOrEmpty(userIdStr))
-            throw new HubException("Unauthorized");
-
-        var roleStr = Context.User?.FindFirstValue(ClaimTypes.Role) ?? nameof(UserRole.Client);
-        if (!Enum.TryParse<UserRole>(roleStr, ignoreCase: true, out var role))
-            role = UserRole.Client;
-
-        return (Guid.Parse(userIdStr), role);
+        try
+        {
+            return Context.User!.GetUserIdAndRole();
+        }
+        catch (UnauthorizedException ex)
+        {
+            throw new HubException(ex.Message);
+        }
     }
 }

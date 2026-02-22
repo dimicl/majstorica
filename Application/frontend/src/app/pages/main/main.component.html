@@ -1,8 +1,13 @@
 <section class="landing p-y-24 p-x-18">
   <div class="topbar d-flex align-items-center justify-content-between m-b-22">
-    <a class="brand" routerLink="/home" aria-label="Majstorica - početna"
-      >Majstorica</a
-    >
+    <div class="brand" routerLink="/home">
+      <img
+        src="assets/icons/majstorski.png"
+        alt="Majstorica"
+        class="brand-icon"
+      />
+      <span class="brand-text">Majstorica</span>
+    </div>
 
     <div class="topbar-actions">
       @if (!(auth.isAuthenticated$ | async)) {
@@ -47,11 +52,38 @@
         Saradjuju bez stresa }
       </h1>
 
+      @if (auth.userSelector$ | async; as user) {
+      <p class="hero-subtitle m-t-14">
+        @if (user.role === userRole.Master) { Pregledaj zahteve od klijenata,
+        upravljaj poslovima i rezervacijama. } @else if (user.role ===
+        userRole.Client) { Pronađi proverenog majstora, dogovori termin i dobij
+        jasnu cenu — sve na jednom mestu. } @else { Zaboravi beskonačne pozive i
+        kašnjenja. Brzo pronađi proverenog majstora, dogovori termin i dobij
+        jasnu cenu — sve na jednom mestu. }
+      </p>
+      <div class="hero-cta d-flex align-items-center flex-wrap m-t-18">
+        @if (user.role === userRole.Master) {
+        <a class="btn btn-primary btn-large" routerLink="/profile">
+          Rezervacije i poslovi
+          <span class="btn-icon" aria-hidden="true">↗</span>
+        </a>
+        } @else if (user.role === userRole.Client) {
+        <a class="btn btn-primary btn-large" routerLink="/masters">
+          Zatraži majstora
+          <span class="btn-icon" aria-hidden="true">↗</span>
+        </a>
+        } @else {
+        <a class="btn btn-primary btn-large" routerLink="/masters">
+          Zatraži majstora
+          <span class="btn-icon" aria-hidden="true">↗</span>
+        </a>
+        }
+      </div>
+      } @else {
       <p class="hero-subtitle m-t-14">
         Zaboravi beskonačne pozive i kašnjenja. Brzo pronađi proverenog
         majstora, dogovori termin i dobij jasnu cenu — sve na jednom mestu.
       </p>
-
       <div class="hero-controls d-flex flex-wrap align-items-center m-t-18">
         <label
           class="pill pill-select d-inline-flex align-items-center"
@@ -65,7 +97,6 @@
             <option>Kragujevac</option>
           </select>
         </label>
-
         <div
           class="pill pill-disabled d-flex align-items-center gap-4"
           aria-disabled="true"
@@ -74,14 +105,14 @@
           <span class="pill-value">Još gradova</span>
         </div>
       </div>
-
       <div class="hero-cta d-flex align-items-center flex-wrap m-t-18">
-        <a class="btn btn-primary btn-large" routerLink="/services">
+        <a class="btn btn-primary btn-large" routerLink="/masters">
           Zatraži majstora
           <span class="btn-icon" aria-hidden="true">↗</span>
         </a>
-        <div class="btn-link" routerLink="/technicians">Postani majstor</div>
+        <div class="btn-link" routerLink="/masters">Postani majstor</div>
       </div>
+      }
     </div>
 
     <div class="hero-right" aria-hidden="true">
@@ -155,7 +186,7 @@
 
     <div class="features-grid">
       @for (c of categories; track c.title) {
-      <a class="feature-card" routerLink="/services">
+      <a class="feature-card" routerLink="/masters">
         <div class="feature-icon" aria-hidden="true">{{ c.icon }}</div>
         <div class="feature-title">{{ c.title }}</div>
         <div class="feature-desc">{{ c.description }}</div>

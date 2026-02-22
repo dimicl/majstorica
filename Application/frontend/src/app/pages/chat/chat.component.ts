@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, NgZone, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ChatPanelComponent } from '../../components/chat-panel/chat-panel.component';
 import { ChatService } from '../../shared/services/chat.service';
@@ -21,9 +21,9 @@ export class ChatComponent {
   private chat = inject(ChatService);
   private signalr = inject(SignalrService);
   private auth = inject(AuthService);
-  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private ngZone = inject(NgZone);
 
   realtimeError = this.signalr.lastError;
 
@@ -49,39 +49,45 @@ export class ChatComponent {
   });
 
   constructor() {
+    // SignalR se konektuje pri login/register/loadUser (auth.effects) – ovde samo koristimo postojeću konekciju.
+    // Ako korisnik osveži stranicu na /chat, loadUserSuccess možda još nije izvršen – osiguraj konekciju.
     const token = this.auth.getToken();
-    // accessTokenFactory je obavezan: WebSocketTransport dodaje access_token u URL samo ako postoji factory.
-    // Bez njega negotiate može proći (Authorization header), ali WebSocket se otvara bez tokena → Unauthorized.
-    const options = token
-      ? { accessTokenFactory: () => this.auth.getToken() ?? '' }
-      : undefined;
-    void this.signalr.connect(HUB_CHAT_URL, options);
-    this.destroyRef.onDestroy(() => {
-      void this.signalr.disconnect();
-    });
+    if (token && this.signalr.status() !== SIGNALR_STATUS.CONNECTED) {
+      const options = {
+        accessTokenFactory: () => this.auth.getToken() ?? '',
+      };
+      void this.signalr.connect(HUB_CHAT_URL, options);
+    }
+    // Ne disconnect-ujemo na izlasku sa chat stranice – korisnik ostaje online dok je ulogovan.
 
     this.signalr.on<ReceiveMessagePayload>('ReceiveMessage', (payload) => {
-      this.handleReceiveMessage(payload);
+      this.ngZone.run(() => this.handleReceiveMessage(payload));
     });
 
     void this.loadThreads();
   }
 
   private handleReceiveMessage(payload: ReceiveMessagePayload): void {
+    const id = payload.id ?? payload.Id ?? '';
+    const convId = String(payload.conversationId ?? payload.ConversationId ?? '');
+    const senderId = payload.senderId ?? payload.SenderId ?? '';
+    const content = payload.content ?? payload.Content ?? '';
+    const sentAt = payload.sentAt ?? payload.SentAt ?? new Date().toISOString();
+
     const currentUserId = this.auth.getUserIdFromStorage() ?? '';
-    const isFromMe = payload.senderId === currentUserId;
+    const isFromMe = senderId === currentUserId;
     const msg: ChatMessage = {
-      id: payload.id,
+      id: id,
       from: isFromMe ? 'me' : 'them',
-      text: payload.content,
-      time: this.formatTime(payload.sentAt),
+      text: content,
+      time: this.formatTimeOnly(sentAt),
+      sentAt,
     };
-    const convId = payload.conversationId;
     let current = this.messagesByThread()[convId] ?? [];
     // Ako stigne naša poruka sa servera, ukloni optimističku sa istim tekstom da ne bude duplikat
     if (isFromMe) {
       current = current.filter(
-        (m) => !(String(m.id).startsWith('opt-') && m.text === payload.content)
+        (m) => !(String(m.id).startsWith('opt-') && m.text === content)
       );
     }
     this.messagesByThread.set({
@@ -97,13 +103,19 @@ export class ChatComponent {
       const addUnread = !isFromMe && isOtherConversation ? 1 : 0;
       const updated: ChatThread = {
         ...t,
-        lastMessage: payload.content,
-        updatedAt: this.formatTime(payload.sentAt),
+        lastMessage: content,
+        updatedAt: this.formatTimeOrDate(sentAt),
         unreadCount: t.unreadCount + addUnread,
       };
       this.threads.set(
         threads.slice(0, idx).concat(updated, threads.slice(idx + 1))
       );
+      if (addUnread > 0) {
+        this.chat.setHasNewMessages(true);
+      }
+    } else if (convId) {
+      // Poruka za konverzaciju koja nije u listi – osveži listu da se prikaže
+      void this.refreshThreads();
     }
   }
 
@@ -117,11 +129,31 @@ export class ChatComponent {
     );
   }
 
-  private formatTime(iso: string): string {
+  /** Samo vreme (HH:mm) za poruke u chatu */
+  private formatTimeOnly(iso: string): string {
     const d = new Date(iso);
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;
+  }
+
+  /** Danas: vreme (HH:mm), inače: datum (dd.MM.yyyy.) – za thread listu */
+  private formatTimeOrDate(iso: string): string {
+    const d = new Date(iso);
+    const now = new Date();
+    const isToday =
+      d.getDate() === now.getDate() &&
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear();
+    if (isToday) {
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}.`;
   }
 
   /** Minimalni thread kada otvaramo samo po open= u URL (nema u listi). */
@@ -157,11 +189,9 @@ export class ChatComponent {
     const updated: ChatThread = {
       ...list[idx],
       title: conv.otherPartyName || 'Razgovor',
-      subtitle:
-        conv.jobId === emptyJobId ? 'Razgovor' : conv.jobDescription ?? 'Posao',
       lastMessage: conv.lastMessageText ?? '',
       updatedAt: conv.lastMessageAt
-        ? this.formatTime(conv.lastMessageAt)
+        ? this.formatTimeOrDate(conv.lastMessageAt)
         : '--:--',
       unreadCount: conv.unreadCount ?? list[idx].unreadCount,
       presence: conv.isOnline ?? conv.IsOnline ?? false ? 'online' : 'offline',
@@ -253,11 +283,13 @@ export class ChatComponent {
 
     // Optimistički prikaži poruku odmah
     const optId = `opt-${Date.now()}`;
+    const sentAt = new Date().toISOString();
     const optimisticMsg: ChatMessage = {
       id: optId,
       from: 'me',
       text,
-      time: this.formatTime(new Date().toISOString()),
+      time: this.formatTimeOnly(sentAt),
+      sentAt,
     };
     const current = this.messagesByThread()[conversationId] ?? [];
     this.messagesByThread.set({

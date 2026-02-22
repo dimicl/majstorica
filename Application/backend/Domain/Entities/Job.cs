@@ -11,10 +11,15 @@ public class Job
     public Guid ClientId { get; private set; }
     public Guid? MasterId { get; private set; }
 
+    public string Title { get; private set; } = default!;
     public string Description { get; private set; } = default!;
+    public DateTime? ScheduledDate { get; private set; }
     public decimal? Price { get; private set; }
 
     public bool IsEmergency { get; private set; }
+
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     public JobStatus Status { get; private set; }
 
@@ -44,14 +49,19 @@ public class Job
 
     //pravimo ga ovde kako application deo ne bi znao pravila joba, jer domen garantuje sva pravila joba
     //jedini nacin da nastane posao, kada klijent napravi zahtev za posao ovde se kreira
-    public Job(Guid clientId, string description, decimal? price = null)
+    public Job(Guid clientId, string title, string description, DateTime? scheduledDate, bool isEmergency, DateTime createdAt, decimal? price = null)
     {
         Id = Guid.NewGuid();
         ClientId = clientId;
-        Description = description;
+        Title = title ?? string.Empty;
+        Description = description ?? string.Empty;
+        ScheduledDate = scheduledDate;
         Price = price;
+        IsEmergency = isEmergency;
 
         Status = JobStatus.Created;
+        CreatedAt = createdAt;
+        UpdatedAt = null;
 
         //da pokazes kako se taj posao ponasa kad je kreiran
         _state = new CreatedState();
@@ -60,17 +70,21 @@ public class Job
     //uzima podatke iz baze i vraca job entitet bez da mu promeni nesto
     //poziva se u Infrastructure iz koje baze vracamo job
     //static da pripada klasi da mozemo da je pozovemo i napravimo objekat jer ne mozemo da je pozovemo nad nepostojecim objektom
-    public static Job Rehydrate(Guid id, Guid clientId, Guid? masterId, string description, decimal? price, bool isEmergency, string status)
+    public static Job Rehydrate(Guid id, Guid clientId, Guid? masterId, string title, string description, DateTime? scheduledDate, decimal? price, bool isEmergency, string status, DateTime createdAt, DateTime updatedAt)
     {
         var job = new Job
         {
             Id = id,
             ClientId = clientId,
             MasterId = masterId,
-            Description = description,
+            Title = title ?? string.Empty,
+            Description = description ?? string.Empty,
+            ScheduledDate = scheduledDate,
             Price = price,
             IsEmergency = isEmergency,
-            Status = Enum.Parse<JobStatus>(status)
+            Status = Enum.Parse<JobStatus>(status),
+            CreatedAt = createdAt,
+            UpdatedAt = updatedAt
         };
         job.SetStateFromString(status);
         return job;
@@ -99,39 +113,43 @@ public class Job
 
     public void SendRequests()
     {
-        //poziva se funkcija iz stanja i ono odlucuje sta moze da se desi
         _state.SendRequests(this);
-        //dodaje se event ako je moguce
+        TouchUpdatedAt();
         AddEvent(new JobUpdatedEvent(Id));
     }
 
     public void Accept(Guid masterId)
     {
         _state.Accept(this, masterId);
+        TouchUpdatedAt();
         AddEvent(new JobUpdatedEvent(Id));
     }
 
     public void Start()
     {
         _state.Start(this);
+        TouchUpdatedAt();
         AddEvent(new JobUpdatedEvent(Id));
     }
 
     public void Complete()
     {
         _state.Complete(this);
+        TouchUpdatedAt();
         AddEvent(new JobUpdatedEvent(Id));
     }
 
     public void ChangeDescription(string description)
     {
         _state.ChangeDescription(this, description);
+        TouchUpdatedAt();
         AddEvent(new JobUpdatedEvent(Id));
     }
 
     public void ChangePrice(decimal? price)
     {
         _state.ChangePrice(this, price);
+        TouchUpdatedAt();
         AddEvent(new JobUpdatedEvent(Id));
     }
 
@@ -174,6 +192,11 @@ public class Job
     internal void MarkAsEmergency()
     {
         IsEmergency = true;
+    }
+
+    private void TouchUpdatedAt()
+    {
+        UpdatedAt = DateTime.UtcNow;
     }
 
 }
