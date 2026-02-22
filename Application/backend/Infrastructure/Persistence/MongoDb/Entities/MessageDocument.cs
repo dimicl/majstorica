@@ -21,4 +21,6 @@ public class MessageDocument
     public string Content { get; set; } = default!;
 
     public DateTime SentAt { get; set; }
+
+    public bool IsSystemMessage { get; set; }
 }

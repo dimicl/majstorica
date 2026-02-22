@@ -1,10 +1,10 @@
-@use '../../../assets/scss/variables' as *;
+@use "../../../assets/scss/variables" as *;
 
 .app-button {
   border: none;
   outline: none;
   border-radius: 999px;
-  padding: 9px 12px;  
+  padding: 9px 12px;
   color: $color-white;
   cursor: pointer;
   display: flex;
@@ -21,6 +21,7 @@
   &.dsb-btn {
     opacity: 0.5;
     cursor: default;
+    pointer-events: none;
   }
 
   &.positive-button {
@@ -29,12 +30,12 @@
     transition: background-color 0.3s ease, color 0.3s ease;
     &:hover:not(.dsb-btn) {
       background-color: #0b49d1;
-      color: $color-white;     
+      color: $color-white;
     }
-  
+
     &:active:not(.dsb-btn) {
       background-color: #00179e;
-      color: $color-white;     
+      color: $color-white;
     }
   }
 
@@ -45,7 +46,7 @@
       background-color: #2f2f2f;
       color: $color-white;
     }
-  
+
     &:active {
       background-color: #2f2f2f;
       color: $color-white;
@@ -60,7 +61,7 @@
       background-color: #2f2f2f;
       color: $color-white;
     }
-  
+
     &:active {
       background-color: #1d1d1d;
       color: $color-white;

@@ -1,20 +1,37 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { MapComponent, MapMarkerData, Coordinates } from '../../components/map/map.component';
+import {
+  MapComponent,
+  MapMarkerData,
+  Coordinates,
+} from '../../components/map/map.component';
 import { firstValueFrom } from 'rxjs';
-import { MasterService, type MasterListItem } from '../../shared/services/master.service';
+import {
+  MasterService,
+  type MasterListItem,
+} from '../../shared/services/master.service';
+import { TechnicianDetailModalComponent } from './technician-detail-modal/technician-detail-modal.component';
+import { CreateJobModalComponent, type CreateJobMaster } from '../../components/create-job-modal/create-job-modal.component';
 
 type TechnicianTab = 'list' | 'map';
 
 @Component({
   selector: 'app-technicians',
-  imports: [CommonModule, MapComponent, RouterLink],
+  imports: [
+    CommonModule,
+    MapComponent,
+    TechnicianDetailModalComponent,
+    CreateJobModalComponent,
+  ],
   templateUrl: './technicians.component.html',
   styleUrl: './technicians.component.scss',
 })
 export class TechniciansComponent implements OnInit {
   private masterService = inject(MasterService);
+
+  selectedMasterIdForDetail: string | null = null;
+  showCreateJobModal = false;
+  createJobMaster: CreateJobMaster | null = null;
 
   public tabs: Record<'LIST' | 'MAP', TechnicianTab> = {
     LIST: 'list',
@@ -31,9 +48,8 @@ export class TechniciansComponent implements OnInit {
   public get filteredTechnicians(): MasterListItem[] {
     const q = this.searchQuery.trim().toLowerCase();
     if (!q) return this.technicians;
-    return this.technicians.filter(
-      (t) =>
-        `${t.firstName} ${t.lastName} ${t.username}`.toLowerCase().includes(q)
+    return this.technicians.filter((t) =>
+      `${t.firstName} ${t.lastName} ${t.username}`.toLowerCase().includes(q)
     );
   }
 
@@ -86,5 +102,30 @@ export class TechniciansComponent implements OnInit {
 
   atUsername(t: MasterListItem): string {
     return '@' + t.username;
+  }
+
+  openDetail(masterId: string): void {
+    this.selectedMasterIdForDetail = masterId;
+  }
+
+  closeDetail(): void {
+    this.selectedMasterIdForDetail = null;
+  }
+
+  onOpenCreateJob(event: { master: CreateJobMaster }): void {
+    this.closeDetail();
+    setTimeout(() => {
+      this.createJobMaster = event.master;
+      this.showCreateJobModal = true;
+    }, 0);
+  }
+
+  closeCreateJobModal(): void {
+    this.showCreateJobModal = false;
+    this.createJobMaster = null;
+  }
+
+  onJobCreated(_event: { jobId: string }): void {
+    this.closeCreateJobModal();
   }
 }

@@ -13,7 +13,8 @@ public static class ChatMessageMapper
             JobId = message.JobId,
             SenderId = message.SenderId,
             Content = message.Content,
-            SentAt = message.SentAt
+            SentAt = message.SentAt,
+            IsSystemMessage = message.IsSystemMessage
         };
     }
 
@@ -25,6 +26,7 @@ public static class ChatMessageMapper
             doc.JobId,
             doc.SenderId,
             doc.Content,
-            doc.SentAt);
+            doc.SentAt,
+            doc.IsSystemMessage);
     }
 }

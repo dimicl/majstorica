@@ -42,12 +42,12 @@ public class ChatService : IChatService
 
     public async Task<ChatConversation> EnsureOrCreateConversationWithMaster(Guid clientId, Guid masterId)
     {
-        var jobId = Guid.Empty;
-        var existing = await _conversationRepository.GetByClientAndMasterAndJob(clientId, masterId, jobId);
-        if (existing != null && existing.IsActive)
+        // Ako već postoji bilo koja aktivna konverzacija (npr. iz posla), koristi je – ne kreiraj drugi chat
+        var existing = await _conversationRepository.GetActiveByClientAndMaster(clientId, masterId);
+        if (existing != null)
             return existing;
 
-        var conversation = new ChatConversation(jobId, clientId, masterId);
+        var conversation = new ChatConversation(Guid.Empty, clientId, masterId);
         await _conversationRepository.Save(conversation);
         return conversation;
     }

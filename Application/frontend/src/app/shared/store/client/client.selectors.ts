@@ -5,7 +5,7 @@ export const selectClientState = createFeatureSelector<ClientState>('client');
 
 export const selectClientProfile = createSelector(
   selectClientState,
-  (state) => state.profile
+  (state) => state?.profile
 );
 
 export const selectClientLoading = createSelector(

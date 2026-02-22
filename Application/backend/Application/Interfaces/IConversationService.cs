@@ -9,5 +9,7 @@ public interface IConversationService
     Task<List<ChatMessageResponse>> GetMessagesForUser(Guid userId, Guid conversationId);
     Task MarkAsRead(Guid userId, Guid conversationId);
     Task<ConversationCreatedResponse> EnsureOrCreateWithMaster(Guid clientId, Guid masterId);
-}
 
+    Task DeclineRequest(Guid masterId, Guid conversationId);
+    Task<Guid?> GetRecipientId(Guid conversationId, Guid currentUserId);
+}

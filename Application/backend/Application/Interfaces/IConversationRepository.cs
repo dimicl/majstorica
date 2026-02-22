@@ -16,6 +16,15 @@ public interface IConversationRepository
 
     Task<ChatConversation?> GetByClientAndMasterAndJob(Guid clientId, Guid masterId, Guid jobId);
 
+    /// <summary>Vraća bilo koju aktivnu konverzaciju između klijenta i majstora (sa poslom ili bez).</summary>
+    Task<ChatConversation?> GetActiveByClientAndMaster(Guid clientId, Guid masterId);
+
+    /// <summary>Vraća bilo koju konverzaciju između klijenta i majstora (aktivnu ili zatvorenu).</summary>
+    Task<ChatConversation?> GetByClientAndMaster(Guid clientId, Guid masterId);
+
+    /// <summary>Da li postoji aktivna konverzacija (aktivan posao/zahtev) između klijenta i majstora.</summary>
+    Task<bool> ExistsByClientAndMaster(Guid clientId, Guid masterId);
+
     /// <summary>Broj nepročitanih poruka za korisnika u konverzaciji.</summary>
     Task<int> GetUnreadCountAsync(Guid conversationId, Guid userId);
 

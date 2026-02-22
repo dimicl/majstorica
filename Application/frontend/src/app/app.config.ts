@@ -2,6 +2,7 @@ import {
   ApplicationConfig,
   provideZoneChangeDetection,
   isDevMode,
+  importProvidersFrom,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import {
@@ -14,33 +15,40 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { routes } from './app.routes';
 
 // Reducers
 import { authReducer } from './shared/store/auth/auth.reducer';
+import { clientReducer } from './shared/store/client/client.reducer';
+import { MasterEffects, masterReducer } from './shared/store';
 
 // Effects
 import { AuthEffects } from './shared/store/auth/auth.effects';
+import { ClientEffects } from './shared/store/client/client.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-
+    importProvidersFrom(NgbModule),
     // Angular SVG Icon
     provideAngularSvgIcon(),
 
     // NgRx Store
     provideStore({
       auth: authReducer,
-      // Dodaj ostale reducere ovde
+      client: clientReducer,
+      master: masterReducer,
     }),
 
     // NgRx Effects
     provideEffects([
       AuthEffects,
+      ClientEffects,
+      MasterEffects,
       // Dodaj ostale effects ovde
     ]),
 

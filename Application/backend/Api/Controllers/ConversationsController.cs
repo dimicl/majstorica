@@ -65,4 +65,12 @@ public class ConversationsController : ControllerBase
         return CreatedAtAction(nameof(GetMessages), new { conversationId = created.Id }, created);
     }
 
+    /// <summary>Majstor odbija zahtev za posao – zatvara konverzaciju.</summary>
+    [HttpPost("{conversationId:guid}/decline")]
+    public async Task<ActionResult> DeclineRequest(Guid conversationId)
+    {
+        var masterId = User.GetUserId();
+        await _conversationService.DeclineRequest(masterId, conversationId);
+        return NoContent();
+    }
 }

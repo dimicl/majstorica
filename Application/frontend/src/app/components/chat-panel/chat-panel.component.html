@@ -24,23 +24,26 @@
           </span>
         </div>
       </div>
-
-      <div class="chat-title__sub">{{ subtitle() }}</div>
     </div>
   </header>
 
   <div #scrollViewport class="chat-body" role="log" aria-live="polite">
-    @for (m of displayMessages(); track m.id) {
-    <div
-      class="msg"
-      [class.msg--me]="m.from === 'me'"
-      [class.msg--them]="m.from === 'them'"
-      [class.msg--system]="m.from === 'system'"
-    >
-      <div class="msg-bubble">
-        <div class="msg-text">{{ m.text }}</div>
-        <div class="msg-meta">{{ m.time }}</div>
+    @for (group of messageGroups(); track group.dateKey) {
+    <div class="msg-date-group">
+      <div class="msg-date">{{ group.dateLabel }}</div>
+      @for (m of group.messages; track m.id) {
+      <div
+        class="msg"
+        [class.msg--me]="m.from === 'me'"
+        [class.msg--them]="m.from === 'them'"
+        [class.msg--system]="m.from === 'system'"
+      >
+        <div class="msg-bubble">
+          <div class="msg-text">{{ m.text }}</div>
+          <div class="msg-meta">{{ m.time }}</div>
+        </div>
       </div>
+      }
     </div>
     }
   </div>

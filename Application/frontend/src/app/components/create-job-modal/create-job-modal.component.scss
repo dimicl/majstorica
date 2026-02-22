@@ -1,0 +1,282 @@
+@use "../../../assets/scss/variables" as *;
+
+@keyframes create-job-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes create-job-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.create-job-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 24px;
+  animation: create-job-overlay-in 0.2s ease-out forwards;
+}
+
+.create-job-modal {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  box-shadow: 0 20px 40px -12px rgba(17, 24, 39, 0.18);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: create-job-modal-in 0.28s ease-out forwards;
+}
+
+.create-job-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+  cursor: move;
+  flex-shrink: 0;
+}
+
+.create-job-modal__title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: rgba(17, 24, 39, 0.92);
+  letter-spacing: -0.02em;
+}
+
+.create-job-modal__close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgba(17, 24, 39, 0.5);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-job-modal__close:hover {
+  background: rgba(17, 24, 39, 0.08);
+  color: rgba(17, 24, 39, 0.9);
+}
+
+.create-job-modal__body {
+  padding: 20px;
+  overflow: visible;
+  flex: 0 1 auto;
+}
+
+.create-job-modal__master {
+  margin-bottom: 16px;
+}
+
+.create-job-modal__master-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.5);
+  margin-bottom: 6px;
+}
+
+.create-job-modal__master-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  background: rgba(62, 125, 215, 0.06);
+  border: 1px solid rgba(62, 125, 215, 0.18);
+  border-radius: 10px;
+}
+
+.create-job-modal__master-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: rgba(17, 24, 39, 0.9);
+}
+
+.create-job-modal__master-username {
+  font-size: 0.9rem;
+  color: rgba(17, 24, 39, 0.55);
+}
+
+.create-job-form__field {
+  margin-bottom: 14px;
+
+  &--required .create-job-form__label::after {
+    content: " *";
+    color: #c53030;
+  }
+
+  &--half {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &--checkbox {
+    margin-bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 2px;
+  }
+
+  &.emergency-field {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+}
+
+.create-job-form__row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.create-job-form__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.78);
+  margin-bottom: 4px;
+}
+
+.create-job-form__address {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.85);
+  background: rgba(17, 24, 39, 0.04);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 8px;
+  white-space: pre-line;
+}
+
+.create-job-form__input,
+.create-job-form__textarea,
+.create-job-form__select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: rgba(17, 24, 39, 0.9);
+  background: #f8f9fa;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+
+  &::placeholder {
+    color: rgba(17, 24, 39, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-blue;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(62, 125, 215, 0.15);
+  }
+}
+
+.create-job-form__select {
+  cursor: pointer;
+  appearance: auto;
+}
+
+.create-job-form__textarea {
+  resize: none;
+  min-height: 72px;
+}
+
+.create-job-form__checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: $color-blue;
+  cursor: pointer;
+}
+
+.create-job-form__checkbox-text {
+  font-weight: 500;
+}
+
+.create-job-form__error {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #c53030;
+  font-weight: 500;
+
+  &--block {
+    margin-bottom: 8px;
+  }
+}
+
+.create-job-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.create-job-modal__btn {
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+
+  &--secondary {
+    background: rgba(17, 24, 39, 0.06);
+    color: rgba(17, 24, 39, 0.8);
+    border: none;
+  }
+
+  &--secondary:hover {
+    background: rgba(17, 24, 39, 0.1);
+  }
+
+  &--primary {
+    background: $color-blue;
+    color: #fff;
+    border: none;
+  }
+
+  &--primary:hover:not(:disabled) {
+    background: $color-blue-dark;
+  }
+
+  &--primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}

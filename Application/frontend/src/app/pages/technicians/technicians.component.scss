@@ -18,10 +18,10 @@
 
 .technicians-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  justify-content: start;
+  align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
+  height: 48px;
 }
 
 .technicians-title {
@@ -47,6 +47,7 @@
   border-radius: 999px;
   background: rgba(17, 24, 39, 0.06);
   padding: 4px;
+  margin-top: 16px;
 }
 
 .tab-button {
@@ -123,7 +124,7 @@
 
 .technician-card {
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 18px;
+  border-radius: 3px;
   padding: 18px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   display: flex;
@@ -131,6 +132,14 @@
   gap: 8px;
   text-decoration: none;
   color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+
+  &:hover {
+    border-color: rgba(62, 125, 215, 0.25);
+    background: rgba(255, 255, 255, 0.98);
+  }
 }
 
 .technician-card__link {
@@ -223,7 +232,7 @@
   width: clamp(270px, 26vw, 360px);
   background: rgba(255, 255, 255, 0.95);
   border-radius: 3px;
-  padding: 4px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -253,15 +262,6 @@
   color: rgba(17, 24, 39, 0.6);
   font-weight: 600;
   grid-column: 1 / -1;
-}
-
-.card-hover {
-  transition: transform 0.25s ease;
-  will-change: transform;
-
-  &:hover {
-    transform: translateY(-2px);
-  }
 }
 
 @media (max-width: 1050px) {

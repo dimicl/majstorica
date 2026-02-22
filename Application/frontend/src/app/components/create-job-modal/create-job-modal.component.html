@@ -1,0 +1,139 @@
+<div class="create-job-modal-overlay" (click)="close()">
+  <div
+    class="create-job-modal"
+    cdkDrag
+    cdkDragBoundary=".create-job-modal-overlay"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="create-job-modal__header" cdkDragHandle>
+      <h2 class="create-job-modal__title">Kreiraj posao</h2>
+      <button
+        type="button"
+        class="create-job-modal__close"
+        (click)="close(); $event.stopPropagation()"
+        aria-label="Zatvori"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </header>
+
+    <div class="create-job-modal__body">
+      @if (selectedMaster(); as m) {
+      <div class="create-job-modal__master">
+        <span class="create-job-modal__master-label">Izabrani majstor</span>
+        <div class="create-job-modal__master-card">
+          <span class="create-job-modal__master-name">{{ m.fullName }}</span>
+          <span class="create-job-modal__master-username">{{
+            m.username
+          }}</span>
+        </div>
+      </div>
+      }
+
+      <form class="create-job-form" (ngSubmit)="onSubmit()" #form="ngForm">
+        <div class="create-job-form__field">
+          <label for="job-title" class="create-job-form__label"
+            >Naslov posla</label
+          >
+          <input
+            id="job-title"
+            type="text"
+            class="create-job-form__input"
+            placeholder="npr. Popravka bojlera"
+            [(ngModel)]="title"
+            name="title"
+            maxlength="120"
+          />
+        </div>
+
+        <div class="create-job-form__row">
+          <div class="create-job-form__field create-job-form__field--half">
+            <label for="job-date" class="create-job-form__label">Datum</label>
+            <input
+              id="job-date"
+              type="date"
+              class="create-job-form__input"
+              [min]="minDate"
+              [(ngModel)]="scheduledDate"
+              name="scheduledDate"
+            />
+          </div>
+          <div class="create-job-form__field create-job-form__field--half">
+            <span class="create-job-form__label">Adresa</span>
+            <p class="create-job-form__address">
+              {{ clientProfile()?.address || 'Adresa nije uneta u profilu.' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="create-job-form__field create-job-form__field--required">
+          <label for="job-description" class="create-job-form__label"
+            >Opis</label
+          >
+          <textarea
+            id="job-description"
+            class="create-job-form__textarea"
+            placeholder="Opis posla..."
+            [(ngModel)]="description"
+            name="description"
+            rows="3"
+            required
+          ></textarea>
+          @if (form.submitted && !description.trim()) {
+          <p class="create-job-form__error">Opis je obavezan.</p>
+          }
+        </div>
+
+        <div class="create-job-form__row">
+          <div class="create-job-form__field create-job-form__field--half">
+            <label for="job-price" class="create-job-form__label"
+              >Cena (RSD)</label
+            >
+            <input
+              id="job-price"
+              type="number"
+              class="create-job-form__input"
+              placeholder="Opciono"
+              min="0"
+              step="100"
+              [(ngModel)]="price"
+              name="price"
+            />
+          </div>
+          <div class="create-job-form__field emergency-field">
+            <input
+              type="checkbox"
+              class="create-job-form__checkbox"
+              [(ngModel)]="isEmergency"
+              name="isEmergency"
+            />
+            <span class="create-job-form__checkbox-text">Hitno</span>
+          </div>
+        </div>
+
+        @if (submitError()) {
+        <p
+          class="create-job-form__error create-job-form__error--block"
+          role="alert"
+        >
+          {{ submitError() }}
+        </p>
+        }
+
+        <div class="create-job-modal__actions">
+          <app-button
+            [buttonType]="eButtonType.NEGATIVE"
+            [label]="'Odustani'"
+            (click)="close()"
+          ></app-button>
+          <app-button
+            [buttonType]="eButtonType.POSITIVE"
+            [label]="isSubmitting() ? 'Slanje...' : 'Kreiraj'"
+            [disabled]="isSubmitting()"
+            (click)="onSubmit()"
+          ></app-button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

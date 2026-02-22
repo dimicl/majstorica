@@ -1,3 +1,5 @@
+using backend.Api.DTOs.Master;
+using backend.Api.DTOs.User;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -23,6 +25,22 @@ public class UserService : IUserService
     public async Task<User?> GetById(Guid userId)
     {
         return await _userRepository.GetById(userId);
+    }
+
+    public async Task<UserRequest?> GetProfile(Guid userId)
+    {
+        var user = await _userRepository.GetById(userId);
+        if (user == null) return null;
+        return new UserRequest
+        {
+            Id = user.Id,
+            Username = user.Username,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Role = user.Role,
+            Phone = user.Phone,
+            DeliveryAddress = user.DeliveryAddress
+        };
     }
 
     public async Task UpdateProfile(
@@ -73,11 +91,18 @@ public class UserService : IUserService
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
 
-    public async Task<List<User>> GetAllMasters()
+    public async Task<List<MasterListItemResponse>> GetMastersList()
     {
         var users = await _userRepository.GetAll();
         return users
             .Where(u => u.Role == UserRole.Master && u.IsActive)
+            .Select(u => new MasterListItemResponse
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Username = u.Username
+            })
             .ToList();
     }
 }

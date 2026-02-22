@@ -17,6 +17,9 @@ export interface UserResponse {
     firstName: string;
     lastName: string;
     role: string;
+    phone?: string | null;
+    deliveryAddress?: string | null;
+    description?: string | null;
   };
 }
 

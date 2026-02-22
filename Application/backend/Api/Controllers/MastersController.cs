@@ -20,14 +20,7 @@ public class MastersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<MasterListItemResponse>>> GetMasters()
     {
-        var masters = await _userService.GetAllMasters();
-        var result = masters.Select(u => new MasterListItemResponse
-        {
-            Id = u.Id,
-            FirstName = u.FirstName,
-            LastName = u.LastName,
-            Username = u.Username
-        }).ToList();
+        var result = await _userService.GetMastersList();
         return Ok(result);
     }
 }

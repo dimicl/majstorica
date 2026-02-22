@@ -1,14 +1,16 @@
+$layout-bg: #f6f8fc;
 
 .app-layout {
   display: flex;
   min-height: 100vh;
   position: relative;
-  background: #f5f7fa;
+  background: $layout-bg;
 }
 
 .main-content {
   flex: 1;
   margin-left: 0;
+  background: $layout-bg;
 
   .app-layout.has-navbar & {
     margin-left: 90px;

@@ -1,61 +1,121 @@
-<section class="profile-page p-y-12 p-x-18">
-  <div class="profile-shell">
+<section class="profil-page">
+  <div class="profil-shell">
+    <header class="profil-header">
+      <h1>Profil</h1>
+    </header>
+
     @if (user$ | async; as user) {
-    <div class="profile-hero card-glow">
-      <div class="profile-hero__content">
-        <p class="eyebrow">Profil</p>
-        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-        <p class="lead">
+    <div class="profil-card">
+      <div class="profil-hero">
+        <p class="profil-eyebrow">Korisnički nalog</p>
+        <h2 class="profil-name">{{ user.firstName }} {{ user.lastName }}</h2>
+        <p class="profil-username">
           Korisničko ime: <strong>{{ user.username }}</strong>
         </p>
-        <div class="profile-hero__meta">
-          <span
-            class="profile-role"
-            [class.role-client]="user.role === userRole.Client"
-            [class.role-master]="user.role === userRole.Master"
-          >
-            {{
-              user.role === userRole.Client
-                ? "Klijent"
-                : user.role === userRole.Master
-                ? "Majstor"
-                : "Admin"
-            }}
-          </span>
-        </div>
+        <span
+          class="profil-badge"
+          [class.profil-badge--client]="user.role === userRole.Client"
+          [class.profil-badge--master]="user.role === userRole.Master"
+        >
+          {{
+            user.role === userRole.Client
+              ? "Klijent"
+              : user.role === userRole.Master
+              ? "Majstor"
+              : "Admin"
+          }}
+        </span>
       </div>
     </div>
 
     @switch (user.role) { @case (userRole.Client) {
-    <ng-container *ngTemplateOutlet="clientBlock"></ng-container>
+    <div class="profil-card">
+      <div class="profil-section-head">
+        <h2 class="profil-section-title">Rezervacije</h2>
+        <p class="profil-section-desc">
+          Vaše zakazane i prošle rezervacije sa majstorima.
+        </p>
+      </div>
+      <div class="profil-empty">
+        <p>Trenutno nema aktivnih rezervacija.</p>
+        <a class="profil-cta" routerLink="/masters">Zatraži majstora</a>
+      </div>
+    </div>
     } @case (userRole.Master) {
-    <ng-container *ngTemplateOutlet="masterBlock"></ng-container>
+    <div class="profil-card">
+      <div class="profil-section-head">
+        <h2 class="profil-section-title">Zahtevi i poslovi</h2>
+        <p class="profil-section-desc">
+          Zahtevi od klijenata i vaši aktivni poslovi.
+        </p>
+      </div>
+      @if (requestError()) {
+      <p class="profil-error" role="alert">{{ requestError() }}</p>
+      } @if (loadingRequests()) {
+      <p class="profil-loading">Učitavanje zahteva...</p>
+      } @else if (requests().length === 0) {
+      <div class="profil-empty">
+        <p>Trenutno nema novih zahteva.</p>
+        <a class="profil-cta" routerLink="/masters">Pogledaj majstore</a>
+      </div>
+      } @else {
+      <div class="profil-requests-wrap">
+        <table class="profil-requests-table">
+          <thead>
+            <tr>
+              <th>Ime</th>
+              <th>Naslov posla</th>
+              <th>Datum dolaska</th>
+              <th>Cena</th>
+              <th>Hitnost</th>
+              <th>Stanje posla</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (req of requests(); track req.conversationId) {
+            <tr class="profil-request-row">
+              <td>{{ req.clientName }}</td>
+              <td class="profil-request-desc-cell">
+                {{ req.jobTitle || "—" }}
+              </td>
+              <td>{{ req.date | date : "dd.MM.yyyy." }}</td>
+              <td>{{ req.price != null ? req.price + " RSD" : "—" }}</td>
+              <td>
+                @if (req.isEmergency) {
+                <span
+                  class="profil-request-badge profil-request-badge--emergency"
+                  >Hitno</span
+                >
+                } @else {
+                <span class="profil-request-badge profil-request-badge--normal"
+                  >Obično</span
+                >
+                }
+              </td>
+              <td><span class="profil-request-status">Na čekanju</span></td>
+              <td class="profil-request-actions-cell">
+                <div class="profil-request-actions">
+                  <app-button
+                    [buttonType]="eButtonType.POSITIVE"
+                    [label]="'Prihvati'"
+                    [disabled]="actingRequestId() !== null"
+                    (onButtonClick)="acceptRequest(req)"
+                  />
+                  <app-button
+                    [buttonType]="eButtonType.NEUTRAL"
+                    [label]="'Odbij'"
+                    [disabled]="actingRequestId() !== null"
+                    (onButtonClick)="declineRequest(req)"
+                  />
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </div>
     } } }
   </div>
 </section>
-
-<ng-template #clientBlock>
-  <div class="profile-section card-glow">
-    <div class="section-heading">
-      <h2>Rezervacije</h2>
-      <p>Vaše zakazane i prošle rezervacije sa majstorima.</p>
-    </div>
-    <div class="profile-placeholder">
-      <p>Trenutno nema aktivnih rezervacija.</p>
-      <a class="profile-cta" routerLink="/services">Zatraži majstora</a>
-    </div>
-  </div>
-</ng-template>
-
-<ng-template #masterBlock>
-  <div class="profile-section card-glow">
-    <div class="section-heading">
-      <h2>Zahtevi i poslovi</h2>
-      <p>Zahtevi od klijenata i vaši aktivni poslovi.</p>
-    </div>
-    <div class="profile-placeholder">
-      <p>Trenutno nema novih zahteva.</p>
-      <a class="profile-cta" routerLink="/technicians">Pogledaj profil</a>
-    </div>
-  </div>
-</ng-template>

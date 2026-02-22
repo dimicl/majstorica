@@ -55,7 +55,7 @@
 
 .chat-title__row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
@@ -64,13 +64,6 @@
   font-weight: 900;
   color: rgba(17, 24, 39, 0.9);
   line-height: 1.1;
-}
-
-.chat-title__sub {
-  margin-top: 4px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: rgba(17, 24, 39, 0.6);
 }
 
 .chat-badges {
@@ -145,6 +138,21 @@
     rgba(245, 247, 250, 0.75);
 }
 
+.msg-date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msg-date {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.5);
+  padding: 6px 0 2px;
+  flex-shrink: 0;
+}
+
 .msg {
   display: flex;
   flex-shrink: 0; // visina samo po sadržaju, bez rastezanja
@@ -189,9 +197,27 @@
   background: rgba(255, 255, 255, 0.86);
 }
 
-.msg--system .msg-bubble {
-  background: rgba(17, 24, 39, 0.05);
-  border-color: rgba(17, 24, 39, 0.08);
+/* Sistemska poruka (npr. "X ti je poslao zahtev za posao") – po sredini, bez balona, kao na Messengeru */
+.msg--system {
+  justify-content: center;
+
+  .msg-bubble {
+    max-width: 85%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 6px 10px;
+  }
+
+  .msg-text {
+    color: rgba(17, 24, 39, 0.55);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .msg-meta {
+    display: none;
+  }
 }
 
 .msg-text {
@@ -223,14 +249,14 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
-  align-items: end;
+  align-items: center;
 }
 
 .chat-input {
   width: 100%;
   min-height: 42px;
   max-height: 120px;
-  resize: vertical;
+  resize: none;
   border-radius: 14px;
   border: 1px solid rgba(17, 24, 39, 0.12);
   background: rgba(255, 255, 255, 0.7);

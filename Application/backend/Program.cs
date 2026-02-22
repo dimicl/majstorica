@@ -119,6 +119,8 @@ builder.Services.AddScoped<IUserGraphSync, Neo4jUserGraphRepository>();
 
 // Services
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<IJobRequestRealtimeSender, backend.Api.Hubs.SignalRJobRequestSender>();
+builder.Services.AddScoped<backend.Application.Interfaces.IJobRequestNotifier, backend.Application.Services.JobRequestNotifier>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
