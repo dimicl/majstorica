@@ -1,19 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  MapComponent,
-  MapMarkerData,
-  Coordinates,
-} from '../../components/map/map.component';
+import { RouterLink } from '@angular/router';
+import { MapComponent } from '../../components/map/map.component';
+import type { Coordinates } from '../../shared/types';
+import type { MapMarkerData } from '../../shared/interfaces';
 import { firstValueFrom } from 'rxjs';
-import {
-  MasterService,
-  type MasterListItem,
-} from '../../shared/services/master.service';
+import { MasterService } from '../../shared/services/master.service';
+import { MasterListItem } from '../../shared/interfaces';
+import { TechnicianTab } from '../../shared/types';
 import { TechnicianDetailModalComponent } from './technician-detail-modal/technician-detail-modal.component';
 import { CreateJobModalComponent, type CreateJobMaster } from '../../components/create-job-modal/create-job-modal.component';
-
-type TechnicianTab = 'list' | 'map';
 
 @Component({
   selector: 'app-technicians',

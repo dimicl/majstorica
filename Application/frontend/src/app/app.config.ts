@@ -22,11 +22,12 @@ import { routes } from './app.routes';
 // Reducers
 import { authReducer } from './shared/store/auth/auth.reducer';
 import { clientReducer } from './shared/store/client/client.reducer';
-import { MasterEffects, masterReducer } from './shared/store';
+import { masterReducer } from './shared/store/master/master.reducer';
 
 // Effects
 import { AuthEffects } from './shared/store/auth/auth.effects';
 import { ClientEffects } from './shared/store/client/client.effects';
+import { MasterEffects } from './shared/store/master/master.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -45,12 +46,7 @@ export const appConfig: ApplicationConfig = {
     }),
 
     // NgRx Effects
-    provideEffects([
-      AuthEffects,
-      ClientEffects,
-      MasterEffects,
-      // Dodaj ostale effects ovde
-    ]),
+    provideEffects([AuthEffects, ClientEffects, MasterEffects]),
 
     // NgRx DevTools - samo u development modu
     provideStoreDevtools({

@@ -7,21 +7,10 @@ import {
   output,
   signal,
 } from '@angular/core';
-import type { SignalrStatus } from '../../shared/types';
+import type { SignalrStatus, ChatPresence } from '../../shared/types';
+import type { ChatMessage } from '../../shared/interfaces';
 import { ButtonComponent } from '../button/button.component';
 import { BUTTON_TYPES } from '../../shared/types';
-
-type ChatPresence = 'online' | 'offline' | 'typing';
-
-export type ChatMessage = {
-  id: string;
-  from: 'me' | 'them' | 'system';
-  text: string;
-  /** Prikaz na balonu: uvek vreme (HH:mm) */
-  time: string;
-  /** ISO datum za grupisane po danu; ako nema, poruka ide u današnji dan */
-  sentAt?: string;
-};
 
 @Component({
   selector: 'app-chat-panel',

@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { SignalrService } from '../../services/signalr.service';
 import { ChatService } from '../../services/chat.service';
 import { AuthActions } from './auth.actions';
+import { HUB_CHAT_URL } from '../../constants/api.constants';
 
 @Injectable()
 export class AuthEffects {
@@ -47,7 +48,7 @@ export class AuthEffects {
         ofType(AuthActions.loginSuccess),
         tap(() => {
           void this.signalr
-            .connect('http://localhost:5187/hubs/document', {
+            .connect(HUB_CHAT_URL, {
               accessTokenFactory: () => this.authService.getToken() ?? '',
             })
             .then(() => this.chatService.registerRealtimeHandlers());
@@ -89,7 +90,7 @@ export class AuthEffects {
         ofType(AuthActions.registerSuccess),
         tap(() => {
           void this.signalr
-            .connect('http://localhost:5187/hubs/document', {
+            .connect(HUB_CHAT_URL, {
               accessTokenFactory: () => this.authService.getToken() ?? '',
             })
             .then(() => this.chatService.registerRealtimeHandlers());

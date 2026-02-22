@@ -8,10 +8,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  MasterService,
-  type UserResponse,
-} from '../../../shared/services/master.service';
+import { MasterService } from '../../../shared/services/master.service';
+import { UserResponse } from '../../../shared/interfaces';
 import { ChatService } from '../../../shared/services/chat.service';
 import { JobService } from '../../../shared/services/job.service';
 import { ButtonComponent } from '../../../components/button/button.component';
@@ -99,7 +97,9 @@ export class TechnicianDetailComponent implements OnInit {
         this.error.set('Majstor nije pronađen.');
         this.hasRequestedThisMaster.set(false);
       } else {
-        const hasSent = await this.jobService.hasSentRequestToMaster(data.user.id);
+        const hasSent = await this.jobService.hasSentRequestToMaster(
+          data.user.id
+        );
         this.hasRequestedThisMaster.set(hasSent);
       }
     } catch {
