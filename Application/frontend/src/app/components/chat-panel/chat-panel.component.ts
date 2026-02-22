@@ -7,18 +7,10 @@ import {
   output,
   signal,
 } from '@angular/core';
-import type { SignalrStatus } from '../../shared/types';
+import type { SignalrStatus, ChatPresence } from '../../shared/types';
+import type { ChatMessage } from '../../shared/interfaces';
 import { ButtonComponent } from '../button/button.component';
 import { BUTTON_TYPES } from '../../shared/types';
-
-type ChatPresence = 'online' | 'offline' | 'typing';
-
-export type ChatMessage = {
-  id: string;
-  from: 'me' | 'them' | 'system';
-  text: string;
-  time: string;
-};
 
 @Component({
   selector: 'app-chat-panel',

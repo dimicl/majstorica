@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MasterService, type UserResponse } from '../../../shared/services/master.service';
+import { MasterService } from '../../../shared/services/master.service';
+import { UserResponse } from '../../../shared/interfaces';
 import { ChatService } from '../../../shared/services/chat.service';
 import { ButtonComponent } from '../../../components/button/button.component';
 import { BUTTON_TYPES } from '../../../shared/types';

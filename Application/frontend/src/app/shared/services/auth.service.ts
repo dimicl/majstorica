@@ -1,22 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { User } from '../models/user.model';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../interfaces';
+import { AuthResponse, LoginRequest, RegisterRequest, UserResponse } from '../interfaces';
+import { API_BASE_URL } from '../constants/api.constants';
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_ID_KEY = 'auth_user_id';
-
-export interface UserResponse {
-  user: User;
-}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:5187/api';
+  private readonly API_URL = API_BASE_URL;
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, request);

@@ -5,6 +5,7 @@ import { catchError, map, exhaustMap, of, tap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { SignalrService } from '../../services/signalr.service';
 import { AuthActions } from './auth.actions';
+import { HUB_CHAT_URL } from '../../constants/api.constants';
 
 @Injectable()
 export class AuthEffects {
@@ -44,7 +45,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(() => {
-          void this.signalr.connect('http://localhost:5187/hubs/document', {
+          void this.signalr.connect(HUB_CHAT_URL, {
             accessTokenFactory: () => this.authService.getToken() ?? '',
           });
           this.router.navigate(['/home']);
@@ -85,7 +86,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.registerSuccess),
         tap(() => {
-          void this.signalr.connect('http://localhost:5187/hubs/document', {
+          void this.signalr.connect(HUB_CHAT_URL, {
             accessTokenFactory: () => this.authService.getToken() ?? '',
           });
           this.router.navigate(['/home']);

@@ -1,48 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import type { ChatMessage } from '../../components/chat-panel/chat-panel.component';
 import { AuthService } from './auth.service';
-
-const API_URL = 'http://localhost:5187/api';
-
-export type ChatPresence = 'online' | 'offline' | 'typing';
-
-export type ChatThread = {
-  id: string;
-  jobId: string;
-  title: string;
-  subtitle: string;
-  lastMessage: string;
-  updatedAt: string;
-  unreadCount: number;
-  presence: ChatPresence;
-};
-
-interface ConversationListItemApi {
-  id: string;
-  jobId: string;
-  jobDescription: string | null;
-  otherPartyName: string;
-  otherPartyId: string;
-  lastMessageText: string | null;
-  lastMessageAt: string | null;
-  isActive: boolean;
-  /** Backend šalje camelCase (unreadCount); podrška i za PascalCase (UnreadCount) */
-  unreadCount?: number;
-  UnreadCount?: number;
-  isOnline?: boolean;
-  IsOnline?: boolean;
-}
-
-interface ChatMessageApi {
-  id: string;
-  conversationId: string;
-  jobId: string;
-  senderId: string;
-  content: string;
-  sentAt: string;
-}
+import { API_BASE_URL } from '../constants/api.constants';
+import type { ChatMessage } from '../interfaces/chat-message.interface';
+import type { ChatThread } from '../interfaces/chat-thread.interface';
+import type { ChatPresence } from '../types/chat-presence.type';
+import type { ConversationListItemApi } from '../interfaces/conversation-list-item-api.interface';
+import type { ChatMessageApi } from '../interfaces/chat-message-api.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -51,7 +16,7 @@ export class ChatService {
 
   async getThreads(): Promise<ChatThread[]> {
     const list = await firstValueFrom(
-      this.http.get<ConversationListItemApi[]>(`${API_URL}/conversations`)
+      this.http.get<ConversationListItemApi[]>(`${API_BASE_URL}/conversations`)
     );
     const emptyJobId = '00000000-0000-0000-0000-000000000000';
     return list.map((c) => ({
@@ -93,7 +58,7 @@ export class ChatService {
   async getConversation(conversationId: string): Promise<ConversationListItemApi | null> {
     try {
       return await firstValueFrom(
-        this.http.get<ConversationListItemApi>(`${API_URL}/conversations/${conversationId}`)
+        this.http.get<ConversationListItemApi>(`${API_BASE_URL}/conversations/${conversationId}`)
       );
     } catch {
       return null;
@@ -104,7 +69,7 @@ export class ChatService {
   async startConversationWithMaster(masterId: string): Promise<{ id: string }> {
     const res = await firstValueFrom(
       this.http.post<{ id: string }>(
-        `${API_URL}/conversations/with-master/${masterId}`,
+        `${API_BASE_URL}/conversations/with-master/${masterId}`,
         {}
       )
     );
@@ -115,7 +80,7 @@ export class ChatService {
     const currentUserId = this.auth.getUserIdFromStorage() ?? '';
     const list = await firstValueFrom(
       this.http.get<ChatMessageApi[]>(
-        `${API_URL}/conversations/${conversationId}/messages`
+        `${API_BASE_URL}/conversations/${conversationId}/messages`
       )
     );
     return list.map((m) => ({
@@ -129,7 +94,7 @@ export class ChatService {
   async markRead(conversationId: string): Promise<void> {
     try {
       await firstValueFrom(
-        this.http.post<void>(`${API_URL}/conversations/${conversationId}/read`, {})
+        this.http.post<void>(`${API_BASE_URL}/conversations/${conversationId}/read`, {})
       );
     } catch {
       // ignorišemo greške (npr. offline)

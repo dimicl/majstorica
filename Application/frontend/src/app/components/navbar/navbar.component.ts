@@ -21,6 +21,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 import { NavbarItem } from '../../shared/interfaces';
 import { NavbarItemUserType, NavbarItemString } from '../../shared/enums';
+import { UserRole } from '../../shared/enums/user-role.enum';
 import { NavbarHelper } from './utils/helpers';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
 import { Subject } from 'rxjs';
@@ -67,9 +68,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.getNavbarItems();
+    this.getNavbarItems(NavbarItemUserType.CLIENT);
+    this.auth.userSelector$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        const userType = user?.role === UserRole.Master
+          ? NavbarItemUserType.TECHNICIAN
+          : NavbarItemUserType.CLIENT;
+        this.getNavbarItems(userType);
+      });
     this.syncNavbarWithRoute(this.router.url);
-    // svaka promena rute
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
@@ -98,12 +106,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl(`/${item.id}`);
   }
 
-  private getNavbarItems() {
-    const filteredNavbarItems = NavbarHelper.getFilteredNavbarItems(
-      NavbarItemUserType.CLIENT /*ovde prosledjujes tip*/
-    );
-    this.menuItems = filteredNavbarItems.menuItems;
-    this.bottomItems = filteredNavbarItems.bottomItems;
+  private getNavbarItems(userType: NavbarItemUserType): void {
+    const filtered = NavbarHelper.getFilteredNavbarItems(userType);
+    this.menuItems = filtered.menuItems;
+    this.bottomItems = filtered.bottomItems;
   }
 
   private syncNavbarWithRoute(url: string): void {

@@ -1,29 +1,15 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  ChatPanelComponent,
-  type ChatMessage,
-} from '../../components/chat-panel/chat-panel.component';
-import {
-  ChatService,
-  type ChatThread,
-} from '../../shared/services/chat.service';
+import { ChatPanelComponent } from '../../components/chat-panel/chat-panel.component';
+import { ChatService } from '../../shared/services/chat.service';
+import type { ChatMessage, ChatThread } from '../../shared/interfaces';
 import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { ButtonComponent } from '../../components/button/button.component';
 import { BUTTON_TYPES, SIGNALR_STATUS } from '../../shared/types';
+import { ReceiveMessagePayload } from '../../shared/interfaces';
+import { HUB_CHAT_URL } from '../../shared/constants/api.constants';
 import { CommonModule } from '@angular/common';
-
-const HUB_URL = 'http://localhost:5187/hubs/document';
-
-interface ReceiveMessagePayload {
-  id: string;
-  conversationId: string;
-  jobId: string;
-  senderId: string;
-  content: string;
-  sentAt: string;
-}
 
 @Component({
   selector: 'app-chat',
@@ -69,7 +55,7 @@ export class ChatComponent {
     const options = token
       ? { accessTokenFactory: () => this.auth.getToken() ?? '' }
       : undefined;
-    void this.signalr.connect(HUB_URL, options);
+    void this.signalr.connect(HUB_CHAT_URL, options);
     this.destroyRef.onDestroy(() => {
       void this.signalr.disconnect();
     });

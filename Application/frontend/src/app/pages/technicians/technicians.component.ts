@@ -1,11 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MapComponent, MapMarkerData, Coordinates } from '../../components/map/map.component';
+import { MapComponent } from '../../components/map/map.component';
+import type { Coordinates } from '../../shared/types';
+import type { MapMarkerData } from '../../shared/interfaces';
 import { firstValueFrom } from 'rxjs';
-import { MasterService, type MasterListItem } from '../../shared/services/master.service';
-
-type TechnicianTab = 'list' | 'map';
+import { MasterService } from '../../shared/services/master.service';
+import { MasterListItem } from '../../shared/interfaces';
+import { TechnicianTab } from '../../shared/types';
 
 @Component({
   selector: 'app-technicians',

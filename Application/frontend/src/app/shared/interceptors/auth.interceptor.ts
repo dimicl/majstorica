@@ -7,15 +7,14 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-
-const API_BASE = 'http://localhost:5187/api';
+import { API_BASE_URL } from '../constants/api.constants';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   const token = authService.getToken();
 
-  const isApiRequest = req.url.startsWith(API_BASE);
+  const isApiRequest = req.url.startsWith(API_BASE_URL);
   if (isApiRequest && token) {
     req = req.clone({
       setHeaders: { Authorization: `Bearer ${token}` },

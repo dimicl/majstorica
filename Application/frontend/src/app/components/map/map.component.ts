@@ -1,14 +1,8 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
-
-export type Coordinates = { lat: number; lng: number };
-
-export interface MapMarkerData {
-  position: Coordinates;
-  title?: string;
-  color?: string;
-}
+import type { Coordinates } from '../../shared/types';
+import type { MapMarkerData } from '../../shared/interfaces';
 
 @Component({
   selector: 'app-map',

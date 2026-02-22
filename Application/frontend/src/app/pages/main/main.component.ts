@@ -6,7 +6,7 @@ import { take } from 'rxjs/operators';
 import { ButtonComponent } from '../../components/button/button.component';
 import { BUTTON_TYPES } from '../../shared/types';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
-import { ServiceCardModel } from '../../shared/interfaces';
+import { SERVICE_CATEGORIES } from '../../shared/constants/service-categories.constants';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
 import { ClientActions } from '../../shared/store/client/client.actions';
 import { MasterActions } from '../../shared/store/master/master.actions';
@@ -43,44 +43,7 @@ export class MainComponent implements OnInit {
       });
   }
 
-  categories: ServiceCardModel[] = [
-    {
-      id: 1,
-      icon: '⚡',
-      title: 'Električar',
-      description: 'Ugradnja, popravke, kratki spojevi, rasveta.'
-    },
-    {
-      id: 2,
-      icon: '🚰',
-      title: 'Vodoinstalater',
-      description: 'Curanje, sifoni, ventili, sanitarije.'
-    },
-    {
-      id: 3,
-      icon: '🧱',
-      title: 'Keramičar',
-      description: 'Kupatila, kuhinje, fugovanje i nivelacija.'
-    },
-    {
-      id: 4,
-      icon: '🛠️',
-      title: 'Majstor za sve',
-      description: 'Montaže, sitne popravke, “po kući”.'
-    },
-    {
-      id: 5,
-      icon: '🎨',
-      title: 'Moler',
-      description: 'Krečenje, gletovanje, priprema zidova.'
-    },
-    {
-      id: 6,
-      icon: '🪚',
-      title: 'Stolar',
-      description: 'Nameštaj po meri, popravke, vrata.'
-    }
-  ];
+  categories = SERVICE_CATEGORIES;
 
   public onButtonClick(event: MouseEvent): void {
     console.log('Button clicked', event);
