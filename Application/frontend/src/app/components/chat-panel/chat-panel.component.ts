@@ -10,17 +10,20 @@ import {
 import type { SignalrStatus, ChatPresence } from '../../shared/types';
 import type { ChatMessage } from '../../shared/interfaces';
 import { ButtonComponent } from '../button/button.component';
+import { AvatarComponent } from '../avatar/avatar.component';
 import { BUTTON_TYPES } from '../../shared/types';
 
 @Component({
   selector: 'app-chat-panel',
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',
-  imports: [ButtonComponent],
+  imports: [ButtonComponent, AvatarComponent],
 })
 export class ChatPanelComponent {
   eButtonType = BUTTON_TYPES;
   title = input<string>('Chat sa majstorom');
+  firstName = input<string>('');
+  lastName = input<string>('');
 
   // Ako želiš da vežeš na SignalR status iz parent-a:
   signalrStatus = input<SignalrStatus | null>(null);

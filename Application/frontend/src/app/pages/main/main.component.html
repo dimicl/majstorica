@@ -67,16 +67,14 @@
           Rezervacije i poslovi
           <span class="btn-icon" aria-hidden="true">↗</span>
         </a>
-        } @else if (user.role === userRole.Client) {
-        <a class="btn btn-primary btn-large" routerLink="/masters">
-          Zatraži majstora
-          <span class="btn-icon" aria-hidden="true">↗</span>
-        </a>
         } @else {
-        <a class="btn btn-primary btn-large" routerLink="/masters">
-          Zatraži majstora
-          <span class="btn-icon" aria-hidden="true">↗</span>
-        </a>
+        <app-button
+          [buttonType]="eButtonType.POSITIVE"
+          [label]="'Zatraži majstora'"
+          [hasIcon]="false"
+          [disabled]="false"
+          (onButtonClick)="onButtonClick($event)"
+        ></app-button>
         }
       </div>
       } @else {

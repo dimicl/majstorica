@@ -26,7 +26,8 @@
       </div>
     </header>
 
-    <div *ngIf="isListActive" class="technicians-list-mode">
+    @if (isListActive) {
+    <div class="technicians-list-mode">
       <label class="technicians-search">
         <input
           type="search"
@@ -41,13 +42,19 @@
       <div class="technicians-error" role="alert">{{ loadError }}</div>
       } @else {
       <div class="technician-grid custom-scrollbar">
-        <button
+        <div
           *ngFor="let technician of filteredTechnicians"
           type="button"
           class="technician-card card-hover"
           (click)="openDetail(technician.id)"
         >
           <header>
+            <app-avatar
+              [firstName]="technician.firstName"
+              [lastName]="technician.lastName"
+              [width]="56"
+              [height]="56"
+            />
             <div>
               <h3>{{ fullName(technician) }}</h3>
               <p class="technician-card__location">
@@ -55,17 +62,17 @@
               </p>
             </div>
           </header>
-          <p class="technician-card__meta">Majstor</p>
           <span class="technician-card__link">Pogledaj profil →</span>
-        </button>
+        </div>
         <p class="empty-state" *ngIf="!filteredTechnicians.length">
           Nema majstora za odabranu pretragu.
         </p>
       </div>
       }
     </div>
+    } @else{
 
-    <div *ngIf="!isListActive" class="technicians-map-mode">
+    <div class="technicians-map-mode">
       <app-map
         class="technicians-map__leaflet"
         [markers]="mapMarkers"
@@ -83,6 +90,10 @@
             class="technician-card"
             (click)="openDetail(technician.id)"
           >
+            <app-avatar
+              [firstName]="technician.firstName"
+              [lastName]="technician.lastName"
+            />
             <div>
               <h3>{{ fullName(technician) }}</h3>
               <p>{{ atUsername(technician) }}</p>
@@ -91,6 +102,7 @@
         </div>
       </aside>
     </div>
+    }
   </div>
 
   @if (selectedMasterIdForDetail) {
@@ -99,9 +111,7 @@
     (closed)="closeDetail()"
     (openCreateJob)="onOpenCreateJob($event)"
   />
-  }
-
-  @if (showCreateJobModal && createJobMaster) {
+  } @if (showCreateJobModal && createJobMaster) {
   <app-create-job-modal
     [master]="createJobMaster"
     (closed)="closeCreateJobModal()"

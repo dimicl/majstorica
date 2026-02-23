@@ -11,22 +11,18 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import {
-  MasterService,
-  type UserResponse,
-} from '../../../shared/services/master.service';
+import { MasterService } from '../../../shared/services/master.service';
 import { ChatService } from '../../../shared/services/chat.service';
 import { JobService } from '../../../shared/services/job.service';
 import { ButtonComponent } from '../../../components/button/button.component';
 import { type CreateJobMaster } from '../../../components/create-job-modal/create-job-modal.component';
 import { BUTTON_TYPES } from '../../../shared/types';
+import { UserResponse } from '../../../shared/interfaces';
+import { AvatarComponent } from '../../../components/avatar/avatar.component';
 
 @Component({
   selector: 'app-technician-detail-modal',
-  imports: [
-    CommonModule,
-    ButtonComponent,
-  ],
+  imports: [CommonModule, ButtonComponent, AvatarComponent],
   templateUrl: './technician-detail-modal.component.html',
   styleUrl: './technician-detail-modal.component.scss',
 })
@@ -99,7 +95,9 @@ export class TechnicianDetailModalComponent {
         this.error.set('Majstor nije pronađen.');
         this.hasRequestedThisMaster.set(false);
       } else {
-        const hasSent = await this.jobService.hasSentRequestToMaster(data.user.id);
+        const hasSent = await this.jobService.hasSentRequestToMaster(
+          data.user.id
+        );
         this.hasRequestedThisMaster.set(hasSent);
       }
     } catch {

@@ -9,7 +9,7 @@
   overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  height: 70vh;
+  height: 100%;
 
   // Scrollbar styling (WebKit) for internal scroll areas
   ::-webkit-scrollbar {
@@ -41,16 +41,14 @@
   );
 }
 
-.chat-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(62, 125, 215, 0.35),
-    rgba(155, 81, 224, 0.25)
-  );
-  border: 1px solid rgba(17, 24, 39, 0.08);
+.chat-header app-avatar {
+  display: block;
+
+  ::ng-deep .avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
 }
 
 .chat-title__row {

@@ -1,0 +1,10 @@
+<div
+  class="avatar"
+  [class.avatar--placeholder]="showPlaceholder()"
+  [style.width.px]="width"
+  [style.height.px]="height"
+>
+  @if (!showPlaceholder()) {
+    {{ initials() }}
+  }
+</div>

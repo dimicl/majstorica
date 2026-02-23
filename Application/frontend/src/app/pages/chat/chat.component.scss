@@ -2,16 +2,14 @@
 
 .chat-page {
   position: relative;
-  padding: 26px 32px 58px;
+  padding: 26px 32px 15px;
   background: #f6f8fc;
-  min-height: calc(100vh - 64px);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 .chat-inner {
-  max-width: 1120px;
-  margin: 0 auto;
   width: 100%;
   flex: 1;
   min-height: 0; // da grid/flex deca mogu da skroluju umesto da raste stranica
@@ -77,7 +75,6 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(17, 24, 39, 0.1);
-  box-shadow: 0 18px 50px rgba(17, 24, 39, 0.08);
   padding: 16px 16px 14px;
   backdrop-filter: blur(10px);
 }
@@ -168,16 +165,12 @@
   }
 }
 
-.thread-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(62, 125, 215, 0.35),
-    rgba(155, 81, 224, 0.25)
-  );
-  border: 1px solid rgba(17, 24, 39, 0.08);
+.thread .thread-avatar {
+  ::ng-deep .avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
 }
 
 .thread-row {

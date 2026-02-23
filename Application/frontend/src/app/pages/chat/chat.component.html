@@ -40,7 +40,14 @@
               (click)="selectThread(t.id)"
               [class.active]="selectedThreadId() === t.id"
             >
-              <div class="thread-avatar" aria-hidden="true"></div>
+              <app-avatar
+                [width]="44"
+                [height]="44"
+                [firstName]="threadInitials(t.title).firstName"
+                [lastName]="threadInitials(t.title).lastName"
+                class="thread-avatar"
+                aria-hidden="true"
+              />
 
               <div class="thread-main">
                 <div class="thread-row">
@@ -92,6 +99,8 @@
         <app-chat-panel
           [presence]="selectedThread()!.presence"
           [title]="selectedThread()!.title"
+          [firstName]="threadInitials(selectedThread()!.title).firstName"
+          [lastName]="threadInitials(selectedThread()!.title).lastName"
           [messages]="selectedMessages()"
           (send)="onSendMessage($event)"
         />

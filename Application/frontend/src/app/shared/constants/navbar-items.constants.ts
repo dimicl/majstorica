@@ -37,7 +37,7 @@ export const NAVBAR_ITEMS: NavbarItem[] = [
   },
   {
     id: NavbarItemString.REQUESTS,
-    icon: '',
+    icon: SharedSvgRoutes.REQUESTS_ICON,
     label: NavbarItemString.REQUESTS_LABEL,
     userType: NavbarItemUserType.MASTER,
     isBottomPinned: false,

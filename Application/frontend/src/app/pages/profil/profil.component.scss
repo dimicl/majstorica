@@ -10,10 +10,7 @@
 
 .profil-shell {
   width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
   display: flex;
-  flex-direction: column;
   gap: 24px;
 }
 
@@ -27,23 +24,14 @@
 // —— Kartice (isti jezik kao chat/technicians) ——
 .profil-card {
   background: #fff;
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid rgba(17, 24, 39, 0.08);
-  box-shadow: 0 4px 20px rgba(17, 24, 39, 0.06);
   padding: 28px 32px;
+  flex: 1;
 }
 
 .profil-hero {
   padding: 0;
-}
-
-.profil-eyebrow {
-  margin: 0 0 8px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(17, 24, 39, 0.5);
 }
 
 .profil-name {
@@ -147,13 +135,6 @@
   color: rgba(17, 24, 39, 0.6);
 }
 
-.profil-requests-wrap {
-  overflow-x: auto;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 14px;
-  background: #fafbfc;
-}
-
 .profil-requests-table {
   width: 100%;
   min-width: 860px;
@@ -173,15 +154,6 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(17, 24, 39, 0.6);
-}
-
-.profil-request-row {
-  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
-  transition: background 0.15s ease;
-}
-
-.profil-request-row:last-child {
-  border-bottom: none;
 }
 
 .profil-request-row:hover {

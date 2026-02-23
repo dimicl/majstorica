@@ -6,6 +6,7 @@ import type { ChatMessage, ChatThread } from '../../shared/interfaces';
 import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { ButtonComponent } from '../../components/button/button.component';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { BUTTON_TYPES, SIGNALR_STATUS } from '../../shared/types';
 import { ReceiveMessagePayload } from '../../shared/interfaces';
 import { HUB_CHAT_URL } from '../../shared/constants/api.constants';
@@ -13,7 +14,13 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-chat',
-  imports: [RouterLink, ChatPanelComponent, ButtonComponent, CommonModule],
+  imports: [
+    RouterLink,
+    ChatPanelComponent,
+    ButtonComponent,
+    AvatarComponent,
+    CommonModule,
+  ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })
@@ -263,6 +270,15 @@ export class ChatComponent {
     } finally {
       this.isLoadingMessages.set(false);
     }
+  }
+
+  /** Iz naslova razgovora (npr. "Marko Marković") uzmi prvu i drugu reč za inicijale avatara. */
+  threadInitials(title: string): { firstName: string; lastName: string } {
+    const parts = (title ?? '').trim().split(/\s+/);
+    return {
+      firstName: parts[0] ?? '',
+      lastName: parts[1] ?? '',
+    };
   }
 
   async onSendMessage(text: string): Promise<void> {

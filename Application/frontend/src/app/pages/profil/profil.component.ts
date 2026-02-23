@@ -1,6 +1,6 @@
 import { AsyncPipe, DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, inject, OnInit, OnDestroy, NgZone } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
 import { UserRole } from '../../shared/enums/user-role.enum';
 import {
@@ -29,9 +29,10 @@ export class ProfilComponent implements OnInit, OnDestroy {
   private signalr = inject(SignalrService);
   private authService = inject(AuthService);
   private ngZone = inject(NgZone);
+  private router = inject(Router);
 
   user$ = this.auth.userSelector$;
-  readonly userRole = UserRole;
+  public userRole = UserRole;
   public eButtonType = BUTTON_TYPES;
 
   /** Zahtevi za majstora (samo kada je uloga Master). */
@@ -150,5 +151,9 @@ export class ProfilComponent implements OnInit, OnDestroy {
     } finally {
       this.actingRequestId.set(null);
     }
+  }
+
+  navigateToMasters(): void {
+    this.router.navigate(['/masters']);
   }
 }

@@ -1,0 +1,181 @@
+<section class="requests-page">
+  <header class="requests-header">
+    <h1 class="requests-title">Zahtevi</h1>
+    <p class="requests-subtitle">Pregled zahteva po datumu i brza analitika.</p>
+  </header>
+
+  @if (requestError()) {
+  <div class="requests-error" role="alert">
+    {{ requestError() }}
+  </div>
+  }
+
+  <div class="requests-layout">
+    <main class="requests-main">
+      <div class="calendar-card">
+        <div class="calendar-nav">
+          <button
+            type="button"
+            class="calendar-nav-btn"
+            (click)="prevMonth()"
+            aria-label="Prethodni mesec"
+          >
+            ‹
+          </button>
+          <h2 class="calendar-month-label">{{ monthLabel() }}</h2>
+          <button
+            type="button"
+            class="calendar-nav-btn"
+            (click)="nextMonth()"
+            aria-label="Sledeći mesec"
+          >
+            ›
+          </button>
+        </div>
+
+        <div class="calendar-weekdays">
+          @for (w of weekdays; track w) {
+          <span class="calendar-weekday">{{ w }}</span>
+          }
+        </div>
+
+        <div class="calendar-grid">
+          @for (day of calendarDays(); track day.dayKey + day.date.getTime()) {
+          <button
+            type="button"
+            class="calendar-day"
+            [class.calendar-day--other-month]="!day.isCurrentMonth"
+            [class.calendar-day--today]="day.isToday"
+            [class.calendar-day--occupied]="day.count > 0"
+            [class.calendar-day--selected]="selectedDate() === day.dayKey"
+            (click)="selectDay(day)"
+          >
+            <span class="calendar-day-num">{{ day.day }}</span>
+            @if (day.count > 0 && day.isCurrentMonth) {
+            <span class="calendar-day-flag">
+              <span class="calendar-day-badge">{{ day.count }}</span>
+            </span>
+            }
+          </button>
+          }
+        </div>
+
+        @if (selectedDate()) {
+        <button
+          type="button"
+          class="calendar-clear-btn"
+          (click)="clearSelection()"
+        >
+          Prikaži sve zahteve
+        </button>
+        }
+      </div>
+
+      <div class="requests-list-card">
+        <h2 class="requests-list-title">
+          @if (selectedDate(); as sel) { Zahtevi za
+          {{ sel | date : "dd.MM.yyyy." }}
+          } @else { Svi zahtevi }
+        </h2>
+        @if (loadingRequests()) {
+        <p class="requests-loading">Učitavanje...</p>
+        } @else if (selectedDayRequests().length === 0) {
+        <div class="requests-empty">
+          <p>Nema zahteva za prikaz.</p>
+        </div>
+        } @else {
+        <ul class="requests-list">
+          @for (req of selectedDayRequests(); track req.conversationId) {
+          <li class="request-item">
+            <div class="request-item-main">
+              <span class="request-item-client">{{ req.clientName }}</span>
+              <span class="request-item-title">{{ req.jobTitle || "—" }}</span>
+              <div class="request-item-meta">
+                <span class="request-item-date">{{
+                  req.date | date : "dd.MM.yyyy."
+                }}</span>
+                @if (req.price != null) {
+                <span class="request-item-price">{{ req.price }} RSD</span>
+                } @if (req.isEmergency) {
+                <span class="request-item-badge request-item-badge--emergency"
+                  >Hitno</span
+                >
+                } @else {
+                <span class="request-item-badge request-item-badge--normal"
+                  >Obično</span
+                >
+                }
+              </div>
+            </div>
+            <div class="request-item-actions">
+              <app-button
+                [buttonType]="eButtonType.POSITIVE"
+                [label]="'Prihvati'"
+                [disabled]="actingRequestId() !== null"
+                (onButtonClick)="acceptRequest(req)"
+              />
+              <app-button
+                [buttonType]="eButtonType.NEUTRAL"
+                [label]="'Odbij'"
+                [disabled]="actingRequestId() !== null"
+                (onButtonClick)="declineRequest(req)"
+              />
+              <button
+                type="button"
+                class="request-item-chat-btn"
+                (click)="openChat(req.conversationId)"
+              >
+                Poruka
+              </button>
+            </div>
+          </li>
+          }
+        </ul>
+        }
+      </div>
+    </main>
+
+    <aside class="requests-sidebar">
+      <div class="sidebar-card sidebar-stats">
+        <h3 class="sidebar-title">Pregled</h3>
+        <div class="stat-row">
+          <span class="stat-label">Ukupno na čekanju</span>
+          <span class="stat-value stat-value--primary">{{
+            stats().total
+          }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Ovaj mesec</span>
+          <span class="stat-value">{{ stats().thisMonth }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Hitni</span>
+          <span class="stat-value stat-value--emergency">{{
+            stats().emergency
+          }}</span>
+        </div>
+      </div>
+
+      <div class="sidebar-card sidebar-chart">
+        <h3 class="sidebar-title">Zahtevi po danu (7 dana)</h3>
+        <div class="chart-bars">
+          @for (bar of chartData(); track bar.dayKey) {
+          <div class="chart-bar-wrap">
+            <span class="chart-value" [style.--value]="bar.value" [class.chart-value--zero]="bar.value === 0">{{
+              bar.value
+            }}</span>
+            <div class="chart-bar-outer">
+              <div
+                class="chart-bar"
+                [style.--bar-value]="bar.value"
+                [attr.aria-label]="bar.label + ': ' + bar.value"
+              ></div>
+            </div>
+            <span class="chart-label">{{ bar.label }}</span>
+          </div>
+          }
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>

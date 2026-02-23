@@ -46,8 +46,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   public bottomItems: NavbarItem[] = [];
   public activeNavbarItem: string = NavbarItemString.HOME;
 
-  private currentUrl = '';
-
   isNewMessages = input<boolean>(false);
   private readonly destroy$ = new Subject<void>();
 
