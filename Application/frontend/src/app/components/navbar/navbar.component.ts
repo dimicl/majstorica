@@ -10,13 +10,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  NavigationEnd,
-  Router,
-  RouterLink,
-  RouterLinkActive,
-} from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 import { NavbarItem } from '../../shared/interfaces';
@@ -31,7 +25,7 @@ import { filter, takeUntil } from 'rxjs/operators';
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
-  imports: [RouterLink, RouterLinkActive, CommonModule, SvgIconComponent],
+  imports: [CommonModule, SvgIconComponent],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   // SVG Icons
@@ -102,7 +96,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('item', item);
     this.isExpanded.set(true);
     this.router.navigateByUrl(`/${item.id}`);
   }

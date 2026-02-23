@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, inject, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
@@ -19,7 +19,7 @@ const HUB_URL = 'http://localhost:5187/hubs/document';
 
 @Component({
   selector: 'app-profil',
-  imports: [AsyncPipe, DatePipe, NgTemplateOutlet, RouterLink, ButtonComponent],
+  imports: [AsyncPipe, DatePipe, RouterLink, ButtonComponent],
   templateUrl: './profil.component.html',
   styleUrl: './profil.component.scss',
 })

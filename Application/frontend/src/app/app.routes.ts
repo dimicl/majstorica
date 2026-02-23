@@ -14,6 +14,10 @@ export const routes: Routes = [
     component: AuthComponent,
   },
   {
+    path: 'register',
+    component: AuthComponent,
+  },
+  {
     path: 'home',
     component: MainComponent,
     resolve: { _: profileLoadUserResolver },
