@@ -10,6 +10,7 @@ import { MasterListItem } from '../../shared/interfaces';
 import { TechnicianTab } from '../../shared/types';
 import { TechnicianDetailModalComponent } from './technician-detail-modal/technician-detail-modal.component';
 import { CreateJobModalComponent, type CreateJobMaster } from '../../components/create-job-modal/create-job-modal.component';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
 
 @Component({
   selector: 'app-technicians',
@@ -18,6 +19,7 @@ import { CreateJobModalComponent, type CreateJobMaster } from '../../components/
     MapComponent,
     TechnicianDetailModalComponent,
     CreateJobModalComponent,
+    AvatarComponent,
   ],
   templateUrl: './technicians.component.html',
   styleUrl: './technicians.component.scss',

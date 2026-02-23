@@ -1,0 +1,433 @@
+@use "../../../assets/scss/variables" as *;
+$t: 17, 24, 39;
+$b: 62, 125, 215;
+$p: 124, 58, 237;
+.requests-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f6f8fc 0%, #f8fafd 50%, #f5f7fc 100%);
+  padding: 28px 32px 48px;
+  .requests-header {
+    margin-bottom: 28px;
+  }
+  .requests-title {
+    margin: 0 0 6px;
+    font-size: clamp(1.85rem, 3.2vw, 2.5rem);
+    font-weight: 900;
+    color: rgba($t..., 0.95);
+    letter-spacing: -0.02em;
+  }
+  .requests-subtitle {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba($t..., 0.6);
+  }
+  .requests-error {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background: rgba(255, 107, 107, 0.12);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: #c92a2a;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .requests-layout {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+  }
+  .requests-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .requests-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .calendar-card {
+    background: #ffffff6c;
+    border-radius: 3px;
+    padding: 24px 28px 20px;
+    border: 5px solid #fff;
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      gap: 16px;
+    }
+    .calendar-nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba($t..., 0.12);
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: rgba(37, 46, 67, 0.75);
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.3s ease;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &:hover {
+        background: rgba(138, 138, 138, 0.08);
+        color: #2f2f2f;
+      }
+    }
+    .calendar-month-label {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: rgba($t..., 0.9);
+      letter-spacing: -0.01em;
+    }
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .calendar-weekday {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: rgba($t..., 0.5);
+      padding: 6px 0;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .calendar-day {
+      max-height: 56px;
+      border-radius: 2px;
+      background: rgba($t..., 0.04);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, border-color 0.2s ease,
+        transform 0.15s ease;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba($t..., 0.85);
+      position: relative;
+      width: 64px;
+      height: 64px;
+      margin: auto;
+      padding: 8px;
+      border: none;
+      &:hover {
+        background: $color-blue;
+        outline-color: $color-blue;
+        transform: scale(1.03);
+        color: $color-white;
+      }
+      &--other-month {
+        color: rgba($t..., 0.35);
+        background: transparent;
+      }
+      &--other-month:hover {
+        background: rgba($t..., 0.04);
+      }
+      &--today {
+        border-color: rgba($b..., 0.4);
+        background: rgba($b..., 0.08);
+      }
+      &--occupied {
+        background: linear-gradient(
+          135deg,
+          rgba($b..., 0.15) 0%,
+          rgba($p..., 0.12) 100%
+        );
+        color: rgba($t..., 0.95);
+      }
+      &--occupied:hover {
+        background: linear-gradient(
+          135deg,
+          rgba($b..., 0.22) 0%,
+          rgba($p..., 0.18) 100%
+        );
+        border-color: rgba($b..., 0.4);
+      }
+      &--selected {
+        border-color: $color-blue;
+        background: linear-gradient(
+          135deg,
+          rgba($b..., 0.2) 0%,
+          rgba($p..., 0.15) 100%
+        );
+      }
+    }
+    .calendar-day-num {
+      display: block;
+      line-height: 1;
+      text-align: center;
+    }
+    .calendar-day-flag {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+    }
+    .calendar-day-badge {
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: $color-blue;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      box-shadow: 0 2px 8px rgba($b..., 0.4);
+    }
+    .calendar-clear-btn {
+      margin-top: 16px;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 10px;
+      background: rgba($t..., 0.06);
+      color: rgba($t..., 0.7);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+      &:hover {
+        background: rgba($t..., 0.1);
+        color: rgba($t..., 0.9);
+      }
+    }
+  }
+  .requests-list-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid rgba($t..., 0.08);
+    box-shadow: 0 4px 24px rgba($t..., 0.06);
+    padding: 24px 28px;
+    .requests-list-title {
+      margin: 0 0 18px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: rgba($t..., 0.9);
+    }
+    .requests-loading,
+    .requests-empty p {
+      margin: 0;
+      color: rgba($t..., 0.55);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .requests-empty {
+      padding: 24px 0;
+    }
+    .requests-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .request-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba($t..., 0.08);
+      background: rgba($t..., 0.02);
+      transition: background 0.2s ease, border-color 0.2s ease;
+      flex-wrap: wrap;
+      &:hover {
+        background: rgba($b..., 0.04);
+        border-color: rgba($b..., 0.12);
+      }
+      .request-item-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .request-item-client {
+        display: block;
+        font-weight: 800;
+        font-size: 1rem;
+        color: rgba($t..., 0.9);
+        margin-bottom: 4px;
+      }
+      .request-item-title {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba($t..., 0.7);
+        margin-bottom: 8px;
+      }
+      .request-item-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: rgba($t..., 0.55);
+      }
+      .request-item-price {
+        color: $color-blue;
+        font-weight: 800;
+      }
+      .request-item-badge {
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        &--emergency {
+          background: rgba(255, 107, 107, 0.15);
+          color: #c92a2a;
+          border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        &--normal {
+          background: rgba($t..., 0.08);
+          color: rgba($t..., 0.65);
+        }
+      }
+      .request-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .request-item-chat-btn {
+        padding: 8px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba($b..., 0.35);
+        background: rgba($b..., 0.08);
+        color: $color-blue;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+        &:hover {
+          background: rgba($b..., 0.15);
+          border-color: rgba($b..., 0.5);
+        }
+      }
+    }
+  }
+  .sidebar-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid rgba($t..., 0.08);
+    box-shadow: 0 4px 20px rgba($t..., 0.05);
+    padding: 20px 22px;
+    .sidebar-title {
+      margin: 0 0 16px;
+      font-size: 1rem;
+      font-weight: 900;
+      color: rgba($t..., 0.9);
+    }
+    &.sidebar-stats .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba($t..., 0.06);
+      font-size: 0.9rem;
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+    .stat-label {
+      font-weight: 600;
+      color: rgba($t..., 0.6);
+    }
+    .stat-value {
+      font-weight: 700;
+      font-size: 1rem;
+      color: rgba($t..., 0.9);
+      &--primary {
+        color: $color-blue;
+      }
+      &--emergency {
+        color: #c92a2a;
+      }
+    }
+  }
+  .sidebar-chart {
+    min-height: 180px;
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 6px;
+      height: 140px;
+      padding: 0 4px;
+    }
+    .chart-bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+      justify-content: flex-end;
+    }
+    .chart-value {
+      font-size: 0.8rem;
+      font-weight: 900;
+      color: rgba($t..., 0.85);
+      flex-shrink: 0;
+      &.chart-value--zero {
+        color: rgba($t..., 0.45);
+      }
+    }
+    .chart-bar-outer {
+      width: 100%;
+      height: 90px;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .chart-bar {
+      --bar-value: 0;
+      width: 100%;
+      height: calc(var(--bar-value) * 5px);
+      min-height: 0;
+      max-height: 90px;
+      border-radius: 8px 8px 0 0;
+      background: linear-gradient(
+        180deg,
+        rgba($b..., 0.9) 0%,
+        rgba($p..., 0.75) 100%
+      );
+      transition: height 0.3s ease;
+      box-shadow: 0 -2px 10px rgba($b..., 0.25);
+    }
+    .chart-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: rgba($t..., 0.5);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+  }
+}

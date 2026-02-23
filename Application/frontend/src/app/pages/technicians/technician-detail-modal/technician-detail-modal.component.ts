@@ -12,16 +12,17 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MasterService } from '../../../shared/services/master.service';
-import type { UserResponse } from '../../../shared/interfaces';
 import { ChatService } from '../../../shared/services/chat.service';
 import { JobService } from '../../../shared/services/job.service';
 import { ButtonComponent } from '../../../components/button/button.component';
 import { type CreateJobMaster } from '../../../components/create-job-modal/create-job-modal.component';
 import { BUTTON_TYPES } from '../../../shared/types';
+import { UserResponse } from '../../../shared/interfaces';
+import { AvatarComponent } from '../../../components/avatar/avatar.component';
 
 @Component({
   selector: 'app-technician-detail-modal',
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, AvatarComponent],
   templateUrl: './technician-detail-modal.component.html',
   styleUrl: './technician-detail-modal.component.scss',
 })

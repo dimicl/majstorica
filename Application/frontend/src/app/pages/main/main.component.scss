@@ -31,34 +31,17 @@
   }
 }
 
-// -----------------------------------------------------------------------------
-// Topbar
-// -----------------------------------------------------------------------------
-.topbar {
-  max-width: 1120px;
-  margin: 0 auto;
-  gap: 16px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-
-    .brand-text {
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      font-size: 36px;
-      line-height: 36px;
-      color: #1f2937;
-    }
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 10px;
+    flex-shrink: 0;
   }
 
   .topbar-actions {

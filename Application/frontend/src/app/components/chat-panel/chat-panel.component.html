@@ -1,6 +1,12 @@
 <section class="chat-card" aria-label="Chat">
   <header class="chat-header">
-    <div class="chat-avatar" aria-hidden="true"></div>
+    <app-avatar
+      [firstName]="firstName()"
+      [lastName]="lastName()"
+      [width]="44"
+      [height]="44"
+      aria-hidden="true"
+    />
 
     <div class="chat-title">
       <div class="chat-title__row">

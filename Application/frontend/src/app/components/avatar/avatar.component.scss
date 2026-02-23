@@ -1,0 +1,49 @@
+// Iste proporcije kao avatar-placeholder iz referentnog avatara:
+// .lg: head 46px, body 100px, body-top 50px na 74×82px → head ≈56%, body ≈122%, body-top ≈61%
+.avatar {
+  min-width: 36px;
+  min-height: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #6c6c6c;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+
+  // Unisex placeholder (::before + ::after) samo kad nema inicijala
+  &--placeholder {
+    &::before {
+      content: "";
+      position: absolute;
+      width: 56%;
+      height: 56%;
+      border-radius: 50%;
+      opacity: 40%;
+      background-color: #6c6c6c;
+      top: 5;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      width: 122%;
+      height: 122%;
+      border-radius: 50%;
+      opacity: 40%;
+      background-color: #6c6c6c;
+      top: 61%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 0;
+      outline: 0;
+    }
+  }
+}

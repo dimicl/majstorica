@@ -1,13 +1,11 @@
 <section class="profil-page">
+  <header class="profil-header">
+    <h1>Profil</h1>
+  </header>
   <div class="profil-shell">
-    <header class="profil-header">
-      <h1>Profil</h1>
-    </header>
-
     @if (user$ | async; as user) {
     <div class="profil-card">
       <div class="profil-hero">
-        <p class="profil-eyebrow">Korisnički nalog</p>
         <h2 class="profil-name">{{ user.firstName }} {{ user.lastName }}</h2>
         <p class="profil-username">
           Korisničko ime: <strong>{{ user.username }}</strong>
@@ -38,7 +36,11 @@
       </div>
       <div class="profil-empty">
         <p>Trenutno nema aktivnih rezervacija.</p>
-        <a class="profil-cta" routerLink="/masters">Zatraži majstora</a>
+        <app-button
+          [buttonType]="eButtonType.POSITIVE"
+          [label]="'Pogledaj majstore'"
+          (onButtonClick)="navigateToMasters()"
+        />
       </div>
     </div>
     } @case (userRole.Master) {
@@ -56,19 +58,18 @@
       } @else if (requests().length === 0) {
       <div class="profil-empty">
         <p>Trenutno nema novih zahteva.</p>
-        <a class="profil-cta" routerLink="/masters">Pogledaj majstore</a>
       </div>
       } @else {
-      <div class="profil-requests-wrap">
+      <div>
         <table class="profil-requests-table">
           <thead>
             <tr>
               <th>Ime</th>
-              <th>Naslov posla</th>
-              <th>Datum dolaska</th>
+              <th>Naslov</th>
+              <th>Datum</th>
               <th>Cena</th>
               <th>Hitnost</th>
-              <th>Stanje posla</th>
+              <th>Stanje</th>
             </tr>
           </thead>
           <tbody>

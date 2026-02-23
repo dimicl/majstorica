@@ -20,7 +20,9 @@
       } @else { @if (master(); as m) {
       <article class="profile__card">
         <header class="profile__header">
-          <div class="profile__avatar" aria-hidden="true"></div>
+          <div class="profile__avatar">
+            <app-avatar [width]="80" [height]="80" />
+          </div>
           <div class="profile__head">
             <h1 class="profile__name">{{ fullName() }}</h1>
             <p class="profile__username">
@@ -41,7 +43,6 @@
                 (onButtonClick)="openCreateJobModal()"
               />
             </div>
-            <span class="profile__badge">Majstor</span>
           </div>
         </header>
 
@@ -57,12 +58,12 @@
               <a [href]="'tel:' + m.user.phone" class="profile__link">Pozovi</a>
               } -->
             </div>
-            <div class="profile__meta-item">
+            <!-- <div class="profile__meta-item">
               <span class="profile__meta-icon" aria-hidden="true"> </span>
-              <!--               <span class="profile__meta-value profile__meta-value--address">{{
-                m.user.address?.trim() || "No Address"
-              }}</span> -->
-            </div>
+              <span class="profile__meta-value profile__meta-value--address">{{
+                m.user.deliveryAddress?.trim() || "No Address"
+              }}</span>
+            </div> -->
           </div>
         </section>
 
