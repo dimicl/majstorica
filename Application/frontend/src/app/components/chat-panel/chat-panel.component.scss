@@ -4,7 +4,7 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(17, 24, 39, 0.1);
-  box-shadow: 0 28px 70px rgba(17, 24, 39, 0.12);
+  box-shadow: 0 28px 70px rgba(17, 24, 39, 0.06);
   backdrop-filter: blur(10px);
   overflow: hidden;
   display: grid;
@@ -81,8 +81,8 @@
   gap: 6px;
   font-weight: 900;
   font-size: 0.78rem;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  background: rgba(17, 24, 39, 0.06);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  background: #f0f2f5;
   color: rgba(17, 24, 39, 0.7);
 
   strong {
@@ -91,7 +91,7 @@
 }
 
 .chat-pill--muted {
-  background: rgba(17, 24, 39, 0.04);
+  background: #f5f6f8;
   color: rgba(17, 24, 39, 0.62);
 }
 
@@ -172,7 +172,7 @@
   border-radius: 16px;
   padding: 10px 12px 8px;
   border: 1px solid rgba(17, 24, 39, 0.08);
-  box-shadow: 0 14px 40px rgba(17, 24, 39, 0.08);
+  box-shadow: 0 14px 40px rgba(17, 24, 39, 0.04);
   background: rgba(255, 255, 255, 0.78);
 }
 

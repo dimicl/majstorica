@@ -1,26 +1,21 @@
 @use "../../../assets/scss/variables" as *;
-$t: 17, 24, 39;
-$b: 62, 125, 215;
-$p: 124, 58, 237;
 .requests-page {
   min-height: 100vh;
   background: linear-gradient(160deg, #f6f8fc 0%, #f8fafd 50%, #f5f7fc 100%);
   padding: 28px 32px 48px;
-  .requests-header {
-    margin-bottom: 28px;
-  }
+  .requests-header { margin-bottom: 28px; }
   .requests-title {
     margin: 0 0 6px;
     font-size: clamp(1.85rem, 3.2vw, 2.5rem);
     font-weight: 900;
-    color: rgba($t..., 0.95);
+    color: rgba(17, 24, 39, 0.95);
     letter-spacing: -0.02em;
   }
   .requests-subtitle {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    color: rgba($t..., 0.6);
+    color: rgba(17, 24, 39, 0.6);
   }
   .requests-error {
     padding: 14px 18px;
@@ -52,7 +47,7 @@ $p: 124, 58, 237;
     gap: 20px;
   }
   .calendar-card {
-    background: #ffffff6c;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 3px;
     padding: 24px 28px 20px;
     border: 5px solid #fff;
@@ -67,7 +62,7 @@ $p: 124, 58, 237;
       width: 44px;
       height: 44px;
       border-radius: 12px;
-      border: 1px solid rgba($t..., 0.12);
+      border: 1px solid rgba(17, 24, 39, 0.12);
       background: rgba(255, 255, 255, 0.9);
       font-size: 1.5rem;
       font-weight: 700;
@@ -87,7 +82,7 @@ $p: 124, 58, 237;
       margin: 0;
       font-size: 1.15rem;
       font-weight: 700;
-      color: rgba($t..., 0.9);
+      color: rgba(17, 24, 39, 0.9);
       letter-spacing: -0.01em;
     }
     .calendar-weekdays {
@@ -102,7 +97,7 @@ $p: 124, 58, 237;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: rgba($t..., 0.5);
+      color: rgba(17, 24, 39, 0.5);
       padding: 6px 0;
     }
     .calendar-grid {
@@ -113,16 +108,15 @@ $p: 124, 58, 237;
     .calendar-day {
       max-height: 56px;
       border-radius: 2px;
-      background: rgba($t..., 0.04);
+      background: #f1f3f5;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s ease, border-color 0.2s ease,
-        transform 0.15s ease;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
       font-size: 0.95rem;
       font-weight: 600;
-      color: rgba($t..., 0.85);
+      color: rgba(17, 24, 39, 0.85);
       position: relative;
       width: 64px;
       height: 64px;
@@ -136,39 +130,27 @@ $p: 124, 58, 237;
         color: $color-white;
       }
       &--other-month {
-        color: rgba($t..., 0.35);
+        color: rgba(17, 24, 39, 0.35);
         background: transparent;
       }
       &--other-month:hover {
-        background: rgba($t..., 0.04);
+        background: #f1f3f5;
       }
       &--today {
-        border-color: rgba($b..., 0.4);
-        background: rgba($b..., 0.08);
+        border-color: rgba(62, 125, 215, 0.4);
+        background: rgba(62, 125, 215, 0.08);
       }
       &--occupied {
-        background: linear-gradient(
-          135deg,
-          rgba($b..., 0.15) 0%,
-          rgba($p..., 0.12) 100%
-        );
-        color: rgba($t..., 0.95);
+        background: linear-gradient(135deg, rgba(62, 125, 215, 0.15) 0%, rgba(124, 58, 237, 0.12) 100%);
+        color: rgba(17, 24, 39, 0.95);
       }
       &--occupied:hover {
-        background: linear-gradient(
-          135deg,
-          rgba($b..., 0.22) 0%,
-          rgba($p..., 0.18) 100%
-        );
-        border-color: rgba($b..., 0.4);
+        background: linear-gradient(135deg, rgba(62, 125, 215, 0.22) 0%, rgba(124, 58, 237, 0.18) 100%);
+        border-color: rgba(62, 125, 215, 0.4);
       }
       &--selected {
         border-color: $color-blue;
-        background: linear-gradient(
-          135deg,
-          rgba($b..., 0.2) 0%,
-          rgba($p..., 0.15) 100%
-        );
+        background: linear-gradient(135deg, rgba(62, 125, 215, 0.2) 0%, rgba(124, 58, 237, 0.15) 100%);
       }
     }
     .calendar-day-num {
@@ -194,41 +176,41 @@ $p: 124, 58, 237;
       align-items: center;
       justify-content: center;
       line-height: 1;
-      box-shadow: 0 2px 8px rgba($b..., 0.4);
+      box-shadow: 0 2px 8px rgba(62, 125, 215, 0.18);
     }
     .calendar-clear-btn {
       margin-top: 16px;
       padding: 8px 14px;
       border: none;
       border-radius: 10px;
-      background: rgba($t..., 0.06);
-      color: rgba($t..., 0.7);
+      background: #f0f2f5;
+      color: rgba(17, 24, 39, 0.7);
       font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       transition: background 0.2s ease, color 0.2s ease;
       &:hover {
-        background: rgba($t..., 0.1);
-        color: rgba($t..., 0.9);
+        background: #e8eaee;
+        color: rgba(17, 24, 39, 0.9);
       }
     }
   }
   .requests-list-card {
     background: #fff;
     border-radius: 20px;
-    border: 1px solid rgba($t..., 0.08);
-    box-shadow: 0 4px 24px rgba($t..., 0.06);
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    box-shadow: 0 4px 24px rgba(17, 24, 39, 0.04);
     padding: 24px 28px;
     .requests-list-title {
       margin: 0 0 18px;
       font-size: 1.15rem;
       font-weight: 900;
-      color: rgba($t..., 0.9);
+      color: rgba(17, 24, 39, 0.9);
     }
     .requests-loading,
     .requests-empty p {
       margin: 0;
-      color: rgba($t..., 0.55);
+      color: rgba(17, 24, 39, 0.55);
       font-weight: 600;
       font-size: 0.95rem;
     }
@@ -250,30 +232,27 @@ $p: 124, 58, 237;
       gap: 20px;
       padding: 16px 18px;
       border-radius: 14px;
-      border: 1px solid rgba($t..., 0.08);
-      background: rgba($t..., 0.02);
+      border: 1px solid #e8eaee;
+      background: #fafbfc;
       transition: background 0.2s ease, border-color 0.2s ease;
       flex-wrap: wrap;
       &:hover {
-        background: rgba($b..., 0.04);
-        border-color: rgba($b..., 0.12);
+        background: rgba(62, 125, 215, 0.04);
+        border-color: rgba(62, 125, 215, 0.12);
       }
-      .request-item-main {
-        flex: 1;
-        min-width: 0;
-      }
+      .request-item-main { flex: 1; min-width: 0; }
       .request-item-client {
         display: block;
         font-weight: 800;
         font-size: 1rem;
-        color: rgba($t..., 0.9);
+        color: rgba(17, 24, 39, 0.9);
         margin-bottom: 4px;
       }
       .request-item-title {
         display: block;
         font-size: 0.9rem;
         font-weight: 600;
-        color: rgba($t..., 0.7);
+        color: rgba(17, 24, 39, 0.7);
         margin-bottom: 8px;
       }
       .request-item-meta {
@@ -283,7 +262,7 @@ $p: 124, 58, 237;
         gap: 10px;
         font-size: 0.82rem;
         font-weight: 600;
-        color: rgba($t..., 0.55);
+        color: rgba(17, 24, 39, 0.55);
       }
       .request-item-price {
         color: $color-blue;
@@ -301,8 +280,8 @@ $p: 124, 58, 237;
           border: 1px solid rgba(255, 107, 107, 0.3);
         }
         &--normal {
-          background: rgba($t..., 0.08);
-          color: rgba($t..., 0.65);
+          background: rgba(17, 24, 39, 0.08);
+          color: rgba(17, 24, 39, 0.65);
         }
       }
       .request-item-actions {
@@ -314,16 +293,16 @@ $p: 124, 58, 237;
       .request-item-chat-btn {
         padding: 8px 14px;
         border-radius: 10px;
-        border: 1px solid rgba($b..., 0.35);
-        background: rgba($b..., 0.08);
+        border: 1px solid rgba(62, 125, 215, 0.35);
+        background: rgba(62, 125, 215, 0.08);
         color: $color-blue;
         font-size: 0.85rem;
         font-weight: 700;
         cursor: pointer;
         transition: background 0.2s ease, border-color 0.2s ease;
         &:hover {
-          background: rgba($b..., 0.15);
-          border-color: rgba($b..., 0.5);
+          background: rgba(62, 125, 215, 0.15);
+          border-color: rgba(62, 125, 215, 0.5);
         }
       }
     }
@@ -331,21 +310,21 @@ $p: 124, 58, 237;
   .sidebar-card {
     background: #fff;
     border-radius: 18px;
-    border: 1px solid rgba($t..., 0.08);
-    box-shadow: 0 4px 20px rgba($t..., 0.05);
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    box-shadow: 0 4px 20px rgba(17, 24, 39, 0.03);
     padding: 20px 22px;
     .sidebar-title {
       margin: 0 0 16px;
       font-size: 1rem;
       font-weight: 900;
-      color: rgba($t..., 0.9);
+      color: rgba(17, 24, 39, 0.9);
     }
     &.sidebar-stats .stat-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 0;
-      border-bottom: 1px solid rgba($t..., 0.06);
+      border-bottom: 1px solid rgba(17, 24, 39, 0.06);
       font-size: 0.9rem;
       &:last-child {
         border-bottom: none;
@@ -353,12 +332,12 @@ $p: 124, 58, 237;
     }
     .stat-label {
       font-weight: 600;
-      color: rgba($t..., 0.6);
+      color: rgba(17, 24, 39, 0.6);
     }
     .stat-value {
       font-weight: 700;
       font-size: 1rem;
-      color: rgba($t..., 0.9);
+      color: rgba(17, 24, 39, 0.9);
       &--primary {
         color: $color-blue;
       }
@@ -389,10 +368,10 @@ $p: 124, 58, 237;
     .chart-value {
       font-size: 0.8rem;
       font-weight: 900;
-      color: rgba($t..., 0.85);
+      color: rgba(17, 24, 39, 0.85);
       flex-shrink: 0;
       &.chart-value--zero {
-        color: rgba($t..., 0.45);
+        color: rgba(17, 24, 39, 0.45);
       }
     }
     .chart-bar-outer {
@@ -413,16 +392,16 @@ $p: 124, 58, 237;
       border-radius: 8px 8px 0 0;
       background: linear-gradient(
         180deg,
-        rgba($b..., 0.9) 0%,
-        rgba($p..., 0.75) 100%
+        rgba(62, 125, 215, 0.9) 0%,
+        rgba(124, 58, 237, 0.75) 100%
       );
       transition: height 0.3s ease;
-      box-shadow: 0 -2px 10px rgba($b..., 0.25);
+      box-shadow: 0 -2px 10px rgba(62, 125, 215, 0.12);
     }
     .chart-label {
       font-size: 0.7rem;
       font-weight: 800;
-      color: rgba($t..., 0.5);
+      color: rgba(17, 24, 39, 0.5);
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
