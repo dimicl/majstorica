@@ -11,10 +11,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import {
-  MasterService,
-  type UserResponse,
-} from '../../../shared/services/master.service';
+import { MasterService } from '../../../shared/services/master.service';
+import type { UserResponse } from '../../../shared/interfaces';
 import { ChatService } from '../../../shared/services/chat.service';
 import { JobService } from '../../../shared/services/job.service';
 import { ButtonComponent } from '../../../components/button/button.component';
@@ -23,10 +21,7 @@ import { BUTTON_TYPES } from '../../../shared/types';
 
 @Component({
   selector: 'app-technician-detail-modal',
-  imports: [
-    CommonModule,
-    ButtonComponent,
-  ],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './technician-detail-modal.component.html',
   styleUrl: './technician-detail-modal.component.scss',
 })
@@ -99,7 +94,9 @@ export class TechnicianDetailModalComponent {
         this.error.set('Majstor nije pronađen.');
         this.hasRequestedThisMaster.set(false);
       } else {
-        const hasSent = await this.jobService.hasSentRequestToMaster(data.user.id);
+        const hasSent = await this.jobService.hasSentRequestToMaster(
+          data.user.id
+        );
         this.hasRequestedThisMaster.set(hasSent);
       }
     } catch {

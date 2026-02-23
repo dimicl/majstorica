@@ -13,16 +13,14 @@ export const routes: Routes = [
     component: AuthComponent,
   },
   {
+    path: 'register',
+    component: AuthComponent,
+  },
+  {
     path: 'home',
     component: MainComponent,
     resolve: { _: profileLoadUserResolver },
   },
-  {
-    path: 'chat',
-    component: ChatComponent,
-    canActivate: [authGuard],
-  },
-  // Navbar koristi id "messages" (Poruke) → vodi na chat stranicu
   {
     path: 'chat',
     component: ChatComponent,

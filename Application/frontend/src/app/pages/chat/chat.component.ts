@@ -1,5 +1,5 @@
 import { Component, computed, inject, NgZone, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ChatPanelComponent } from '../../components/chat-panel/chat-panel.component';
 import { ChatService } from '../../shared/services/chat.service';
 import type { ChatMessage, ChatThread } from '../../shared/interfaces';
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-chat',
-  imports: [RouterLink, ChatPanelComponent, ButtonComponent, CommonModule],
+  imports: [ChatPanelComponent, ButtonComponent, CommonModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })
