@@ -14,13 +14,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-chat',
-  imports: [
-    RouterLink,
-    ChatPanelComponent,
-    ButtonComponent,
-    AvatarComponent,
-    CommonModule,
-  ],
+  imports: [ChatPanelComponent, ButtonComponent, AvatarComponent, CommonModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })
@@ -76,7 +70,9 @@ export class ChatComponent {
 
   private handleReceiveMessage(payload: ReceiveMessagePayload): void {
     const id = payload.id ?? payload.Id ?? '';
-    const convId = String(payload.conversationId ?? payload.ConversationId ?? '');
+    const convId = String(
+      payload.conversationId ?? payload.ConversationId ?? ''
+    );
     const senderId = payload.senderId ?? payload.SenderId ?? '';
     const content = payload.content ?? payload.Content ?? '';
     const sentAt = payload.sentAt ?? payload.SentAt ?? new Date().toISOString();
