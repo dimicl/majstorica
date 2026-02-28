@@ -13,16 +13,19 @@ export interface CreateJobPayload {
   isEmergency: boolean;
 }
 
-export interface JobRequestItem {
+/** Jedan posao u listi (za majstora i klijenta). Status: Pending, Accepted, InProgress, Completed. */
+export interface JobListItem {
   jobId: string;
   conversationId: string;
   jobTitle: string;
   description: string;
   clientName: string;
-  clientId: string;
+  masterName: string | null;
   date: string;
+  clientId: string;
   price: number | null;
   isEmergency: boolean;
+  status: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,10 +65,10 @@ export class JobService {
     );
   }
 
-  /** Zahtevi za poslove za trenutnog majstora (Pending). */
-  async getPendingRequests(): Promise<JobRequestItem[]> {
+  /** Svi poslovi za trenutnog korisnika (majstor: zahtevi na čekanju + dodeljeni, klijent: kreirani). */
+  async getJobs(): Promise<JobListItem[]> {
     const list = await firstValueFrom(
-      this.http.get<JobRequestItem[]>(`${API_URL}/jobs/requests`)
+      this.http.get<JobListItem[]>(`${API_URL}/jobs/list`)
     );
     return list ?? [];
   }

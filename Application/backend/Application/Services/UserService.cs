@@ -1,5 +1,6 @@
 using backend.Api.DTOs.Master;
 using backend.Api.DTOs.User;
+using backend.Application.Helpers;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -8,18 +9,23 @@ namespace backend.Application.Services;
 
 public class UserService : IUserService
 {
+    private static readonly TimeSpan RedisListCacheTtl = TimeSpan.FromMinutes(5);
+
     private readonly IUserRepository _userRepository;
     private readonly IUserGraphSync _userGraphSync;
     private readonly IMasterRepository _masterRepository;
+    private readonly IRedisListCache _redisListCache;
 
     public UserService(
         IUserRepository userRepository,
         IUserGraphSync userGraphSync,
-        IMasterRepository masterRepository)
+        IMasterRepository masterRepository,
+        IRedisListCache redisListCache)
     {
         _userRepository = userRepository;
         _userGraphSync = userGraphSync;
         _masterRepository = masterRepository;
+        _redisListCache = redisListCache;
     }
 
     public async Task<User?> GetById(Guid userId)
@@ -34,6 +40,7 @@ public class UserService : IUserService
         return new UserRequest
         {
             Id = user.Id,
+            Email = user.Email,
             Username = user.Username,
             FirstName = user.FirstName,
             LastName = user.LastName,
@@ -91,18 +98,84 @@ public class UserService : IUserService
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
 
-    public async Task<List<MasterListItemResponse>> GetMastersList()
+    public async Task<List<MasterListItemResponse>> GetMastersList(MastersListQuery? query = null)
+    {
+        query ??= new MastersListQuery();
+        var key = RedisListCacheKey.Create(query);
+
+        var cached = await _redisListCache.GetAsync(key);
+        if (cached != null)
+            return cached;
+
+        var list = await GetMastersListFromDb();
+        var filtered = ApplyFilterAndSort(list, query);
+        await _redisListCache.SetAsync(key, filtered, RedisListCacheTtl);
+        return filtered;
+    }
+
+    private async Task<List<MasterListItemResponse>> GetMastersListFromDb()
     {
         var users = await _userRepository.GetAll();
-        return users
+        var masterUsers = users
             .Where(u => u.Role == UserRole.Master && u.IsActive)
-            .Select(u => new MasterListItemResponse
+            .ToList();
+        if (masterUsers.Count == 0)
+            return new List<MasterListItemResponse>();
+
+        var userIds = masterUsers.Select(u => u.Id).ToList();
+        var masters = await _masterRepository.GetByUserIds(userIds);
+        var masterByUserId = masters.ToDictionary(m => m.UserId);
+
+        return masterUsers
+            .Select(u =>
             {
-                Id = u.Id,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Username = u.Username
+                var master = masterByUserId.GetValueOrDefault(u.Id);
+                return new MasterListItemResponse
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Username = u.Username,
+                    Category = master?.Category.HasValue == true ? MasterCategoryDisplay.ToDisplayName(master.Category!.Value) : null,
+                    Rating = master?.Rating
+                };
             })
             .ToList();
+    }
+
+    private static List<MasterListItemResponse> ApplyFilterAndSort(List<MasterListItemResponse> list, MastersListQuery query)
+    {
+        var search = (query.Search ?? "").Trim().ToLowerInvariant();
+        var category = (query.Category ?? "").Trim();
+        var minRating = query.MinRating;
+        var sortAsc = string.Equals(query.Sort, "name-desc", StringComparison.OrdinalIgnoreCase) ? false : true;
+
+        IEnumerable<MasterListItemResponse> result = list;
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            result = result.Where(m =>
+                (m.FirstName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (m.LastName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (m.Username?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        if (!string.IsNullOrEmpty(category))
+            result = result.Where(m => string.Equals(m.Category, category, StringComparison.OrdinalIgnoreCase));
+
+        if (minRating.HasValue && minRating.Value >= 1 && minRating.Value <= 5)
+            result = result.Where(m => m.Rating.HasValue && m.Rating.Value >= minRating.Value);
+
+        var sorted = result.OrderBy(m =>
+        {
+            var name = $"{m.FirstName} {m.LastName}".Trim();
+            if (string.IsNullOrEmpty(name)) name = m.Username ?? "";
+            return name;
+        }, StringComparer.OrdinalIgnoreCase).ToList();
+
+        if (!sortAsc)
+            sorted.Reverse();
+
+        return sorted;
     }
 }

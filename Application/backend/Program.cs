@@ -79,6 +79,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 });
 
 builder.Services.AddScoped<IRedisLockService, RedisLockService>();
+builder.Services.AddScoped<IRedisListCache, RedisMastersListCache>();
 
 // Redis OM 
 builder.Services.AddSingleton<RedisConnectionProvider>();

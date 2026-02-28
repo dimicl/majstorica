@@ -7,4 +7,6 @@ export interface RegisterRequest {
   username: string;
   password: string;
   role: UserRole;
+  phone?: string | null;
+  deliveryAddress?: string | null;
 }

@@ -10,7 +10,7 @@ public class MasterDocument
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string? Bio { get; set; }
-    public List<string> Categories { get; set; } = new();
+    public int? Category { get; set; }
     public decimal? Rating { get; set; }
     public int? YearsExperience { get; set; }
     public DateTime CreatedAt { get; set; }

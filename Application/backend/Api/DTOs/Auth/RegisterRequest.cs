@@ -29,8 +29,8 @@ public class RegisterRequest
     [EnumDataType(typeof(UserRole), ErrorMessage = "Uloga nije validna")]
     public UserRole Role { get; set; }
 
-    [Phone(ErrorMessage = "Telefon nije u validnom formatu")]
-    [StringLength(20)]
+    [Required(ErrorMessage = "Telefon je obavezan")]
+    [RegularExpression(@"^\d{10}$", ErrorMessage = "Telefon mora imati tačno 10 cifara")]
     public string? Phone { get; set; }
 
     [StringLength(200)]

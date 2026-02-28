@@ -140,6 +140,32 @@
 
     <div class="m-b-24">
       <app-input
+        id="phone"
+        inputmode="numeric"
+        maxlength="10"
+        type="number"
+        label="Telefon"
+        theme="dark"
+        [errorMessage]="registerForm.get('phone')?.errors?.['pattern'] ? 'Telefon mora imati tačno 10 cifara' : 'Telefon je obavezan'"
+        formControlName="phone"
+      >
+      </app-input>
+    </div>
+
+    <div class="m-b-24">
+      <app-input
+        id="deliveryAddress"
+        type="text"
+        label="Adresa"
+        theme="dark"
+        errorMessage="Adresa je predugačka"
+        formControlName="deliveryAddress"
+      >
+      </app-input>
+    </div>
+
+    <div class="m-b-24">
+      <app-input
         id="reg-password"
         type="password"
         label="Lozinka"

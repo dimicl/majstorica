@@ -1,4 +1,4 @@
-import type { JobRequestItem } from '../services/job.service';
+import type { JobListItem } from '../services/job.service';
 import type { NewJobRequestPayload } from '../interfaces/new-job-request-payload.interface';
 
 // -----------------------------------------------------------------------------
@@ -55,11 +55,6 @@ const MONTH_NAMES = [
   'Decembar',
 ];
 
-// -----------------------------------------------------------------------------
-// Date / calendar
-// -----------------------------------------------------------------------------
-
-/** Vraća YYYY-MM-DD u lokalnoj vremenskoj zoni. */
 export function toDayKey(d: string | Date): string {
   if (typeof d === 'string') {
     const match = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -98,7 +93,7 @@ export function nextMonthDate(date: Date): Date {
 /** Dan u mesecu za prikaz u kalendaru (sa padding danima pre/posle). */
 export function buildCalendarDays(
   month: Date,
-  requests: JobRequestItem[]
+  requests: JobListItem[]
 ): CalendarDay[] {
   const dayKeyToCount = new Map<string, number>();
   for (const r of requests) {
@@ -147,9 +142,9 @@ export function toggleDaySelection(
 // -----------------------------------------------------------------------------
 
 export function groupRequestsByDayKey(
-  requests: JobRequestItem[]
-): Map<string, JobRequestItem[]> {
-  const map = new Map<string, JobRequestItem[]>();
+  requests: JobListItem[]
+): Map<string, JobListItem[]> {
+  const map = new Map<string, JobListItem[]>();
   for (const r of requests) {
     const key = toDayKey(r.date);
     if (!map.has(key)) map.set(key, []);
@@ -160,15 +155,15 @@ export function groupRequestsByDayKey(
 
 /** Zahtevi za izabrani dan ili svi ako selectedDate null. */
 export function getSelectedDayRequests(
-  requests: JobRequestItem[],
-  byDay: Map<string, JobRequestItem[]>,
+  requests: JobListItem[],
+  byDay: Map<string, JobListItem[]>,
   selectedDate: string | null
-): JobRequestItem[] {
+): JobListItem[] {
   if (!selectedDate) return requests;
   return byDay.get(selectedDate) ?? [];
 }
 
-export function computeStats(requests: JobRequestItem[]): RequestsStats {
+export function computeStats(requests: JobListItem[]): RequestsStats {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -187,7 +182,7 @@ export function computeStats(requests: JobRequestItem[]): RequestsStats {
 }
 
 export function buildChartData(
-  byDay: Map<string, JobRequestItem[]>,
+  byDay: Map<string, JobListItem[]>,
   daysRange = 3
 ): ChartBar[] {
   const result: ChartBar[] = [];
@@ -207,9 +202,9 @@ export function buildChartData(
 // Payload & list updates
 // -----------------------------------------------------------------------------
 
-export function jobRequestItemFromPayload(
+export function jobListItemFromPayload(
   p: NewJobRequestPayload
-): JobRequestItem | null {
+): JobListItem | null {
   const jobId = p.jobId ?? '';
   const conversationId = p.conversationId ?? '';
   if (!jobId || !conversationId) return null;
@@ -220,11 +215,13 @@ export function jobRequestItemFromPayload(
     conversationId,
     jobTitle: p.jobTitle ?? '',
     description: p.description ?? '',
-    date: p.date ?? now,
     clientName: p.clientName ?? 'Klijent',
+    masterName: null,
+    date: p.date ?? now,
     clientId: p.clientId ?? '',
     price: p.price ?? null,
     isEmergency: p.isEmergency ?? false,
+    status: 'Pending',
     createdAt: now,
     updatedAt: now,
   };
@@ -232,25 +229,25 @@ export function jobRequestItemFromPayload(
 
 /** Dodaje novi zahtev iz payload-a u listu ako ga već nema. Vraća novu listu. */
 export function mergeRequestFromPayload(
-  list: JobRequestItem[],
+  list: JobListItem[],
   payload: NewJobRequestPayload
-): JobRequestItem[] {
-  const item = jobRequestItemFromPayload(payload);
+): JobListItem[] {
+  const item = jobListItemFromPayload(payload);
   if (!item) return list;
   if (list.some((r) => r.conversationId === item.conversationId)) return list;
   return [...list, item];
 }
 
 export function removeRequestByJobId(
-  list: JobRequestItem[],
+  list: JobListItem[],
   jobId: string
-): JobRequestItem[] {
+): JobListItem[] {
   return list.filter((r) => r.jobId !== jobId);
 }
 
 export function removeRequestByConversationId(
-  list: JobRequestItem[],
+  list: JobListItem[],
   conversationId: string
-): JobRequestItem[] {
+): JobListItem[] {
   return list.filter((r) => r.conversationId !== conversationId);
 }

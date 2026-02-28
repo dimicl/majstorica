@@ -123,13 +123,40 @@ public class JobService : IJobService
         await SaveAndPublish(job);
     }
 
-    public Task<bool> HasClientSentRequestToMaster(Guid clientId, Guid masterId) =>
-        _conversationRepository.ExistsByClientAndMaster(clientId, masterId);
+    /// <summary>Da li klijent ima posao/zahtev ka tom majstoru (samo ako posao još postoji u bazi).</summary>
+    public async Task<bool> HasClientSentRequestToMaster(Guid clientId, Guid masterId)
+    {
+        var jobs = await _jobRepository.GetByClientId(clientId);
+        foreach (var job in jobs)
+        {
+            if (job.MasterId == masterId)
+                return true;
+            if (job.Status == JobStatus.Pending)
+            {
+                var convs = await _conversationRepository.GetByJobId(job.Id);
+                if (convs.Any(c => c.MasterId == masterId))
+                    return true;
+            }
+        }
+        return false;
+    }
 
-    public async Task<List<JobRequestListItemResponse>> GetPendingRequestsForMaster(Guid masterId)
+    public async Task<List<JobListItemResponse>> GetJobsForUser(Guid userId, UserRole role)
+    {
+        if (role == UserRole.Master)
+        {
+            var pending = await GetPendingRequestsForMaster(userId);
+            var assigned = await GetJobsForMaster(userId);
+            return pending.Concat(assigned).OrderByDescending(j => j.UpdatedAt).ToList();
+        }
+
+        return await GetJobsForClient(userId);
+    }
+
+    private async Task<List<JobListItemResponse>> GetPendingRequestsForMaster(Guid masterId)
     {
         var conversations = await _conversationRepository.GetByUserId(masterId);
-        var result = new List<JobRequestListItemResponse>();
+        var result = new List<JobListItemResponse>();
 
         foreach (var conv in conversations)
         {
@@ -143,17 +170,115 @@ public class JobService : IJobService
             var client = await _userRepository.GetById(conv.ClientId);
             var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
 
-            result.Add(new JobRequestListItemResponse
+            result.Add(new JobListItemResponse
             {
                 JobId = job.Id,
                 ConversationId = conv.Id,
                 JobTitle = job.Title,
                 Description = job.Description,
                 ClientName = clientName,
-                ClientId = job.ClientId,
+                MasterName = null,
                 Date = job.ScheduledDate ?? job.CreatedAt,
+                ClientId = job.ClientId,
                 Price = job.Price,
                 IsEmergency = job.IsEmergency,
+                Status = JobStatus.Pending.ToString(),
+                CreatedAt = job.CreatedAt,
+                UpdatedAt = job.UpdatedAt ?? job.CreatedAt
+            });
+        }
+
+        return result;
+    }
+
+    private async Task<List<JobListItemResponse>> GetJobsForMaster(Guid masterId)
+    {
+        var jobsById = new Dictionary<Guid, Job>();
+
+        var byMasterAndStatus = await _jobRepository.GetByMasterIdAndStatuses(
+            masterId,
+            new[] { JobStatus.Accepted, JobStatus.InProgress, JobStatus.Completed });
+        foreach (var j in byMasterAndStatus)
+            jobsById[j.Id] = j;
+
+        var conversations = await _conversationRepository.GetByUserId(masterId);
+        foreach (var conv in conversations)
+        {
+            if (conv.MasterId != masterId || conv.JobId == Guid.Empty) continue;
+            if (jobsById.ContainsKey(conv.JobId)) continue;
+
+            var job = await _jobRepository.GetById(conv.JobId);
+            if (job == null) continue;
+            if (job.Status != JobStatus.Accepted && job.Status != JobStatus.InProgress && job.Status != JobStatus.Completed)
+                continue;
+            jobsById[job.Id] = job;
+        }
+
+        var result = new List<JobListItemResponse>();
+        foreach (var job in jobsById.Values.OrderByDescending(j => j.UpdatedAt ?? j.CreatedAt))
+        {
+            var convs = await _conversationRepository.GetByJobId(job.Id);
+            var conv = convs.FirstOrDefault(c => c.MasterId == masterId);
+            var conversationId = conv?.Id ?? Guid.Empty;
+
+            var client = await _userRepository.GetById(job.ClientId);
+            var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
+
+            result.Add(new JobListItemResponse
+            {
+                JobId = job.Id,
+                ConversationId = conversationId,
+                JobTitle = job.Title,
+                Description = job.Description,
+                ClientName = clientName,
+                MasterName = null,
+                Date = job.ScheduledDate ?? job.CreatedAt,
+                ClientId = job.ClientId,
+                Price = job.Price,
+                IsEmergency = job.IsEmergency,
+                Status = job.Status.ToString(),
+                CreatedAt = job.CreatedAt,
+                UpdatedAt = job.UpdatedAt ?? job.CreatedAt
+            });
+        }
+
+        return result;
+    }
+
+    private async Task<List<JobListItemResponse>> GetJobsForClient(Guid clientId)
+    {
+        var jobs = await _jobRepository.GetByClientId(clientId);
+        var result = new List<JobListItemResponse>();
+
+        foreach (var job in jobs.OrderByDescending(j => j.UpdatedAt ?? j.CreatedAt))
+        {
+            var client = await _userRepository.GetById(job.ClientId);
+            var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
+
+            string? masterName = null;
+            var conversationId = Guid.Empty;
+            if (job.MasterId.HasValue)
+            {
+                var master = await _userRepository.GetById(job.MasterId.Value);
+                masterName = UserDisplayNameHelper.GetDisplayName(master, "Majstor");
+                var convs = await _conversationRepository.GetByJobId(job.Id);
+                var conv = convs.FirstOrDefault(c => c.MasterId == job.MasterId.Value);
+                conversationId = conv?.Id ?? Guid.Empty;
+            }
+
+            result.Add(new JobListItemResponse
+            {
+                JobId = job.Id,
+                ConversationId = conversationId,
+                JobTitle = job.Title,
+                Description = job.Description,
+                ClientName = clientName,
+                MasterName = masterName,
+                Date = job.ScheduledDate ?? job.CreatedAt,
+                ClientId = job.ClientId,
+                Price = job.Price,
+                IsEmergency = job.IsEmergency,
+                Status = job.Status.ToString(),
                 CreatedAt = job.CreatedAt,
                 UpdatedAt = job.UpdatedAt ?? job.CreatedAt
             });

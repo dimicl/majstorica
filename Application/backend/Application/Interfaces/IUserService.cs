@@ -20,5 +20,5 @@ public interface IUserService
     Task Deactivate(Guid userId);
     Task Activate(Guid userId);
 
-    Task<List<MasterListItemResponse>> GetMastersList();
+    Task<List<MasterListItemResponse>> GetMastersList(MastersListQuery? query = null);
 }

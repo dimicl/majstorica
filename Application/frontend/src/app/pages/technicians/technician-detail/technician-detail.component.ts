@@ -68,9 +68,10 @@ export class TechnicianDetailComponent implements OnInit {
   });
 
   /** Da li postoji job između mene (klijenta) i ovog majstora. */
+  /** Da li postoji posao (zahtev) između trenutnog klijenta i ovog majstora. */
   hasRequestedThisMaster = signal(false);
   createJobButtonLabel = computed(() =>
-    this.hasRequestedThisMaster() ? 'Već poslato' : 'Kreiraj posao'
+    this.hasRequestedThisMaster() ? 'Već kreirano' : 'Kreiraj posao'
   );
 
   usernameWithAt(username: string): string {
@@ -90,12 +91,12 @@ export class TechnicianDetailComponent implements OnInit {
   async loadMaster(id: string): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
+    this.hasRequestedThisMaster.set(false);
     try {
       const data = await this.masterService.getMasterById(id);
       this.master.set(data);
       if (!data) {
         this.error.set('Majstor nije pronađen.');
-        this.hasRequestedThisMaster.set(false);
       } else {
         const hasSent = await this.jobService.hasSentRequestToMaster(
           data.user.id

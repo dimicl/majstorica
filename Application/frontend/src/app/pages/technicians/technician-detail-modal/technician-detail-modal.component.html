@@ -50,28 +50,33 @@
           <h2 class="profile__section-title">Kontakt</h2>
           <div class="profile__meta-list">
             <div class="profile__meta-item">
-              <span class="profile__meta-icon" aria-hidden="true"> </span>
-              <!-- <span class="profile__meta-value">{{
+              <svg-icon
+                [src]="sharedSvgRoutes.PHONE_ICON"
+                class="d-flex align-items-center svg-size-20"
+              />
+              <span class="profile-value">{{
                 m.user.phone?.trim() || "No Phone"
               }}</span>
-              @if (m.user.phone?.trim()) {
-              <a [href]="'tel:' + m.user.phone" class="profile__link">Pozovi</a>
-              } -->
             </div>
-            <!-- <div class="profile__meta-item">
-              <span class="profile__meta-icon" aria-hidden="true"> </span>
-              <span class="profile__meta-value profile__meta-value--address">{{
-                m.user.deliveryAddress?.trim() || "No Address"
+            <div class="profile__meta-item">
+              <svg-icon
+                [src]="sharedSvgRoutes.ADDRESS_ICON"
+                class="d-flex align-items-center svg-size-20"
+              />
+              <span class="profile-value">{{
+                m.user.deliveryAddress?.trim() ?? "No Address"
               }}</span>
-            </div> -->
+            </div>
+            <div class="profile__meta-item">
+              <svg-icon
+                [src]="sharedSvgRoutes.EMAIL_ICON"
+                class="d-flex align-items-center svg-size-20"
+              />
+              <span class="profile-value">{{
+                m.user.email?.trim() ?? "No Email"
+              }}</span>
+            </div>
           </div>
-        </section>
-
-        <section class="profile__about" aria-label="Opis">
-          <h2 class="profile__section-title">Opis</h2>
-          <!-- <p class="profile__about-text">
-            {{ m.user.description?.trim() || "No Description" }}
-          </p> -->
         </section>
       </article>
       } }

@@ -3,4 +3,6 @@ export interface MasterListItem {
   firstName: string;
   lastName: string;
   username: string;
+  category: string | null;
+  rating: number | null;
 }

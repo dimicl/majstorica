@@ -1,6 +1,7 @@
 using backend.Api.DTOs.Jobs;
 using backend.Api.Extensions;
 using backend.Application.Interfaces;
+using backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,6 @@ namespace backend.Api.Controllers;
 
 [ApiController]
 [Route("api/jobs")]
-[Authorize] 
 public class JobsController : ControllerBase
 {
     private readonly IJobService _jobService;
@@ -48,16 +48,24 @@ public class JobsController : ControllerBase
     [HttpGet("has-sent-request-to/{masterId:guid}")]
     public async Task<ActionResult<object>> HasSentRequestToMaster(Guid masterId)
     {
-        var clientId = User.GetUserId();
-        var hasSent = await _jobService.HasClientSentRequestToMaster(clientId, masterId);
+        if (User.Identity?.IsAuthenticated != true)
+            return Ok(new { hasSentRequest = false });
+        var (userId, role) = User.GetUserIdAndRole();
+        if (role != UserRole.Client)
+            return Ok(new { hasSentRequest = false });
+        var hasSent = await _jobService.HasClientSentRequestToMaster(userId, masterId);
         return Ok(new { hasSentRequest = hasSent });
     }
 
-    [HttpGet("~/api/jobs/requests")]
-    public async Task<ActionResult<List<JobRequestListItemResponse>>> GetMyRequests()
+    /// <summary>Svi poslovi za trenutnog korisnika: majstor = zahtevi na čekanju + dodeljeni, klijent = kreirani.</summary>
+    [AllowAnonymous]
+    [HttpGet("list")]
+    public async Task<ActionResult<List<JobListItemResponse>>> GetJobs()
     {
-        var masterId = User.GetUserId();
-        var list = await _jobService.GetPendingRequestsForMaster(masterId);
+        if (User.Identity?.IsAuthenticated != true)
+            return Ok(new List<JobListItemResponse>());
+        var (userId, role) = User.GetUserIdAndRole();
+        var list = await _jobService.GetJobsForUser(userId, role);
         return Ok(list);
     }
 

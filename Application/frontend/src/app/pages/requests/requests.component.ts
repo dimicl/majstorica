@@ -12,7 +12,7 @@ import { AuthSelectorService } from '../../shared/services/auth-selector.service
 import { UserRole } from '../../shared/enums/user-role.enum';
 import {
   JobService,
-  type JobRequestItem,
+  type JobListItem,
 } from '../../shared/services/job.service';
 import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
@@ -56,7 +56,7 @@ export class RequestsComponent implements OnInit {
   readonly eButtonType = BUTTON_TYPES;
   readonly weekdays = REQUESTS_WEEKDAYS;
 
-  requests = signal<JobRequestItem[]>([]);
+  requests = signal<JobListItem[]>([]);
   loadingRequests = signal(false);
   requestError = signal<string | null>(null);
   actingRequestId = signal<string | null>(null);
@@ -117,7 +117,8 @@ export class RequestsComponent implements OnInit {
     this.loadingRequests.set(true);
     this.requestError.set(null);
     try {
-      this.requests.set(await this.jobService.getPendingRequests());
+      const all = await this.jobService.getJobs();
+      this.requests.set(all.filter((j) => j.status === 'Pending'));
     } catch (err: unknown) {
       this.requests.set([]);
     } finally {
@@ -142,7 +143,7 @@ export class RequestsComponent implements OnInit {
     this.selectedDate.set(null);
   }
 
-  async acceptRequest(item: JobRequestItem): Promise<void> {
+  async acceptRequest(item: JobListItem): Promise<void> {
     if (this.actingRequestId()) return;
     this.actingRequestId.set(item.jobId);
     this.requestError.set(null);
@@ -156,7 +157,7 @@ export class RequestsComponent implements OnInit {
     }
   }
 
-  async declineRequest(item: JobRequestItem): Promise<void> {
+  async declineRequest(item: JobListItem): Promise<void> {
     if (this.actingRequestId()) return;
     this.actingRequestId.set(item.conversationId);
     this.requestError.set(null);

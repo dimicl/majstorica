@@ -44,10 +44,13 @@ internal static class AuthHelper
             User = new UserRequest
             {
                 Id = user.Id,
+                Email = user.Email,
                 Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = user.Role
+                Role = user.Role,
+                Phone = user.Phone,
+                DeliveryAddress = user.DeliveryAddress
             }
         };
     }

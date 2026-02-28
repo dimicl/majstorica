@@ -29,19 +29,54 @@
     @switch (user.role) { @case (userRole.Client) {
     <div class="profil-card">
       <div class="profil-section-head">
-        <h2 class="profil-section-title">Rezervacije</h2>
+        <h2 class="profil-section-title">Moji poslovi</h2>
         <p class="profil-section-desc">
-          Vaše zakazane i prošle rezervacije sa majstorima.
+          Poslovi koje ste kreirali i njihov status.
         </p>
       </div>
+      @if (loadingMyJobs()) {
+      <p class="profil-loading">Učitavanje poslova...</p>
+      } @else if (myJobs().length > 0) {
+      <table class="profil-requests-table">
+        <thead>
+          <tr>
+            <th>Majstor</th>
+            <th>Naslov</th>
+            <th>Datum</th>
+            <th>Cena</th>
+            <th>Hitnost</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (job of myJobs(); track job.jobId) {
+          <tr class="profil-request-row">
+            <td>{{ job.masterName || "—" }}</td>
+            <td class="profil-request-desc-cell">{{ job.jobTitle || "—" }}</td>
+            <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
+            <td>{{ job.price != null ? job.price + " RSD" : "—" }}</td>
+            <td>
+              @if (job.isEmergency) {
+              <span class="profil-request-badge profil-request-badge--emergency">Hitno</span>
+              } @else {
+              <span class="profil-request-badge profil-request-badge--normal">Obično</span>
+              }
+            </td>
+            <td><span class="profil-request-status">{{ statusLabel(job.status) }}</span></td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      } @else {
       <div class="profil-empty">
-        <p>Trenutno nema aktivnih rezervacija.</p>
+        <p>Nemate kreiranih poslova.</p>
         <app-button
           [buttonType]="eButtonType.POSITIVE"
           [label]="'Pogledaj majstore'"
           (onButtonClick)="navigateToMasters()"
         />
       </div>
+      }
     </div>
     } @case (userRole.Master) {
     <div class="profil-card">
@@ -53,14 +88,55 @@
       </div>
       @if (requestError()) {
       <p class="profil-error" role="alert">{{ requestError() }}</p>
-      } @if (loadingRequests()) {
-      <p class="profil-loading">Učitavanje zahteva...</p>
-      } @else if (requests().length === 0) {
-      <div class="profil-empty">
-        <p>Trenutno nema novih zahteva.</p>
+      }
+
+      <!-- Moji poslovi (dodeljeni, bez Pending) -->
+      <div class="profil-subsection">
+        <h3 class="profil-subsection-title">Moji poslovi</h3>
+        @if (loadingMyJobs()) {
+        <p class="profil-loading">Učitavanje poslova...</p>
+        } @else if (assignedJobs().length > 0) {
+        <table class="profil-requests-table">
+          <thead>
+            <tr>
+              <th>Klijent</th>
+              <th>Naslov</th>
+              <th>Datum</th>
+              <th>Cena</th>
+              <th>Hitnost</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (job of assignedJobs(); track job.jobId) {
+            <tr class="profil-request-row">
+              <td>{{ job.clientName }}</td>
+              <td class="profil-request-desc-cell">{{ job.jobTitle || "—" }}</td>
+              <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
+              <td>{{ job.price != null ? job.price + " RSD" : "—" }}</td>
+              <td>
+                @if (job.isEmergency) {
+                <span class="profil-request-badge profil-request-badge--emergency">Hitno</span>
+                } @else {
+                <span class="profil-request-badge profil-request-badge--normal">Obično</span>
+                }
+              </td>
+              <td><span class="profil-request-status">{{ statusLabel(job.status) }}</span></td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        } @else {
+        <p class="profil-empty-inline">Nema dodeljenih poslova.</p>
+        }
       </div>
-      } @else {
-      <div>
+
+      <!-- Zahtevi na čekanju (status Pending) -->
+      <div class="profil-subsection">
+        <h3 class="profil-subsection-title">Zahtevi na čekanju</h3>
+        @if (loadingMyJobs()) {
+        <p class="profil-loading">Učitavanje zahteva...</p>
+        } @else if (pendingRequests().length > 0) {
         <table class="profil-requests-table">
           <thead>
             <tr>
@@ -73,24 +149,17 @@
             </tr>
           </thead>
           <tbody>
-            @for (req of requests(); track req.conversationId) {
+            @for (req of pendingRequests(); track req.conversationId) {
             <tr class="profil-request-row">
               <td>{{ req.clientName }}</td>
-              <td class="profil-request-desc-cell">
-                {{ req.jobTitle || "—" }}
-              </td>
+              <td class="profil-request-desc-cell">{{ req.jobTitle || "—" }}</td>
               <td>{{ req.date | date : "dd.MM.yyyy." }}</td>
               <td>{{ req.price != null ? req.price + " RSD" : "—" }}</td>
               <td>
                 @if (req.isEmergency) {
-                <span
-                  class="profil-request-badge profil-request-badge--emergency"
-                  >Hitno</span
-                >
+                <span class="profil-request-badge profil-request-badge--emergency">Hitno</span>
                 } @else {
-                <span class="profil-request-badge profil-request-badge--normal"
-                  >Obično</span
-                >
+                <span class="profil-request-badge profil-request-badge--normal">Obično</span>
                 }
               </td>
               <td><span class="profil-request-status">Na čekanju</span></td>
@@ -114,8 +183,10 @@
             }
           </tbody>
         </table>
+        } @else {
+        <p class="profil-empty-inline">Nema zahteva na čekanju.</p>
+        }
       </div>
-      }
     </div>
     } } }
   </div>

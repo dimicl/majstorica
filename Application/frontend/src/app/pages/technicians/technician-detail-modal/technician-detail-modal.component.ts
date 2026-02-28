@@ -19,10 +19,12 @@ import { type CreateJobMaster } from '../../../components/create-job-modal/creat
 import { BUTTON_TYPES } from '../../../shared/types';
 import { UserResponse } from '../../../shared/interfaces';
 import { AvatarComponent } from '../../../components/avatar/avatar.component';
+import { SharedSvgRoutes } from '../../../shared/constants/shared_svg_routes';
+import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'app-technician-detail-modal',
-  imports: [CommonModule, ButtonComponent, AvatarComponent],
+  imports: [CommonModule, ButtonComponent, AvatarComponent, SvgIconComponent],
   templateUrl: './technician-detail-modal.component.html',
   styleUrl: './technician-detail-modal.component.scss',
 })
@@ -36,6 +38,8 @@ export class TechnicianDetailModalComponent {
     this._masterId.set(value ?? null);
   }
   _masterId = signal<string | null>(null);
+
+  public sharedSvgRoutes = SharedSvgRoutes;
 
   @Output() closed = new EventEmitter<void>();
   /** Emituje se pre zatvaranja modala – roditelj prikazuje Create Job na svom nivou. */
@@ -64,9 +68,10 @@ export class TechnicianDetailModalComponent {
     };
   });
 
+  /** Da li postoji posao (zahtev) između trenutnog klijenta i ovog majstora. */
   hasRequestedThisMaster = signal(false);
   createJobButtonLabel = computed(() =>
-    this.hasRequestedThisMaster() ? 'Već poslato' : 'Kreiraj posao'
+    this.hasRequestedThisMaster() ? 'Već kreirano' : 'Kreiraj posao'
   );
 
   constructor() {
@@ -88,12 +93,12 @@ export class TechnicianDetailModalComponent {
   async loadMaster(id: string): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
+    this.hasRequestedThisMaster.set(false);
     try {
       const data = await this.masterService.getMasterById(id);
       this.master.set(data);
       if (!data) {
         this.error.set('Majstor nije pronađen.');
-        this.hasRequestedThisMaster.set(false);
       } else {
         const hasSent = await this.jobService.hasSentRequestToMaster(
           data.user.id
@@ -102,7 +107,6 @@ export class TechnicianDetailModalComponent {
       }
     } catch {
       this.error.set('Nije moguće učitati profil.');
-      this.hasRequestedThisMaster.set(false);
     } finally {
       this.isLoading.set(false);
     }

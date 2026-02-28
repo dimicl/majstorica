@@ -5,7 +5,7 @@ import { AuthSelectorService } from '../../shared/services/auth-selector.service
 import { UserRole } from '../../shared/enums/user-role.enum';
 import {
   JobService,
-  type JobRequestItem,
+  type JobListItem,
 } from '../../shared/services/job.service';
 import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
@@ -13,7 +13,7 @@ import { ButtonComponent } from '../../components/button/button.component';
 import { BUTTON_TYPES } from '../../shared/types/button.type';
 import { SIGNALR_STATUS } from '../../shared/types';
 import { NewJobRequestPayload } from '../../shared/interfaces';
-import { signal } from '@angular/core';
+import { signal, computed } from '@angular/core';
 
 const HUB_URL = 'http://localhost:5187/hubs/document';
 
@@ -35,12 +35,20 @@ export class ProfilComponent implements OnInit, OnDestroy {
   public userRole = UserRole;
   public eButtonType = BUTTON_TYPES;
 
-  /** Zahtevi za majstora (samo kada je uloga Master). */
-  requests = signal<JobRequestItem[]>([]);
-  loadingRequests = signal(false);
+  /** Svi poslovi za korisnika (jedan API poziv). */
+  myJobs = signal<JobListItem[]>([]);
+  loadingMyJobs = signal(false);
   requestError = signal<string | null>(null);
-  /** Zaštićeno polje za akciju (da ne dupliramo klik). */
   actingRequestId = signal<string | null>(null);
+
+  /** Za majstora: poslovi sa statusom Pending (zahtevi na čekanju). */
+  pendingRequests = computed(() =>
+    this.myJobs().filter((j) => j.status === 'Pending')
+  );
+  /** Za majstora: poslovi koji nisu Pending (dodeljeni). */
+  assignedJobs = computed(() =>
+    this.myJobs().filter((j) => j.status !== 'Pending')
+  );
 
   private newJobRequestHandlerRegistered = false;
 
@@ -63,7 +71,9 @@ export class ProfilComponent implements OnInit, OnDestroy {
     this.auth.userSelector$.subscribe((user) => {
       if (user?.role === UserRole.Master) {
         this.ensureSignalR();
-        void this.loadRequests();
+        void this.loadJobs();
+      } else if (user?.role === UserRole.Client) {
+        void this.loadJobs();
       }
     });
   }
@@ -84,52 +94,63 @@ export class ProfilComponent implements OnInit, OnDestroy {
     const isEmergency = p.isEmergency ?? false;
     if (!jobId || !conversationId) return;
     const now = new Date().toISOString();
-    const item: JobRequestItem = {
+    const item: JobListItem = {
       jobId,
       conversationId,
       jobTitle,
       description,
       clientName,
-      clientId,
+      masterName: null,
       date,
+      clientId,
       price,
       isEmergency,
+      status: 'Pending',
       createdAt: now,
       updatedAt: now,
     };
-    this.requests.update((list) => {
+    this.myJobs.update((list) => {
       if (list.some((r) => r.conversationId === conversationId)) return list;
       return [...list, item];
     });
   }
 
-  async loadRequests(): Promise<void> {
-    this.loadingRequests.set(true);
+  async loadJobs(): Promise<void> {
+    this.loadingMyJobs.set(true);
     this.requestError.set(null);
     try {
-      const list = await this.jobService.getPendingRequests();
-      this.requests.set(list);
+      const list = await this.jobService.getJobs();
+      this.myJobs.set(list);
     } catch (err: unknown) {
       const msg =
         (err as { error?: { message?: string } })?.error?.message ??
         (err as Error)?.message ??
-        'Nije moguće učitati zahteve.';
+        'Nije moguće učitati poslove.';
       this.requestError.set(msg);
-      this.requests.set([]);
+      this.myJobs.set([]);
     } finally {
-      this.loadingRequests.set(false);
+      this.loadingMyJobs.set(false);
     }
   }
 
-  async acceptRequest(item: JobRequestItem): Promise<void> {
+  statusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      Created: 'Kreiran',
+      Pending: 'Na čekanju',
+      Accepted: 'Prihvaćen',
+      InProgress: 'U toku',
+      Completed: 'Završen',
+    };
+    return labels[status] ?? status;
+  }
+
+  async acceptRequest(item: JobListItem): Promise<void> {
     if (this.actingRequestId()) return;
     this.actingRequestId.set(item.jobId);
     this.requestError.set(null);
     try {
       await this.jobService.acceptJob(item.jobId);
-      this.requests.update((list) =>
-        list.filter((r) => r.jobId !== item.jobId)
-      );
+      await this.loadJobs();
     } catch {
       this.requestError.set('Nije moguće prihvatiti posao.');
     } finally {
@@ -137,13 +158,13 @@ export class ProfilComponent implements OnInit, OnDestroy {
     }
   }
 
-  async declineRequest(item: JobRequestItem): Promise<void> {
+  async declineRequest(item: JobListItem): Promise<void> {
     if (this.actingRequestId()) return;
     this.actingRequestId.set(item.conversationId);
     this.requestError.set(null);
     try {
       await this.jobService.declineRequest(item.conversationId);
-      this.requests.update((list) =>
+      this.myJobs.update((list) =>
         list.filter((r) => r.conversationId !== item.conversationId)
       );
     } catch {

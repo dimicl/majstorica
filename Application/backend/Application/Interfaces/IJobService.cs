@@ -1,4 +1,5 @@
 using backend.Api.DTOs.Jobs;
+using backend.Domain.Enums;
 
 namespace backend.Application.Interfaces;
 
@@ -15,7 +16,9 @@ public interface IJobService
     Task SendRequests(Guid jobId, List<Guid> masterIds);
 
     Task<bool> HasClientSentRequestToMaster(Guid clientId, Guid masterId);
-    Task<List<JobRequestListItemResponse>> GetPendingRequestsForMaster(Guid masterId);
+
+    /// <summary>Svi poslovi za korisnika: majstor = zahtevi na čekanju + dodeljeni, klijent = kreirani.</summary>
+    Task<List<JobListItemResponse>> GetJobsForUser(Guid userId, UserRole role);
 
     Task AcceptJob(Guid jobId, Guid masterId);
 

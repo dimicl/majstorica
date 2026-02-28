@@ -11,4 +11,7 @@ export class SharedSvgRoutes {
   static REQUESTS_ICON = '/assets/icons/requests.svg';
 
   static BACK_ICON = '/assets/icons/backwards.svg';
+  static PHONE_ICON = '/assets/icons/phone-icon.svg';
+  static EMAIL_ICON = '/assets/icons/email-icon.svg';
+  static ADDRESS_ICON = '/assets/icons/address-icon.svg';
 }

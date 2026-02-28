@@ -1,5 +1,6 @@
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Persistence.MongoDb;
 
 namespace backend.Infrastructure.Persistence.MongoDb;
@@ -16,6 +17,12 @@ public class JobRepository : IJobRepository
     }
 
     public async Task<Job?> GetById(Guid id) => await _mongo.GetById(id);
+
+    public Task<List<Job>> GetByMasterIdAndStatuses(Guid masterId, IEnumerable<JobStatus> statuses) =>
+        _mongo.GetByMasterIdAndStatuses(masterId, statuses);
+
+    public Task<List<Job>> GetByClientId(Guid clientId) =>
+        _mongo.GetByClientId(clientId);
 
     public async Task Save(Job job)
     {

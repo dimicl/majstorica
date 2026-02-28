@@ -70,6 +70,12 @@
   gap: 16px;
 }
 
+.technicians-search-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .technicians-search {
   display: flex;
   align-items: center;
@@ -88,6 +94,20 @@
   font-weight: 600;
   color: rgba(17, 24, 39, 0.8);
   outline: none;
+}
+
+.technicians-search__filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.technicians-search__filter-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: rgba(17, 24, 39, 0.65);
+  flex-shrink: 0;
 }
 
 .technicians-search__filters {
@@ -180,6 +200,12 @@
   margin: 0;
   font-size: 0.9rem;
   color: rgba(17, 24, 39, 0.65);
+}
+
+.technician-card__categories {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: rgba(17, 24, 39, 0.55);
 }
 
 .technician-card__tag {

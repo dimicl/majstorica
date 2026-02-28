@@ -90,6 +90,21 @@
   color: rgba(17, 24, 39, 0.6);
 }
 
+.profil-subsection {
+  margin-bottom: 28px;
+}
+
+.profil-subsection:last-child {
+  margin-bottom: 0;
+}
+
+.profil-subsection-title {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: rgba(17, 24, 39, 0.85);
+}
+
 .profil-empty {
   padding: 24px 0 0;
   border-top: 1px solid rgba(17, 24, 39, 0.06);
@@ -133,6 +148,13 @@
   margin: 0;
   font-weight: 600;
   color: rgba(17, 24, 39, 0.6);
+}
+
+.profil-empty-inline {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.55);
 }
 
 .profil-requests-table {

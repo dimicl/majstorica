@@ -35,4 +35,13 @@ public class MasterRepository : IMasterRepository
         var doc = await _collection.Find(x => x.UserId == userId).FirstOrDefaultAsync();
         return doc == null ? null : MasterMapper.ToDomain(doc);
     }
+
+    public async Task<List<Master>> GetByUserIds(IEnumerable<Guid> userIds)
+    {
+        var ids = userIds.Distinct().ToList();
+        if (ids.Count == 0) return new List<Master>();
+        var filter = Builders<MasterDocument>.Filter.In(x => x.UserId, ids);
+        var docs = await _collection.Find(filter).ToListAsync();
+        return docs.Select(MasterMapper.ToDomain).ToList();
+    }
 }

@@ -60,6 +60,19 @@ export class AuthComponent {
           Validators.maxLength(30),
         ],
       ],
+      phone: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^\d{10}$/),
+        ],
+      ],
+      deliveryAddress: [
+        '',
+        [
+          Validators.maxLength(200),
+        ],
+      ],
       password: [
         '',
         [
@@ -124,8 +137,16 @@ export class AuthComponent {
   // Submit register forme
   public onRegister(): void {
     if (this.registerForm.valid) {
-      const { firstName, lastName, email, username, password, role } =
-        this.registerForm.value;
+      const {
+        firstName,
+        lastName,
+        email,
+        username,
+        phone,
+        deliveryAddress,
+        password,
+        role,
+      } = this.registerForm.value;
       // role iz selecta dolazi kao string – backend očekuje number (UserRole enum)
       const roleValue =
         typeof role === 'string' ? Number(role) : (role as UserRole);
@@ -136,6 +157,8 @@ export class AuthComponent {
         username,
         password,
         role: roleValue,
+        phone: phone || null,
+        deliveryAddress: deliveryAddress || null,
       };
 
       this.auth.dispatchRegister(registerRequest);

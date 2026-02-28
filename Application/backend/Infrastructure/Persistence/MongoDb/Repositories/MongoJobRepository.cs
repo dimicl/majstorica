@@ -1,5 +1,5 @@
-using backend.Application.Interfaces;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Persistence.MongoDb.Entities;
 using backend.Infrastructure.Persistence.MongoDb.Mappers;
 using MongoDB.Driver;
@@ -28,5 +28,26 @@ public class MongoJobRepository
     {
         var doc = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         return doc == null ? null : JobMapper.ToDomain(doc);
+    }
+
+    /// <summary>Poslovi gde je majstor dodeljen i status je jedan od navedenih.</summary>
+    public async Task<List<Job>> GetByMasterIdAndStatuses(Guid masterId, IEnumerable<JobStatus> statuses)
+    {
+        var statusStrings = statuses.Select(s => s.ToString()).ToList();
+        var filter = Builders<JobDocument>.Filter.And(
+            Builders<JobDocument>.Filter.Eq(x => x.MasterId, masterId),
+            Builders<JobDocument>.Filter.In(x => x.Status, statusStrings));
+        var docs = await _collection.Find(filter).ToListAsync();
+        return docs.Select(JobMapper.ToDomain).ToList();
+    }
+
+    /// <summary>Svi poslovi koje je kreirao klijent.</summary>
+    public async Task<List<Job>> GetByClientId(Guid clientId)
+    {
+        var docs = await _collection
+            .Find(x => x.ClientId == clientId)
+            .SortByDescending(x => x.CreatedAt)
+            .ToListAsync();
+        return docs.Select(JobMapper.ToDomain).ToList();
     }
 }

@@ -2,7 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { MasterProfile } from '../models/master.model';
-import { MasterListItem, UserResponse } from '../interfaces';
+import { MasterListItem, type MastersListParams } from '../interfaces';
+import { UserResponse } from '../interfaces';
 import { AuthService } from './auth.service';
 import { API_BASE_URL } from '../constants/api.constants';
 
@@ -18,11 +19,26 @@ export class MasterService {
     return this.http.get<MasterProfile>(`${this.API_URL}/master/getMaster`);
   }
 
-  getMasters(): Observable<MasterListItem[]> {
-    return this.http.get<MasterListItem[]>(`${this.API_URL}/masters`);
+  /** Lista majstora – opciono sa parametrima za filter/sort (keš na backendu). */
+  getMasters(params?: MastersListParams): Observable<MasterListItem[]> {
+    let url = `${this.API_URL}/masters`;
+    if (params) {
+      const q = new URLSearchParams();
+      if (params.search?.trim()) q.set('search', params.search.trim());
+      if (params.sort) q.set('sort', params.sort);
+      if (params.category?.trim()) q.set('category', params.category.trim());
+      if (
+        params.minRating != null &&
+        params.minRating >= 1 &&
+        params.minRating <= 5
+      )
+        q.set('minRating', String(params.minRating));
+      const queryString = q.toString();
+      if (queryString) url += '?' + queryString;
+    }
+    return this.http.get<MasterListItem[]>(url);
   }
 
-  /** Podaci o korisniku (majstoru) po id – koristi zajednički user API preko AuthService. */
   async getMasterById(id: string): Promise<UserResponse | null> {
     try {
       return await firstValueFrom(this.auth.getUserById(id));

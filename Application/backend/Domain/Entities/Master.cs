@@ -1,4 +1,7 @@
+using backend.Domain.Enums;
+
 namespace backend.Domain.Entities;
+
 public class Master
 {
     public Guid Id { get; internal set; }
@@ -6,7 +9,7 @@ public class Master
 
     public string? Bio { get; internal set; }
 
-    public IReadOnlyList<string> Categories { get; internal set; } = new List<string>();
+    public MasterCategory? Category { get; internal set; }
 
     public decimal? Rating { get; internal set; }
 
@@ -19,12 +22,12 @@ public class Master
 
     protected Master() { }
 
-    public Master(Guid userId, string? bio = null, IEnumerable<string>? categories = null, int? yearsExperience = null)
+    public Master(Guid userId, string? bio = null, MasterCategory? category = null, int? yearsExperience = null)
     {
         Id = Guid.NewGuid();
         UserId = userId;
         Bio = bio;
-        Categories = (categories?.ToList() ?? new List<string>()).AsReadOnly();
+        Category = category;
         YearsExperience = yearsExperience;
         CreatedAt = DateTime.UtcNow;
     }
@@ -33,7 +36,7 @@ public class Master
         Guid id,
         Guid userId,
         string? bio,
-        IReadOnlyList<string> categories,
+        MasterCategory? category,
         decimal? rating,
         int? yearsExperience,
         DateTime createdAt,
@@ -44,7 +47,7 @@ public class Master
             Id = id,
             UserId = userId,
             Bio = bio,
-            Categories = categories,
+            Category = category,
             Rating = rating,
             YearsExperience = yearsExperience,
             CreatedAt = createdAt,
@@ -58,9 +61,9 @@ public class Master
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateCategories(IEnumerable<string> categories)
+    public void UpdateCategory(MasterCategory? category)
     {
-        Categories = (categories?.ToList() ?? new List<string>()).AsReadOnly();
+        Category = category;
         UpdatedAt = DateTime.UtcNow;
     }
 
