@@ -60,14 +60,6 @@ public class ConversationRepository : IConversationRepository
         return docs.Select(ConversationMapper.ToDomain).ToList();
     }
 
-    public async Task<ChatConversation?> GetByClientAndMasterAndJob(Guid clientId, Guid masterId, Guid jobId)
-    {
-        var doc = await _collection
-            .Find(x => x.ClientId == clientId && x.MasterId == masterId && x.JobId == jobId)
-            .FirstOrDefaultAsync();
-        return doc == null ? null : ConversationMapper.ToDomain(doc);
-    }
-
     public async Task<ChatConversation?> GetActiveByClientAndMaster(Guid clientId, Guid masterId)
     {
         var doc = await _collection
@@ -82,18 +74,6 @@ public class ConversationRepository : IConversationRepository
             .Find(x => x.ClientId == clientId && x.MasterId == masterId)
             .FirstOrDefaultAsync();
         return doc == null ? null : ConversationMapper.ToDomain(doc);
-    }
-
-    /// <summary>Da li postoji aktivna konverzacija za posao (ne "Napiši poruku" bez posla) između klijenta i majstora.</summary>
-    public async Task<bool> ExistsByClientAndMaster(Guid clientId, Guid masterId)
-    {
-        var count = await _collection.CountDocumentsAsync(
-            Builders<ConversationDocument>.Filter.And(
-                Builders<ConversationDocument>.Filter.Eq(x => x.ClientId, clientId),
-                Builders<ConversationDocument>.Filter.Eq(x => x.MasterId, masterId),
-                Builders<ConversationDocument>.Filter.Eq(x => x.IsActive, true),
-                Builders<ConversationDocument>.Filter.Ne(x => x.JobId, Guid.Empty)));
-        return count > 0;
     }
 
     public async Task<int> GetUnreadCountAsync(Guid conversationId, Guid userId)

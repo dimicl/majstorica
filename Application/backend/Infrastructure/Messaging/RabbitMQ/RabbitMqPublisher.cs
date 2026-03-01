@@ -33,7 +33,12 @@ public class RabbitMqPublisher : IMessagePublisher, IDisposable
     public Task Publish(IDomainEvent domainEvent)
     {
         var payload = JsonSerializer.Serialize(domainEvent);
-        var body = Encoding.UTF8.GetBytes(payload);
+        var envelope = new DomainEventEnvelope
+        {
+            EventType = domainEvent.GetType().Name,
+            Payload = payload
+        };
+        var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope));
 
         _channel.BasicPublish(
             exchange: ExchangeName,

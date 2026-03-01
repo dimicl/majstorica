@@ -7,25 +7,39 @@ import {
   JobService,
   type JobListItem,
 } from '../../shared/services/job.service';
+import { MasterService } from '../../shared/services/master.service';
 import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { ButtonComponent } from '../../components/button/button.component';
 import { BUTTON_TYPES } from '../../shared/types/button.type';
 import { SIGNALR_STATUS } from '../../shared/types';
 import { NewJobRequestPayload } from '../../shared/interfaces';
+import { MASTER_CATEGORY_OPTIONS } from '../../shared/enums';
+import { FormsModule } from '@angular/forms';
 import { signal, computed } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { SvgIconComponent } from 'angular-svg-icon';
+import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 
 const HUB_URL = 'http://localhost:5187/hubs/document';
 
 @Component({
   selector: 'app-profil',
-  imports: [AsyncPipe, DatePipe, RouterLink, ButtonComponent],
+  imports: [
+    AsyncPipe,
+    DatePipe,
+    RouterLink,
+    ButtonComponent,
+    FormsModule,
+    SvgIconComponent,
+  ],
   templateUrl: './profil.component.html',
   styleUrl: './profil.component.scss',
 })
 export class ProfilComponent implements OnInit, OnDestroy {
   private auth = inject(AuthSelectorService);
   private jobService = inject(JobService);
+  private masterService = inject(MasterService);
   private signalr = inject(SignalrService);
   private authService = inject(AuthService);
   private ngZone = inject(NgZone);
@@ -34,18 +48,30 @@ export class ProfilComponent implements OnInit, OnDestroy {
   user$ = this.auth.userSelector$;
   public userRole = UserRole;
   public eButtonType = BUTTON_TYPES;
+  public sharedSvgRoutes = SharedSvgRoutes;
 
-  /** Svi poslovi za korisnika (jedan API poziv). */
+  masterProfile = signal<{
+    category: string | null;
+    rating: number | null;
+  } | null>(null);
+  masterProfileLoading = signal(false);
+  masterCategorySaving = signal(false);
+  masterCategoryError = signal<string | null>(null);
+  /** Opcije za dropdown kategorije (iz enum-a). */
+  public categoryOptions = MASTER_CATEGORY_OPTIONS.map((o) => ({
+    value: o.label,
+    label: o.label,
+  }));
+
   myJobs = signal<JobListItem[]>([]);
   loadingMyJobs = signal(false);
   requestError = signal<string | null>(null);
   actingRequestId = signal<string | null>(null);
 
-  /** Za majstora: poslovi sa statusom Pending (zahtevi na čekanju). */
   pendingRequests = computed(() =>
     this.myJobs().filter((j) => j.status === 'Pending')
   );
-  /** Za majstora: poslovi koji nisu Pending (dodeljeni). */
+
   assignedJobs = computed(() =>
     this.myJobs().filter((j) => j.status !== 'Pending')
   );
@@ -72,10 +98,52 @@ export class ProfilComponent implements OnInit, OnDestroy {
       if (user?.role === UserRole.Master) {
         this.ensureSignalR();
         void this.loadJobs();
+        void this.loadMasterProfile();
       } else if (user?.role === UserRole.Client) {
         void this.loadJobs();
+      } else {
+        this.masterProfile.set(null);
       }
     });
+  }
+
+  async loadMasterProfile(): Promise<void> {
+    this.masterProfileLoading.set(true);
+    this.masterCategoryError.set(null);
+    try {
+      const res = await firstValueFrom(this.masterService.getMyMasterProfile());
+      this.masterProfile.set({
+        category: res.category ?? null,
+        rating: res.rating ?? null,
+      });
+    } catch {
+      this.masterProfile.set(null);
+    } finally {
+      this.masterProfileLoading.set(false);
+    }
+  }
+
+  async setMasterCategory(category: string): Promise<void> {
+    if (this.masterCategorySaving()) return;
+    this.masterCategorySaving.set(true);
+    this.masterCategoryError.set(null);
+    try {
+      await firstValueFrom(
+        this.masterService.updateMyCategory(category || null)
+      );
+      this.masterProfile.update((p) =>
+        p
+          ? { ...p, category: category || null }
+          : { category: category || null, rating: null }
+      );
+    } catch (err: unknown) {
+      const msg =
+        (err as { error?: { message?: string } })?.error?.message ??
+        'Nije moguće sačuvati kategoriju.';
+      this.masterCategoryError.set(msg);
+    } finally {
+      this.masterCategorySaving.set(false);
+    }
   }
 
   ngOnDestroy(): void {

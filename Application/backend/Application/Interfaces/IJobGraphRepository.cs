@@ -6,4 +6,6 @@ public interface IJobGraphRepository
     Task InviteMasters(Guid jobId, IEnumerable<Guid> masterIds);
     Task<List<Guid>> GetInvitedMasters(Guid jobId);
     Task AcceptMaster(Guid jobId, Guid masterId);
+
+    Task RecordHired(Guid clientId, Guid masterId, Guid jobId, DateTime completedAt, int? rating);
 }

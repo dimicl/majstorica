@@ -15,17 +15,20 @@ public class UserService : IUserService
     private readonly IUserGraphSync _userGraphSync;
     private readonly IMasterRepository _masterRepository;
     private readonly IRedisListCache _redisListCache;
+    private readonly IGraphQueryRepository _graphQueryRepository;
 
     public UserService(
         IUserRepository userRepository,
         IUserGraphSync userGraphSync,
         IMasterRepository masterRepository,
-        IRedisListCache redisListCache)
+        IRedisListCache redisListCache,
+        IGraphQueryRepository graphQueryRepository)
     {
         _userRepository = userRepository;
         _userGraphSync = userGraphSync;
         _masterRepository = masterRepository;
         _redisListCache = redisListCache;
+        _graphQueryRepository = graphQueryRepository;
     }
 
     public async Task<User?> GetById(Guid userId)
@@ -177,5 +180,35 @@ public class UserService : IUserService
             sorted.Reverse();
 
         return sorted;
+    }
+
+    public async Task<List<MasterListItemResponse>> GetRecommendedMasters(Guid clientId, int limit = 10)
+    {
+        var ids = await _graphQueryRepository.GetRecommendedMastersAsync(clientId, null, limit);
+        if (ids.Count == 0)
+            return new List<MasterListItemResponse>();
+
+        var result = new List<MasterListItemResponse>();
+        var masters = await _masterRepository.GetByUserIds(ids.ToList());
+        var masterByUserId = masters.ToDictionary(m => m.UserId);
+
+        foreach (var id in ids)
+        {
+            var user = await _userRepository.GetById(id);
+            if (user == null || !user.IsActive || user.Role != UserRole.Master)
+                continue;
+            var master = masterByUserId.GetValueOrDefault(id);
+            result.Add(new MasterListItemResponse
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                Category = master?.Category.HasValue == true ? MasterCategoryDisplay.ToDisplayName(master.Category!.Value) : null,
+                Rating = master?.Rating
+            });
+        }
+
+        return result;
     }
 }

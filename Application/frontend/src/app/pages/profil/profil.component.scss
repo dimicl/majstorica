@@ -42,6 +42,76 @@
   line-height: 1.2;
 }
 
+.profil-category-line {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.profil-category-placeholder {
+  color: rgba(17, 24, 39, 0.5);
+  font-style: italic;
+}
+
+.profil-category-value {
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.85);
+}
+
+.profil-category-choices {
+  margin-bottom: 10px;
+}
+
+.profil-category-select {
+  min-width: 200px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(17, 24, 39, 0.2);
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(17, 24, 39, 0.85);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.profil-category-chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 24, 39, 0.2);
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.75);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.profil-category-chip:hover:not(:disabled) {
+  background: rgba(17, 24, 39, 0.04);
+  border-color: rgba(17, 24, 39, 0.35);
+}
+
+.profil-category-chip--active {
+  background: rgba(62, 125, 215, 0.12);
+  border-color: $color-blue;
+  color: $color-blue;
+}
+
+.profil-category-chip:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.profil-category-error {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #b91c1c;
+}
+
 .profil-username {
   margin: 0 0 16px;
   font-size: 1rem;
@@ -235,6 +305,19 @@
   background: rgba(17, 24, 39, 0.08);
   color: rgba(17, 24, 39, 0.6);
   border: 1px solid rgba(17, 24, 39, 0.12);
+}
+
+.profile-data {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-data-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 @media (max-width: 600px) {

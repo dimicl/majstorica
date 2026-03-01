@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
-import { MasterProfile } from '../models/master.model';
+import { MasterProfile, MasterProfileResponse } from '../models/master.model';
 import { MasterListItem, type MastersListParams } from '../interfaces';
 import { UserResponse } from '../interfaces';
 import { AuthService } from './auth.service';
@@ -17,6 +17,24 @@ export class MasterService {
 
   getMaster(): Observable<MasterProfile> {
     return this.http.get<MasterProfile>(`${this.API_URL}/master/getMaster`);
+  }
+
+  /** Profil trenutnog majstora (user + kategorija, ocena). GET api/masters/profile */
+  getMyMasterProfile(): Observable<MasterProfileResponse> {
+    return this.http.get<MasterProfileResponse>(`${this.API_URL}/masters/profile`);
+  }
+
+  /** Ažurira kategoriju majstora. category = prikazno ime (npr. "Električar") ili null da ukloni. */
+  updateMyCategory(category: string | null): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/masters/category`, {
+      category: category ?? null,
+    });
+  }
+
+  /** Preporučeni majstori za klijenta (Neo4j – ista veština kao već angažovani). Za ne-klijente backend vraća praznu listu. */
+  getRecommendedMasters(limit = 10): Observable<MasterListItem[]> {
+    const url = `${this.API_URL}/masters/recommended?limit=${Math.min(20, Math.max(1, limit))}`;
+    return this.http.get<MasterListItem[]>(url);
   }
 
   /** Lista majstora – opciono sa parametrima za filter/sort (keš na backendu). */

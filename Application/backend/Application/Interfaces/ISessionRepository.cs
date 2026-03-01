@@ -10,8 +10,6 @@ public interface ISessionRepository
 
     Task<UserSession?> GetByConnectionId(string connectionId);
 
-    Task<List<UserSession>> GetByJobId(Guid jobId);
-
     Task<List<UserSession>> GetAll();
 
     Task Remove(string sessionId);

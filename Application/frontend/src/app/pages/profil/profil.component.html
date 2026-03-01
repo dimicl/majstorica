@@ -2,14 +2,58 @@
   <header class="profil-header">
     <h1>Profil</h1>
   </header>
+
   <div class="profil-shell">
     @if (user$ | async; as user) {
+
     <div class="profil-card">
       <div class="profil-hero">
         <h2 class="profil-name">{{ user.firstName }} {{ user.lastName }}</h2>
+
+        <!-- MASTER SPECIFIC -->
+        @if (user.role === userRole.Master) {
+        <p class="profil-category-line">
+          @if (masterProfileLoading()) {
+          <span class="profil-category-placeholder">Učitavanje...</span>
+          } @else if (masterProfile()?.category) {
+          <span class="profil-category-value">
+            {{ masterProfile()!.category }}
+          </span>
+          } @else {
+          <span class="profil-category-placeholder"> Dodajte kategoriju </span>
+          }
+        </p>
+
+        @if (!masterProfileLoading() && !masterProfile()?.category) {
+        <div
+          class="profil-category-choices"
+          role="group"
+          aria-label="Izbor kategorije"
+        >
+          <select
+            class="profil-category-select"
+            [value]="''"
+            [disabled]="masterCategorySaving()"
+            (change)="setMasterCategory($any($event.target).value)"
+          >
+            <option value="">Dodajte kategoriju</option>
+            @for (opt of categoryOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+
+        @if (masterCategoryError()) {
+        <p class="profil-category-error" role="alert">
+          {{ masterCategoryError() }}
+        </p>
+        } } }
+
+        <!-- COMMON FOR ALL ROLES -->
         <p class="profil-username">
           Korisničko ime: <strong>{{ user.username }}</strong>
         </p>
+
         <span
           class="profil-badge"
           [class.profil-badge--client]="user.role === userRole.Client"
@@ -23,9 +67,39 @@
               : "Admin"
           }}
         </span>
+        <div class="profile-data">
+          <div class="profile-data-container">
+            <svg-icon
+              [src]="sharedSvgRoutes.PHONE_ICON"
+              class="d-flex align-items-center svg-size-18"
+            />
+            <span class="profile-value">{{
+              user.phone?.trim() || "No Phone"
+            }}</span>
+          </div>
+          <div class="profile-data-container">
+            <svg-icon
+              [src]="sharedSvgRoutes.ADDRESS_ICON"
+              class="d-flex align-items-center svg-size-18"
+            />
+            <span class="profile-value">{{
+              user.deliveryAddress?.trim() ?? "No Address"
+            }}</span>
+          </div>
+          <div class="profile-data-container">
+            <svg-icon
+              [src]="sharedSvgRoutes.EMAIL_ICON"
+              class="d-flex align-items-center svg-size-18"
+            />
+            <span class="profile-value">{{
+              user.email?.trim() ?? "No Email"
+            }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- ROLE SWITCH -->
     @switch (user.role) { @case (userRole.Client) {
     <div class="profil-card">
       <div class="profil-section-head">
@@ -34,6 +108,7 @@
           Poslovi koje ste kreirali i njihov status.
         </p>
       </div>
+
       @if (loadingMyJobs()) {
       <p class="profil-loading">Učitavanje poslova...</p>
       } @else if (myJobs().length > 0) {
@@ -52,17 +127,31 @@
           @for (job of myJobs(); track job.jobId) {
           <tr class="profil-request-row">
             <td>{{ job.masterName || "—" }}</td>
-            <td class="profil-request-desc-cell">{{ job.jobTitle || "—" }}</td>
+            <td class="profil-request-desc-cell">
+              {{ job.jobTitle || "—" }}
+            </td>
             <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
-            <td>{{ job.price != null ? job.price + " RSD" : "—" }}</td>
+            <td>
+              {{ job.price != null ? job.price + " RSD" : "—" }}
+            </td>
             <td>
               @if (job.isEmergency) {
-              <span class="profil-request-badge profil-request-badge--emergency">Hitno</span>
+              <span
+                class="profil-request-badge profil-request-badge--emergency"
+              >
+                Hitno
+              </span>
               } @else {
-              <span class="profil-request-badge profil-request-badge--normal">Obično</span>
+              <span class="profil-request-badge profil-request-badge--normal">
+                Obično
+              </span>
               }
             </td>
-            <td><span class="profil-request-status">{{ statusLabel(job.status) }}</span></td>
+            <td>
+              <span class="profil-request-status">
+                {{ statusLabel(job.status) }}
+              </span>
+            </td>
           </tr>
           }
         </tbody>
@@ -86,13 +175,17 @@
           Zahtevi od klijenata i vaši aktivni poslovi.
         </p>
       </div>
+
       @if (requestError()) {
-      <p class="profil-error" role="alert">{{ requestError() }}</p>
+      <p class="profil-error" role="alert">
+        {{ requestError() }}
+      </p>
       }
 
-      <!-- Moji poslovi (dodeljeni, bez Pending) -->
+      <!-- MOJI POSLOVI -->
       <div class="profil-subsection">
         <h3 class="profil-subsection-title">Moji poslovi</h3>
+
         @if (loadingMyJobs()) {
         <p class="profil-loading">Učitavanje poslova...</p>
         } @else if (assignedJobs().length > 0) {
@@ -111,17 +204,31 @@
             @for (job of assignedJobs(); track job.jobId) {
             <tr class="profil-request-row">
               <td>{{ job.clientName }}</td>
-              <td class="profil-request-desc-cell">{{ job.jobTitle || "—" }}</td>
+              <td class="profil-request-desc-cell">
+                {{ job.jobTitle || "—" }}
+              </td>
               <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
-              <td>{{ job.price != null ? job.price + " RSD" : "—" }}</td>
+              <td>
+                {{ job.price != null ? job.price + " RSD" : "—" }}
+              </td>
               <td>
                 @if (job.isEmergency) {
-                <span class="profil-request-badge profil-request-badge--emergency">Hitno</span>
+                <span
+                  class="profil-request-badge profil-request-badge--emergency"
+                >
+                  Hitno
+                </span>
                 } @else {
-                <span class="profil-request-badge profil-request-badge--normal">Obično</span>
+                <span class="profil-request-badge profil-request-badge--normal">
+                  Obično
+                </span>
                 }
               </td>
-              <td><span class="profil-request-status">{{ statusLabel(job.status) }}</span></td>
+              <td>
+                <span class="profil-request-status">
+                  {{ statusLabel(job.status) }}
+                </span>
+              </td>
             </tr>
             }
           </tbody>
@@ -131,9 +238,10 @@
         }
       </div>
 
-      <!-- Zahtevi na čekanju (status Pending) -->
+      <!-- PENDING -->
       <div class="profil-subsection">
         <h3 class="profil-subsection-title">Zahtevi na čekanju</h3>
+
         @if (loadingMyJobs()) {
         <p class="profil-loading">Učitavanje zahteva...</p>
         } @else if (pendingRequests().length > 0) {
@@ -146,23 +254,36 @@
               <th>Cena</th>
               <th>Hitnost</th>
               <th>Stanje</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             @for (req of pendingRequests(); track req.conversationId) {
             <tr class="profil-request-row">
               <td>{{ req.clientName }}</td>
-              <td class="profil-request-desc-cell">{{ req.jobTitle || "—" }}</td>
+              <td class="profil-request-desc-cell">
+                {{ req.jobTitle || "—" }}
+              </td>
               <td>{{ req.date | date : "dd.MM.yyyy." }}</td>
-              <td>{{ req.price != null ? req.price + " RSD" : "—" }}</td>
+              <td>
+                {{ req.price != null ? req.price + " RSD" : "—" }}
+              </td>
               <td>
                 @if (req.isEmergency) {
-                <span class="profil-request-badge profil-request-badge--emergency">Hitno</span>
+                <span
+                  class="profil-request-badge profil-request-badge--emergency"
+                >
+                  Hitno
+                </span>
                 } @else {
-                <span class="profil-request-badge profil-request-badge--normal">Obično</span>
+                <span class="profil-request-badge profil-request-badge--normal">
+                  Obično
+                </span>
                 }
               </td>
-              <td><span class="profil-request-status">Na čekanju</span></td>
+              <td>
+                <span class="profil-request-status"> Na čekanju </span>
+              </td>
               <td class="profil-request-actions-cell">
                 <div class="profil-request-actions">
                   <app-button

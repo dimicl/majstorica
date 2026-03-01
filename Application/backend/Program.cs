@@ -117,6 +117,7 @@ builder.Services.AddScoped<IJobRepository, JobRepository>();
 
 // Neo4j (graph: minimal User/Job nodes, relationships)
 builder.Services.AddScoped<IUserGraphSync, Neo4jUserGraphRepository>();
+builder.Services.AddScoped<IGraphQueryRepository, Neo4jGraphQueryRepository>();
 
 // Services
 builder.Services.AddScoped<IJobService, JobService>();
@@ -131,6 +132,7 @@ builder.Services.AddScoped<IConversationService, ConversationService>();
 
 // RabbitMQ
 builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
+builder.Services.AddHostedService<backend.Infrastructure.Messaging.RabbitMQ.RabbitMqSignalRHostedService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -209,16 +211,7 @@ catch (Exception ex)
     logger.LogWarning(ex, "Redis indeksi nisu kreirani (možda već postoje). Nastavljam.");
 }
 
-try
-{
-    var rabbitConsumer = new RabbitMqConsumer();
-    rabbitConsumer.Start();
-}
-catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
-{
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogWarning(ex, "RabbitMQ nije dostupan – messaging consumer nije pokrenut. Aplikacija nastavlja bez njega.");
-}
+// RabbitMQ consumer za SignalR je registrovan kao HostedService (RabbitMqSignalRHostedService).
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -46,14 +46,6 @@ public class SessionService : ISessionService
         await _repository.Upsert(session);
     }
 
-    public async Task<List<UserSession>> GetOnlineMasters()
-    {
-        var all = await _repository.GetAll();
-        return all
-            .Where(s => s.Role == UserRole.Master && s.CurrentJobId == null)
-            .ToList();
-    }
-
     public async Task HandleDisconnect(string connectionId)
     {
         var session = await _repository.GetByConnectionId(connectionId);

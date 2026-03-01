@@ -28,6 +28,43 @@
 
     @if (isListActive) {
     <div class="technicians-list-mode">
+      <section class="recommended-section" aria-label="Preporučeni majstori">
+        <h2 class="recommended-section__title">Preporučeni za vas</h2>
+        @if (recommendedLoading) {
+        <p class="recommended-section__loading">Učitavanje preporuka...</p>
+        } @else if (recommendedMasters.length > 0) {
+        <div class="technician-grid recommended-section__grid custom-scrollbar">
+          <div
+            *ngFor="let technician of recommendedMasters"
+            type="button"
+            class="technician-card card-hover"
+            (click)="openDetail(technician.id)"
+          >
+            <header>
+              <app-avatar
+                [firstName]="technician.firstName"
+                [lastName]="technician.lastName"
+                [width]="56"
+                [height]="56"
+              />
+              <div>
+                <h3>{{ fullName(technician) }}</h3>
+                <p class="technician-card__location">{{ atUsername(technician) }}</p>
+                @if (technician.category) {
+                <p class="technician-card__categories">{{ technician.category }}</p>
+                }
+                @if (technician.rating != null) {
+                <p class="technician-card__rating">★ {{ technician.rating | number:'1.1-1' }}</p>
+                }
+              </div>
+            </header>
+            <span class="technician-card__link">Pogledaj profil →</span>
+          </div>
+        </div>
+        } @else {
+        <p class="recommended-section__empty">Trenutno nema preporuka. Angažujte majstora da bismo vam preporučili slične.</p>
+        }
+      </section>
       <div class="technicians-search-wrap">
         <label class="technicians-search">
           <input

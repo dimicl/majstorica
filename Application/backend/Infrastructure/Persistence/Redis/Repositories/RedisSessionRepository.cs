@@ -34,12 +34,6 @@ public class RedisSessionRepository : ISessionRepository
         return Task.FromResult(doc == null ? null : UserSessionMapper.ToDomain(doc));
     }
 
-    public Task<List<UserSession>> GetByJobId(Guid jobId)
-    {
-        var docs = _sessions.Where(s => s.CurrentJobId == jobId).ToList();
-        return Task.FromResult(docs.Select(UserSessionMapper.ToDomain).ToList());
-    }
-
     public Task<List<UserSession>> GetAll()
     {
         var docs = _sessions.ToList();

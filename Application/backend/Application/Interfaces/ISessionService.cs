@@ -14,8 +14,6 @@ public interface ISessionService
 
     Task MarkUserInConversation(Guid userId, Guid conversationId);
 
-    Task<List<UserSession>> GetOnlineMasters();
-
     Task HandleDisconnect(string connectionId);
 
     Task<bool> IsUserOnlineAsync(Guid userId);

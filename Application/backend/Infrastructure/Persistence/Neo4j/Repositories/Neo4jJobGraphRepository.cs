@@ -78,4 +78,18 @@ public class Neo4jJobGraphRepository : IJobGraphRepository
         await using var session = _driver.AsyncSession();
         await session.ExecuteWriteAsync(tx => tx.RunAsync(query, parameters));
     }
+
+    public async Task RecordHired(Guid clientId, Guid masterId, Guid jobId, DateTime completedAt, int? rating)
+    {
+        var parameters = JobGraphMapper.ToRecordHiredParameters(clientId, masterId, jobId, completedAt, rating);
+
+        var query = @"
+            MERGE (c:Client { id: $clientId })
+            MERGE (m:Master { id: $masterId })
+            CREATE (c)-[:HIRED { jobId: $jobId, completedAt: $completedAt, rating: $rating }]->(m)
+        ";
+
+        await using var session = _driver.AsyncSession();
+        await session.ExecuteWriteAsync(tx => tx.RunAsync(query, parameters));
+    }
 }

@@ -60,6 +60,10 @@ export class TechniciansComponent implements OnInit {
   public isLoading = true;
   public loadError: string | null = null;
 
+  /** Preporučeni majstori (Neo4j) – za klijente koji su već angažovali majstore. */
+  public recommendedMasters: MasterListItem[] = [];
+  public recommendedLoading = false;
+
   public get mastersListParams(): MastersListParams {
     return {
       search: this.listParams.search.trim(),
@@ -100,6 +104,7 @@ export class TechniciansComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMasters();
+    this.loadRecommended();
   }
 
   async loadMasters(): Promise<void> {
@@ -119,6 +124,24 @@ export class TechniciansComponent implements OnInit {
       this.technicians = [];
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  async loadRecommended(): Promise<void> {
+    this.recommendedLoading = true;
+    try {
+      const raw = await firstValueFrom(
+        this.masterService.getRecommendedMasters(10)
+      );
+      this.recommendedMasters = raw.map((t) => ({
+        ...t,
+        category: t.category ?? null,
+        rating: t.rating ?? null,
+      }));
+    } catch {
+      this.recommendedMasters = [];
+    } finally {
+      this.recommendedLoading = false;
     }
   }
 

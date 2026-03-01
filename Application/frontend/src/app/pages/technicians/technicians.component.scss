@@ -70,6 +70,31 @@
   gap: 16px;
 }
 
+.recommended-section {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.recommended-section__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.9);
+  margin: 0 0 12px;
+}
+
+.recommended-section__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.recommended-section__loading,
+.recommended-section__empty {
+  margin: 0;
+  color: rgba(17, 24, 39, 0.6);
+  font-size: 14px;
+}
+
 .technicians-search-wrap {
   display: flex;
   flex-direction: column;
