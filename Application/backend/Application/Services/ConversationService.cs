@@ -55,6 +55,7 @@ public class ConversationService : IConversationService
 
             var unreadCount = await _conversationRepository.GetUnreadCountAsync(conv.Id, userId);
             var isOnline = await _sessionService.IsUserOnlineAsync(otherPartyId);
+            var otherPartyLastSeen = await _sessionService.GetLastSeenAsync(otherPartyId);
 
             result.Add(new ConversationListItemResponse
             {
@@ -68,7 +69,8 @@ public class ConversationService : IConversationService
                 LastMessageAt = lastMessage?.SentAt,
                 IsActive = conv.IsActive,
                 UnreadCount = unreadCount,
-                IsOnline = isOnline
+                IsOnline = isOnline,
+                OtherPartyLastSeen = otherPartyLastSeen
             });
         }
 
@@ -101,6 +103,7 @@ public class ConversationService : IConversationService
 
         var unreadCount = await _conversationRepository.GetUnreadCountAsync(conversationId, userId);
         var isOnline = await _sessionService.IsUserOnlineAsync(otherPartyId);
+        var otherPartyLastSeen = await _sessionService.GetLastSeenAsync(otherPartyId);
 
         return new ConversationListItemResponse
         {
@@ -113,7 +116,8 @@ public class ConversationService : IConversationService
             LastMessageAt = lastMessage?.SentAt,
             IsActive = conversation.IsActive,
             UnreadCount = unreadCount,
-            IsOnline = isOnline
+            IsOnline = isOnline,
+            OtherPartyLastSeen = otherPartyLastSeen
         };
     }
 

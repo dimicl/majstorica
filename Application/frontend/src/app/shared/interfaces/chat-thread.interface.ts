@@ -9,4 +9,6 @@ export interface ChatThread {
   updatedAt: string;
   unreadCount: number;
   presence: ChatPresence;
+  /** Formatiran tekst za prikaz "Poslednje aktivan: ..." kada je offline. */
+  lastSeenText?: string;
 }

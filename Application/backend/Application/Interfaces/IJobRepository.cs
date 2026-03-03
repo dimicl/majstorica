@@ -14,4 +14,6 @@ public interface IJobRepository
     Task InviteMasters(Guid jobId, IEnumerable<Guid> masterIds);
     Task<List<Guid>> GetInvitedMasters(Guid jobId);
     Task AcceptMaster(Guid jobId, Guid masterId);
+    /// <summary>Neo4j: upis istorije angažovanja (Client)-[:HIRED]->(Master) za preporuke.</summary>
+    Task RecordHired(Guid clientId, Guid masterId, Guid jobId, DateTime completedAt, int? rating);
 }

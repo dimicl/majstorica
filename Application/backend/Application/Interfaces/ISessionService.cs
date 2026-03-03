@@ -17,4 +17,6 @@ public interface ISessionService
     Task HandleDisconnect(string connectionId);
 
     Task<bool> IsUserOnlineAsync(Guid userId);
+
+    Task<DateTime?> GetLastSeenAsync(Guid userId);
 }

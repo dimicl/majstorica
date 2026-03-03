@@ -32,6 +32,8 @@ export class ChatPanelComponent {
   presence = input<ChatPresence>('online');
 
   // Ako parent prosledi poruke, komponenta radi kao “viewer” + emituje send.
+  lastSeenText = input<string | undefined>(undefined);
+
   messages = input<ChatMessage[] | null>(null);
   send = output<string>();
 

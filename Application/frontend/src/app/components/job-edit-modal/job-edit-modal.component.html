@@ -1,0 +1,88 @@
+<div class="job-edit-modal-overlay" (click)="close()">
+  <div
+    class="job-edit-modal"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="job-edit-modal__header">
+      <h2 class="job-edit-modal__title">Posao – {{ job.jobTitle || 'Bez naslova' }}</h2>
+      <button
+        type="button"
+        class="job-edit-modal__close"
+        (click)="close(); $event.stopPropagation()"
+        aria-label="Zatvori"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </header>
+
+    <div class="job-edit-modal__body">
+      @if (lockLoading()) {
+        <p class="job-edit-modal__loading">Učitavanje...</p>
+      } @else if (lockMessage()) {
+        <p class="job-edit-modal__lock-msg" role="alert">
+          {{ lockMessage() }}
+        </p>
+        <div class="job-edit-modal__readonly">
+          <div class="job-edit-modal__field">
+            <span class="job-edit-modal__label">Opis</span>
+            <p class="job-edit-modal__value">{{ description || '—' }}</p>
+          </div>
+          <div class="job-edit-modal__field">
+            <span class="job-edit-modal__label">Cena (RSD)</span>
+            <p class="job-edit-modal__value">{{ price != null ? price + ' RSD' : '—' }}</p>
+          </div>
+        </div>
+      } @else {
+        @if (saveError()) {
+          <p class="job-edit-modal__error" role="alert">{{ saveError() }}</p>
+        }
+        <div class="job-edit-modal__form">
+          <div class="job-edit-modal__field">
+            <label for="job-edit-desc" class="job-edit-modal__label">Opis</label>
+            <textarea
+              id="job-edit-desc"
+              class="job-edit-modal__textarea"
+              [(ngModel)]="description"
+              name="description"
+              rows="3"
+              [readOnly]="!canEdit()"
+            ></textarea>
+            @if (canEdit()) {
+              <button
+                type="button"
+                class="job-edit-modal__btn job-edit-modal__btn--primary"
+                [disabled]="savingDescription()"
+                (click)="saveDescription()"
+              >
+                {{ savingDescription() ? 'Čuvanje...' : 'Sačuvaj opis' }}
+              </button>
+            }
+          </div>
+          <div class="job-edit-modal__field">
+            <label for="job-edit-price" class="job-edit-modal__label">Cena (RSD)</label>
+            <input
+              id="job-edit-price"
+              type="number"
+              class="job-edit-modal__input"
+              [(ngModel)]="price"
+              name="price"
+              min="0"
+              step="1"
+              [readOnly]="!canEdit()"
+            />
+            @if (canEdit()) {
+              <button
+                type="button"
+                class="job-edit-modal__btn job-edit-modal__btn--primary"
+                [disabled]="savingPrice()"
+                (click)="savePrice()"
+              >
+                {{ savingPrice() ? 'Čuvanje...' : 'Sačuvaj cenu' }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

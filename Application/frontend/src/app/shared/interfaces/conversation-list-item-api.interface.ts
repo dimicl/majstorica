@@ -13,4 +13,7 @@ export interface ConversationListItemApi {
   UnreadCount?: number;
   isOnline?: boolean;
   IsOnline?: boolean;
+  /** ISO string – poslednja aktivnost drugog učesnika (za "Poslednje aktivan: ..."). */
+  otherPartyLastSeen?: string | null;
+  OtherPartyLastSeen?: string | null;
 }

@@ -1,4 +1,8 @@
 <section class="profil-page">
+  @if (editLockToast()) {
+  <div class="profil-toast" role="status">{{ editLockToast() }}</div>
+  }
+
   <header class="profil-header">
     <h1>Profil</h1>
   </header>
@@ -121,6 +125,7 @@
             <th>Cena</th>
             <th>Hitnost</th>
             <th>Status</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -151,6 +156,15 @@
               <span class="profil-request-status">
                 {{ statusLabel(job.status) }}
               </span>
+            </td>
+            <td class="profil-request-actions-cell">
+              @if (job.status === 'Accepted' || job.status === 'InProgress') {
+              <app-button
+                [buttonType]="eButtonType.NEUTRAL"
+                [label]="'Edit'"
+                (onButtonClick)="openJobEdit(job)"
+              />
+              }
             </td>
           </tr>
           }
@@ -198,6 +212,7 @@
               <th>Cena</th>
               <th>Hitnost</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -228,6 +243,15 @@
                 <span class="profil-request-status">
                   {{ statusLabel(job.status) }}
                 </span>
+              </td>
+              <td class="profil-request-actions-cell">
+                @if (job.status === 'Accepted' || job.status === 'InProgress') {
+                <app-button
+                  [buttonType]="eButtonType.NEUTRAL"
+                  [label]="'Edit'"
+                  (onButtonClick)="openJobEdit(job)"
+                />
+                }
               </td>
             </tr>
             }
@@ -311,4 +335,12 @@
     </div>
     } } }
   </div>
+
+  @if (jobEditModal()) {
+  <app-job-edit-modal
+    [job]="jobEditModal()!"
+    (closed)="closeJobEdit()"
+    (saved)="loadJobs()"
+  />
+  }
 </section>

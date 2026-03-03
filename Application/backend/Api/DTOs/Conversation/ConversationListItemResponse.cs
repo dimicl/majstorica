@@ -19,4 +19,8 @@ public class ConversationListItemResponse
 
     [JsonPropertyName("isOnline")]
     public bool IsOnline { get; init; }
+
+    /// <summary>Poslednja aktivnost drugog učesnika (za prikaz u chatu).</summary>
+    [JsonPropertyName("otherPartyLastSeen")]
+    public DateTime? OtherPartyLastSeen { get; init; }
 }

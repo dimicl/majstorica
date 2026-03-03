@@ -78,6 +78,12 @@ public class UserService : IUserService
         await _userRepository.Save(user);
     }
 
+    public async Task SetUserZone(Guid userId, string zoneId, string zoneName)
+    {
+        if (string.IsNullOrWhiteSpace(zoneId) || string.IsNullOrWhiteSpace(zoneName))
+            throw new ArgumentException("ZoneId i zoneName su obavezni.");
+        await _userGraphSync.SyncUserZone(userId, zoneId.Trim(), zoneName.Trim());
+    }
 
     public async Task Deactivate(Guid userId)
     {
@@ -106,13 +112,29 @@ public class UserService : IUserService
         query ??= new MastersListQuery();
         var key = RedisListCacheKey.Create(query);
 
-        var cached = await _redisListCache.GetAsync(key);
-        if (cached != null)
-            return cached;
+        try
+        {
+            var cached = await _redisListCache.GetAsync(key);
+            if (cached != null)
+                return cached;
+        }
+        catch
+        {
+            // Redis nedostupan – nastavljamo bez keša
+        }
 
         var list = await GetMastersListFromDb();
         var filtered = ApplyFilterAndSort(list, query);
-        await _redisListCache.SetAsync(key, filtered, RedisListCacheTtl);
+
+        try
+        {
+            await _redisListCache.SetAsync(key, filtered, RedisListCacheTtl);
+        }
+        catch
+        {
+            // Redis nedostupan – ignorišemo, podaci su već učitani
+        }
+
         return filtered;
     }
 
@@ -184,7 +206,60 @@ public class UserService : IUserService
 
     public async Task<List<MasterListItemResponse>> GetRecommendedMasters(Guid clientId, int limit = 10)
     {
-        var ids = await _graphQueryRepository.GetRecommendedMastersAsync(clientId, null, limit);
+        IReadOnlyList<Guid> ids;
+        try
+        {
+            ids = await _graphQueryRepository.GetRecommendedMastersAsync(clientId, null, limit);
+        }
+        catch
+        {
+            // Neo4j nedostupan ili prazan graf – vraćamo praznu listu
+            return new List<MasterListItemResponse>();
+        }
+
+        if (ids.Count == 0)
+            return new List<MasterListItemResponse>();
+
+        var result = new List<MasterListItemResponse>();
+        var masters = await _masterRepository.GetByUserIds(ids.ToList());
+        var masterByUserId = masters.ToDictionary(m => m.UserId);
+
+        foreach (var id in ids)
+        {
+            var user = await _userRepository.GetById(id);
+            if (user == null || !user.IsActive || user.Role != UserRole.Master)
+                continue;
+            var master = masterByUserId.GetValueOrDefault(id);
+            result.Add(new MasterListItemResponse
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                Category = master?.Category.HasValue == true ? MasterCategoryDisplay.ToDisplayName(master.Category!.Value) : null,
+                Rating = master?.Rating
+            });
+        }
+
+        return result;
+    }
+
+    public async Task<List<MasterListItemResponse>> GetMastersByGraphSearch(
+        IReadOnlyList<int>? categoryIds = null,
+        IReadOnlyList<string>? zoneIds = null,
+        decimal? minRating = null,
+        int limit = 20)
+    {
+        IReadOnlyList<Guid> ids;
+        try
+        {
+            ids = await _graphQueryRepository.SearchMastersAsync(categoryIds, zoneIds, minRating, limit);
+        }
+        catch
+        {
+            return new List<MasterListItemResponse>();
+        }
+
         if (ids.Count == 0)
             return new List<MasterListItemResponse>();
 

@@ -34,6 +34,22 @@ public class MastersController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>Složena pretraga majstora iz Neo4j grafa (kategorija, zona, min ocena). categoryIds=1,2 zoneIds=id1,id2 minRating=4 limit=20.</summary>
+    [HttpGet("search")]
+    public async Task<ActionResult<List<MasterListItemResponse>>> SearchByGraph([FromQuery] MastersGraphSearchQuery? query = null)
+    {
+        query ??= new MastersGraphSearchQuery();
+        var categoryIds = ParseIntList(query.CategoryIds);
+        var zoneIds = ParseStringList(query.ZoneIds);
+        var limit = Math.Clamp(query.Limit, 1, 50);
+        var result = await _userService.GetMastersByGraphSearch(
+            categoryIds.Count > 0 ? categoryIds : null,
+            zoneIds.Count > 0 ? zoneIds : null,
+            query.MinRating,
+            limit);
+        return Ok(result);
+    }
+
     /// <summary>Preporučeni majstori za trenutnog klijenta (Neo4j: ista veština kao već angažovani). Za ne-klijente vraća praznu listu.</summary>
     [HttpGet("recommended")]
     public async Task<ActionResult<List<MasterListItemResponse>>> GetRecommended([FromQuery] int limit = 10)
@@ -93,5 +109,22 @@ public class MastersController : ControllerBase
 
         await _userGraphSync.SyncMasterProfile(userId, master.Category, master.Rating, master.YearsExperience);
         return NoContent();
+    }
+
+    private static List<int> ParseIntList(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return new List<int>();
+        return value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => int.TryParse(s, out _))
+            .Select(int.Parse)
+            .ToList();
+    }
+
+    private static List<string> ParseStringList(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return new List<string>();
+        return value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToList();
     }
 }

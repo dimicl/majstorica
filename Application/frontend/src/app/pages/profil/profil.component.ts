@@ -20,6 +20,7 @@ import { signal, computed } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
+import { JobEditModalComponent } from '../../components/job-edit-modal/job-edit-modal.component';
 
 const HUB_URL = 'http://localhost:5187/hubs/document';
 
@@ -32,6 +33,7 @@ const HUB_URL = 'http://localhost:5187/hubs/document';
     ButtonComponent,
     FormsModule,
     SvgIconComponent,
+    JobEditModalComponent,
   ],
   templateUrl: './profil.component.html',
   styleUrl: './profil.component.scss',
@@ -67,6 +69,9 @@ export class ProfilComponent implements OnInit, OnDestroy {
   loadingMyJobs = signal(false);
   requestError = signal<string | null>(null);
   actingRequestId = signal<string | null>(null);
+  jobEditModal = signal<JobListItem | null>(null);
+  /** Toast kada Edit nije moguć (drugi uređuje) – samo poruka, bez modala. */
+  editLockToast = signal<string | null>(null);
 
   pendingRequests = computed(() =>
     this.myJobs().filter((j) => j.status === 'Pending')
@@ -77,6 +82,7 @@ export class ProfilComponent implements OnInit, OnDestroy {
   );
 
   private newJobRequestHandlerRegistered = false;
+  private editLockToastTimer: ReturnType<typeof setTimeout> | null = null;
 
   private ensureSignalR(): void {
     const token = this.authService.getToken();
@@ -147,7 +153,7 @@ export class ProfilComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Handler ostaje; SignalR se ne disconnect-uje (korisnik je i dalje ulogovan).
+    if (this.editLockToastTimer) clearTimeout(this.editLockToastTimer);
   }
 
   private addRequestFromPayload(p: NewJobRequestPayload): void {
@@ -244,5 +250,66 @@ export class ProfilComponent implements OnInit, OnDestroy {
 
   navigateToMasters(): void {
     this.router.navigate(['/masters']);
+  }
+
+  openJobEdit(job: JobListItem): void {
+    this.ensureSignalR();
+    const jobId = job.jobId.toLowerCase();
+    const myUserId = (this.authService.getUserIdFromStorage() ?? '').toLowerCase();
+
+    const onGranted = (...args: unknown[]) => {
+      this.ngZone.run(() => {
+        const id = args[0] != null ? String(args[0]).toLowerCase() : '';
+        if (id !== jobId) return;
+        const nextUserId = args.length > 1 && args[1] != null ? String(args[1]).toLowerCase() : undefined;
+        const isForMe = nextUserId === undefined || nextUserId === myUserId;
+        if (!isForMe) return;
+        this.signalr.off('WriteGranted', onGranted as (...a: unknown[]) => void);
+        this.signalr.off('WriteDenied', onDenied as (...a: unknown[]) => void);
+        this.editLockToast.set(null);
+        if (this.editLockToastTimer) {
+          clearTimeout(this.editLockToastTimer);
+          this.editLockToastTimer = null;
+        }
+        this.jobEditModal.set(job);
+      });
+    };
+
+    const onDenied = (...args: unknown[]) => {
+      this.ngZone.run(() => {
+        const id = args[0] != null ? String(args[0]).toLowerCase() : '';
+        if (id !== jobId) return;
+        this.signalr.off('WriteDenied', onDenied as (...a: unknown[]) => void);
+        this.editLockToast.set('Trenutno ne možete uređivati.');
+        if (this.editLockToastTimer) clearTimeout(this.editLockToastTimer);
+        this.editLockToastTimer = setTimeout(() => {
+          this.editLockToast.set(null);
+          this.editLockToastTimer = null;
+        }, 4000);
+      });
+    };
+
+    this.signalr.on('WriteGranted', onGranted as (p: unknown) => void);
+    this.signalr.on('WriteDenied', onDenied as (p: unknown) => void);
+    this.signalr.invoke('JoinJob', job.jobId).catch(() => {
+      this.ngZone.run(() => {
+        this.signalr.off('WriteGranted', onGranted as (...a: unknown[]) => void);
+        this.signalr.off('WriteDenied', onDenied as (...a: unknown[]) => void);
+        this.editLockToast.set('Trenutno ne možete uređivati.');
+        if (this.editLockToastTimer) clearTimeout(this.editLockToastTimer);
+        this.editLockToastTimer = setTimeout(() => {
+          this.editLockToast.set(null);
+          this.editLockToastTimer = null;
+        }, 4000);
+      });
+    });
+  }
+
+  closeJobEdit(): void {
+    const job = this.jobEditModal();
+    if (job) {
+      this.signalr.invoke('LeaveJob', job.jobId).catch(() => {});
+    }
+    this.jobEditModal.set(null);
   }
 }

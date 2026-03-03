@@ -13,4 +13,8 @@ public interface ISessionRepository
     Task<List<UserSession>> GetAll();
 
     Task Remove(string sessionId);
+
+    Task SaveLastSeenAsync(Guid userId, DateTime lastSeen);
+
+    Task<DateTime?> GetLastSeenFromStoreAsync(Guid userId);
 }

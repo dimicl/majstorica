@@ -140,6 +140,29 @@ export class ChatComponent {
     return `${hh}:${mm}`;
   }
 
+  /** Za prikaz "Poslednje aktivan: danas 14:32" u listi i panelu. */
+  private formatLastSeen(iso: string): string {
+    const d = new Date(iso);
+    const now = new Date();
+    const isToday =
+      d.getDate() === now.getDate() &&
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday =
+      d.getDate() === yesterday.getDate() &&
+      d.getMonth() === yesterday.getMonth() &&
+      d.getFullYear() === yesterday.getFullYear();
+    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    if (isToday) return `Poslednje aktivan: danas ${time}`;
+    if (isYesterday) return `Poslednje aktivan: juče ${time}`;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `Poslednje aktivan: ${day}.${month}.${year}. ${time}`;
+  }
+
   /** Danas: vreme (HH:mm), inače: datum (dd.MM.yyyy.) – za thread listu */
   private formatTimeOrDate(iso: string): string {
     const d = new Date(iso);
@@ -189,6 +212,13 @@ export class ChatComponent {
     const list = this.threads();
     const idx = list.findIndex((t) => t.id === conversationId);
     if (idx === -1) return;
+    const isOnline = conv.isOnline ?? conv.IsOnline ?? false;
+    const lastSeenIso =
+      conv.otherPartyLastSeen ?? conv.OtherPartyLastSeen ?? null;
+    const lastSeenText =
+      !isOnline && lastSeenIso
+        ? this.formatLastSeen(lastSeenIso)
+        : undefined;
     const updated: ChatThread = {
       ...list[idx],
       title: conv.otherPartyName || 'Razgovor',
@@ -197,7 +227,8 @@ export class ChatComponent {
         ? this.formatTimeOrDate(conv.lastMessageAt)
         : '--:--',
       unreadCount: conv.unreadCount ?? list[idx].unreadCount,
-      presence: conv.isOnline ?? conv.IsOnline ?? false ? 'online' : 'offline',
+      presence: isOnline ? 'online' : 'offline',
+      lastSeenText,
     };
     this.threads.set(list.slice(0, idx).concat(updated, list.slice(idx + 1)));
   }

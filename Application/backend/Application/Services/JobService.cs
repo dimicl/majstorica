@@ -120,6 +120,7 @@ public class JobService : IJobService
                 job.IsEmergency);
         }
 
+        await _jobRepository.InviteMasters(jobId, masterIds);
         await SaveAndPublish(job);
     }
 
@@ -317,6 +318,7 @@ public class JobService : IJobService
 
         await _conversationRepository.SaveMany(conversations);
 
+        await _jobRepository.AcceptMaster(jobId, masterId);
         await SaveAndPublish(job);
     }
 
@@ -337,6 +339,9 @@ public class JobService : IJobService
         job.Complete();
 
         await SaveAndPublish(job);
+
+        if (job.MasterId.HasValue)
+            await _jobRepository.RecordHired(job.ClientId, job.MasterId.Value, job.Id, DateTime.UtcNow, rating: null);
     }
 
 

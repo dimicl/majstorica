@@ -1,0 +1,175 @@
+@use "../../../assets/scss/variables" as *;
+
+.job-edit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 24px;
+}
+
+.job-edit-modal {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  box-shadow: 0 20px 40px -12px rgba(17, 24, 39, 0.18);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.job-edit-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.job-edit-modal__title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: rgba(17, 24, 39, 0.92);
+}
+
+.job-edit-modal__close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgba(17, 24, 39, 0.5);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.job-edit-modal__close:hover {
+  background: rgba(17, 24, 39, 0.08);
+  color: rgba(17, 24, 39, 0.9);
+}
+
+.job-edit-modal__body {
+  padding: 20px;
+}
+
+.job-edit-modal__toast {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  background: rgba(245, 158, 11, 0.95);
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.job-edit-modal__loading,
+.job-edit-modal__lock-msg {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  color: rgba(17, 24, 39, 0.8);
+}
+
+.job-edit-modal__lock-msg {
+  padding: 12px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.job-edit-modal__error {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: #c53030;
+  font-weight: 500;
+}
+
+.job-edit-modal__readonly .job-edit-modal__field {
+  margin-bottom: 14px;
+}
+
+.job-edit-modal__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.6);
+  margin-bottom: 4px;
+}
+
+.job-edit-modal__value {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: rgba(17, 24, 39, 0.85);
+  background: rgba(17, 24, 39, 0.04);
+  border-radius: 8px;
+}
+
+.job-edit-modal__form .job-edit-modal__field {
+  margin-bottom: 16px;
+}
+
+.job-edit-modal__input,
+.job-edit-modal__textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: rgba(17, 24, 39, 0.9);
+  background: #f8f9fa;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $color-blue;
+    background: #fff;
+  }
+
+  &:read-only {
+    background: rgba(17, 24, 39, 0.04);
+    cursor: default;
+  }
+}
+
+.job-edit-modal__textarea {
+  resize: none;
+  min-height: 72px;
+}
+
+.job-edit-modal__btn {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease, opacity 0.2s ease;
+
+  &--primary {
+    background: $color-blue;
+    color: #fff;
+  }
+
+  &--primary:hover:not(:disabled) {
+    background: $color-blue-dark;
+  }
+
+  &--primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}

@@ -84,4 +84,18 @@ export class JobService {
       this.http.post(`${API_URL}/conversations/${conversationId}/decline`, {})
     );
   }
+
+  /** Izmena opisa posla (za klijenta/majstora sa write pristupom). */
+  async changeDescription(jobId: string, description: string): Promise<void> {
+    await firstValueFrom(
+      this.http.put(`${API_URL}/jobs/${jobId}/description`, { description })
+    );
+  }
+
+  /** Izmena cene posla (za klijenta/majstora sa write pristupom). */
+  async changePrice(jobId: string, price: number | null): Promise<void> {
+    await firstValueFrom(
+      this.http.put(`${API_URL}/jobs/${jobId}/price`, { price })
+    );
+  }
 }

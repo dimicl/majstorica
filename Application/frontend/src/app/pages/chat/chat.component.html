@@ -67,6 +67,9 @@
                     @if (t.presence === 'typing') { Kuca... } @else if
                     (t.presence === 'online') { Online } @else { Offline }
                   </span>
+                  @if (t.presence === 'offline' && t.lastSeenText) {
+                    <span class="thread-last-seen">{{ t.lastSeenText }}</span>
+                  }
 
                   @if (t.unreadCount > 0) {
                   <span class="thread-unread">{{
@@ -101,6 +104,7 @@
           [title]="selectedThread()!.title"
           [firstName]="threadInitials(selectedThread()!.title).firstName"
           [lastName]="threadInitials(selectedThread()!.title).lastName"
+          [lastSeenText]="selectedThread()!.lastSeenText"
           [messages]="selectedMessages()"
           (send)="onSendMessage($event)"
         />

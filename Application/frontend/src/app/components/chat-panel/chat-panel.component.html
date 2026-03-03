@@ -28,6 +28,9 @@
             @if (presence() === 'online') { Online } @if (presence() ===
             'typing') { Kuca... } @if (presence() === 'offline') { Offline }
           </span>
+          @if (presence() === 'offline' && lastSeenText()) {
+            <span class="chat-last-seen">{{ lastSeenText() }}</span>
+          }
         </div>
       </div>
     </div>

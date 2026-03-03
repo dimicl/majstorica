@@ -24,5 +24,6 @@ public class UserSessionDocument
     [Indexed]
     public string ConnectionId { get; set; } = default!;
 
+    /// <summary>Poslednja aktivnost; koristi se u chatu za prikaz "poslednje aktivnosti".</summary>
     public DateTime LastSeen { get; set; } = DateTime.UtcNow;
 }

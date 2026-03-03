@@ -38,4 +38,7 @@ public class JobRepository : IJobRepository
 
     public Task AcceptMaster(Guid jobId, Guid masterId) =>
         _graph.AcceptMaster(jobId, masterId);
+
+    public Task RecordHired(Guid clientId, Guid masterId, Guid jobId, DateTime completedAt, int? rating) =>
+        _graph.RecordHired(clientId, masterId, jobId, completedAt, rating);
 }

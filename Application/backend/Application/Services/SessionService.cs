@@ -34,6 +34,7 @@ public class SessionService : ISessionService
         if (session == null) return;
 
         session.CurrentJobId = jobId;
+        session.Touch();
         await _repository.Upsert(session);
     }
 
@@ -43,6 +44,7 @@ public class SessionService : ISessionService
         if (session == null) return;
 
         session.CurrentConversationId = conversationId;
+        session.Touch();
         await _repository.Upsert(session);
     }
 
@@ -51,6 +53,7 @@ public class SessionService : ISessionService
         var session = await _repository.GetByConnectionId(connectionId);
         if (session == null) return;
 
+        await _repository.SaveLastSeenAsync(session.UserId, session.LastSeen);
         await _repository.Remove(session.Id);
     }
 
@@ -58,5 +61,13 @@ public class SessionService : ISessionService
     {
         var session = await _repository.GetByUserId(userId);
         return session != null;
+    }
+
+    public async Task<DateTime?> GetLastSeenAsync(Guid userId)
+    {
+        var session = await _repository.GetByUserId(userId);
+        if (session != null)
+            return session.LastSeen;
+        return await _repository.GetLastSeenFromStoreAsync(userId);
     }
 }
