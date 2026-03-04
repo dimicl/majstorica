@@ -2,10 +2,6 @@ using backend.Domain.Enums;
 using backend.Infrastructure.Persistence.Neo4j.Entities;
 
 namespace backend.Infrastructure.Persistence.Neo4j.Mappers;
-
-/// <summary>
-/// Mapiranje Skill čvora: MasterCategory ↔ SkillNode, parametri za Cypher.
-/// </summary>
 public static class SkillGraphMapper
 {
     public static SkillNode ToNode(MasterCategory category)

@@ -40,6 +40,8 @@ import { AvatarComponent } from '../../components/avatar/avatar.component';
 export class TechniciansComponent implements OnInit {
   private masterService = inject(MasterService);
 
+  private searchTimeoutId: any = null;
+
   selectedMasterIdForDetail: string | null = null;
   showCreateJobModal = false;
   createJobMaster: CreateJobMaster | null = null;
@@ -78,28 +80,8 @@ export class TechniciansComponent implements OnInit {
   }
 
   public get filteredTechnicians(): MasterListItem[] {
-    const { search, sort, category, minRating } = this.listParams;
-    const q = search.trim().toLowerCase();
-    let list = this.technicians;
-    if (q) {
-      list = list.filter((t) =>
-        `${t.firstName} ${t.lastName} ${t.username}`.toLowerCase().includes(q)
-      );
-    }
-    if (category) {
-      list = list.filter((t) => (t.category ?? '') === category);
-    }
-    if (minRating != null && minRating >= 1 && minRating <= 5) {
-      list = list.filter((t) => t.rating != null && t.rating >= minRating);
-    }
-    const asc = sort === 'name-asc';
-    return [...list].sort((a, b) => {
-      const nameA = `${a.firstName} ${a.lastName}`.trim() || a.username;
-      const nameB = `${b.firstName} ${b.lastName}`.trim() || b.username;
-      return asc
-        ? nameA.localeCompare(nameB, 'sr')
-        : nameB.localeCompare(nameA, 'sr');
-    });
+    // Lista majstora je već filtrirana i sortirana na backendu (sa Redis keširanjem).
+    return this.technicians;
   }
 
   ngOnInit(): void {
@@ -149,20 +131,30 @@ export class TechniciansComponent implements OnInit {
     this.activeTab = tab;
   }
 
-  public onSearchInput(value: string): void {
+  public async onSearchInput(value: string): Promise<void> {
     this.listParams = { ...this.listParams, search: value };
+    if (this.searchTimeoutId) {
+      clearTimeout(this.searchTimeoutId);
+    }
+    this.searchTimeoutId = setTimeout(() => {
+      // Ignorišemo Promise; greške se hvataju unutar loadMasters.
+      this.loadMasters();
+    }, 300);
   }
 
-  public setSort(sort: MastersListSort): void {
+  public async setSort(sort: MastersListSort): Promise<void> {
     this.listParams = { ...this.listParams, sort };
+    await this.loadMasters();
   }
 
-  public setCategory(category: string): void {
+  public async setCategory(category: string): Promise<void> {
     this.listParams = { ...this.listParams, category };
+    await this.loadMasters();
   }
 
-  public setMinRating(rating: number | null): void {
+  public async setMinRating(rating: number | null): Promise<void> {
     this.listParams = { ...this.listParams, minRating: rating };
+    await this.loadMasters();
   }
 
   public get isListActive(): boolean {
