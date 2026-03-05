@@ -1,27 +1,22 @@
-using StackExchange.Redis;
-using Redis.OM;
-
-using backend.Application.Interfaces;
-using backend.Application.Services;
-
-using backend.Infrastructure.Persistence.Redis;
-using backend.Infrastructure.Persistence.Neo4j;
-using backend.Infrastructure.Persistence.MongoDb;
-using backend.Infrastructure.Messaging.RabbitMQ;
-using MongoDB.Bson;
-using MongoDB.Driver;
-
+using System.Text;
+using System.Text.Json;
 using backend.Api.Hubs;
 using backend.Api.Middleware;
-
-using Neo4j.Driver;
-
+using backend.Application.Interfaces;
+using backend.Application.Services;
+using backend.Infrastructure.Messaging.RabbitMQ;
+using backend.Infrastructure.Persistence.MongoDb;
+using backend.Infrastructure.Persistence.Neo4j;
+using backend.Infrastructure.Persistence.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Text.Json;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using Neo4j.Driver;
+using Redis.OM;
+using StackExchange.Redis;
 
 
 // MongoDB: registruj Guid serializer da ne baca BsonSerializationException (Unspecified)
@@ -89,11 +84,25 @@ builder.Services.AddScoped<ISessionRepository, RedisSessionRepository>();
 
 // Neo4j
 builder.Services.AddSingleton<IDriver>(_ =>
-    GraphDatabase.Driver(
-        "bolt://localhost:7687",
-        AuthTokens.Basic("neo4j", "password")
-    )
-);
+{
+    var neo4jUri = builder.Configuration["Neo4j:Uri"];
+    var neo4jUser = builder.Configuration["Neo4j:User"];
+    var neo4jPassword = builder.Configuration["Neo4j:Password"];
+
+    if (string.IsNullOrWhiteSpace(neo4jUri) ||
+        string.IsNullOrWhiteSpace(neo4jUser) ||
+        string.IsNullOrWhiteSpace(neo4jPassword))
+    {
+        throw new InvalidOperationException(
+            "Neo4j konfiguracija nije kompletna. Proveri Neo4j:Uri/User/Password u appsettings.json (ili env var)."
+        );
+    }
+
+    return GraphDatabase.Driver(
+        neo4jUri,
+        AuthTokens.Basic(neo4jUser, neo4jPassword)
+    );
+});
 
 // MongoDB
 builder.Services.AddSingleton<IMongoClient>(sp =>

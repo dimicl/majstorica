@@ -1,5 +1,6 @@
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
+using backend.Shared.Exceptions;
 
 namespace backend.Application.Services;
 
@@ -24,7 +25,7 @@ public class ChatService : IChatService
     {
         var conversation = await _conversationRepository.GetById(conversationId);
         if (conversation == null || !conversation.IsActive)
-            throw new Exception("Chat je zatvoren.");
+            throw new ConflictException("Chat je zatvoren.");
 
         var message = new ChatMessage(conversationId, jobId, senderId, content);
         await _messageRepository.Save(message);

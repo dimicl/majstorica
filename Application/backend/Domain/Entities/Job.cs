@@ -1,6 +1,7 @@
 using backend.Domain.Enums;
 using backend.Domain.Events;
 using backend.Domain.States;
+using backend.Shared.Exceptions;
 
 namespace backend.Domain.Entities;
 
@@ -104,7 +105,7 @@ public class Job
             JobStatus.Accepted => new AcceptedState(),
             JobStatus.InProgress => new InProgressState(),
             JobStatus.Completed => new CompletedState(),
-            _ => throw new Exception("Nepoznat status posla")
+            _ => throw new DomainException("Nepoznat status posla")
         };
     }
 
@@ -174,8 +175,8 @@ public class Job
         Description = description;
     }
 
-    internal void ChangePriceInternal(decimal? price) 
-    { 
+    internal void ChangePriceInternal(decimal? price)
+    {
         Price = price;
     }
 

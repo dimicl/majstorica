@@ -4,6 +4,7 @@ using backend.Application.Helpers;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Shared.Exceptions;
 
 namespace backend.Application.Services;
 
@@ -60,7 +61,7 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetById(userId);
         if (user == null)
-            throw new Exception("Korisnik nije pronađen.");
+            throw new NotFoundException("Korisnik nije pronađen.");
 
         user.UpdateProfile(firstName, lastName);
 
@@ -72,7 +73,7 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetById(userId);
         if (user == null)
-            throw new Exception("Korisnik nije pronađen.");
+            throw new NotFoundException("Korisnik nije pronađen.");
 
         user.UpdateContact(phone, deliveryAddress);
         await _userRepository.Save(user);
@@ -89,7 +90,7 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetById(userId);
         if (user == null)
-            throw new Exception("Korisnik nije pronađen.");
+            throw new NotFoundException("Korisnik nije pronađen.");
 
         user.Deactivate();
         await _userRepository.Save(user);
@@ -100,7 +101,7 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetById(userId);
         if (user == null)
-            throw new Exception("Korisnik nije pronađen.");
+            throw new NotFoundException("Korisnik nije pronađen.");
 
         user.Activate();
         await _userRepository.Save(user);
