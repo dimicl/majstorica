@@ -4,6 +4,7 @@ using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Strategies;
+using backend.Shared.Exceptions;
 
 namespace backend.Application.Services;
 
@@ -372,7 +373,7 @@ public class JobService : IJobService
     {
         var job = await _jobRepository.GetById(jobId);
         if (job == null)
-            throw new Exception("Posao nije pronađen.");
+            throw new NotFoundException("Posao nije pronađen.");
 
         return job;
     }

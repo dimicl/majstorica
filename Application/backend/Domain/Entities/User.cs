@@ -1,4 +1,5 @@
 using backend.Domain.Enums;
+using backend.Shared.Exceptions;
 using backend.Shared.Helpers;
 
 namespace backend.Domain.Entities;
@@ -53,7 +54,7 @@ public class User
     public void ChangePassword(string oldPassword, string newPassword)
     {
         if (!PasswordHasher.Verify(oldPassword, PasswordHash))
-            throw new Exception("Pogrešna lozinka.");
+            throw new InvalidCredentialsException("Pogrešna lozinka.");
 
         PasswordHash = PasswordHasher.Hash(newPassword);
     }

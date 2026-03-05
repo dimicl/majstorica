@@ -1,4 +1,5 @@
 using backend.Application.Interfaces;
+using backend.Shared.Exceptions;
 using StackExchange.Redis;
 
 namespace backend.Infrastructure.Persistence.Redis;
@@ -35,7 +36,7 @@ public class RedisLockService : IRedisLockService
                 When.NotExists);
 
             if (!acquired)
-                throw new Exception("Dokument je zaključan.");
+                throw new ConflictException("Dokument je zaključan.");
             return;
         }
 
@@ -46,7 +47,7 @@ public class RedisLockService : IRedisLockService
         }
 
         await Enqueue(jobId, userId);
-        throw new Exception("Nemate write pristup. Dokument je read-only.");
+        throw new ForbiddenException("Nemate write pristup. Dokument je read-only.");
     }
 
     public async Task<Guid?> ReleaseWriteAccess(Guid jobId, Guid userId)
