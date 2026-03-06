@@ -5,6 +5,30 @@ using backend.Shared.Exceptions;
 
 namespace backend.Domain.Entities;
 
+/*GLAVNI OBJEKAT SISTEMA(klijent kreira, majstor izvrsava, filtriranje...), OVO BI TREBALO DA BUDE DOKUMET U NAS PROJEKAT KOJI KORISTE VISE KORISNIKA
+Služi da čuva:
+-naslov i opis posla
+-klijenta koji je napravio posao
+-status posla
+-cenu
+-datum
+-hitnost
+-eventualno prihvaćenog majstora i tok rada
+
+Koristi se u:
+-JobsController
+-JobService
+-Mongo repozitorijumu za trajno čuvanje
+-Neo4j grafu za veze sa klijentima i majstorima
+-chat sistemu jer je conversation vezan za job
+
+U praksi:
+-klijent kreira posao
+-posao ide u status npr. Created/Pending
+-klijent šalje request majstorima
+-jedan majstor prihvati
+-posao prelazi kroz životni ciklus do završetka
+*/
 public class Job
 {
     public Guid Id { get; private set; }

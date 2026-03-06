@@ -1,5 +1,33 @@
 namespace backend.Domain.Entities;
 
+/*NAPRAVLJEN DA PREDSTAVLJA JEDNU PORUKU
+Predstavlja jednu chat poruku:
+-ko ju je poslao
+-u kojoj konverzaciji
+-za koji posao
+-kada je poslata
+-da li je sistemska ili korisnička
+
+Služi za:
+-realtime razmenu poruka
+-istoriju chata
+-sistemske poruke poput:
+    -posao prihvaćen
+    -posao započet
+    -posao završen
+
+Koristi se u:
+-ChatService
+-SignalR hub-u
+-repozitorijumu za poruke
+-frontend chat prikazu
+
+U praksi:
+-korisnik pošalje poruku
+-backend napravi ChatMessage
+-sačuva je
+-prosledi je drugoj strani preko SignalR-a
+*/
 public class ChatMessage
 {
     public string Id { get; internal set; } = Guid.NewGuid().ToString();

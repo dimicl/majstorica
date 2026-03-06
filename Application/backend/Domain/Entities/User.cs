@@ -4,6 +4,23 @@ using backend.Shared.Helpers;
 
 namespace backend.Domain.Entities;
 
+
+/*USER PREDSTAVLJA OSNOVNI NALOG KORISNIKA U SISTEMU, 
+Služi za: registraciju i login, JWT autentifikaciju, proveru role korisnika, promenu lozinke, promenu osnovnih podataka
+
+Koristi se u:
+-AuthService za registraciju i login
+-JwtHelper za pravljenje tokena
+-UserService za izmene profila
+-repozitorijumima za čuvanje i učitavanje user-a iz baze
+
+U praksi:
+-korisnik se registruje → pravi se User
+-korisnik se loguje → čita se User, proverava lozinka, izdaje token
+-kad menja profil ili lozinku → pozivaju se domenske metode nad User
+
+trenutno treba da se pogleda treba li da se prosiri i mislim da treba i da se doda i novi entitet ADMIN
+*/
 public class User
 {
     public Guid Id { get; private set; }
@@ -22,8 +39,10 @@ public class User
     public string? Phone { get; private set; }
     public string? DeliveryAddress { get; private set; }
 
+    //protected da ne moze neko spolja da popuni polja, za ORM
     protected User() { }
 
+    //kreiranje novog korisniika
     public User(
         string firstName,
         string lastName,
@@ -50,6 +69,7 @@ public class User
     }
 
     // ---------------- DOMENSKE OPERACIJE ----------------
+    //ove operacije pravimo ovde jer entitet treba da zna pravila svog ponasanja, te metode kasnije koriste servisi, ove metode su ovde jer je to poslovna logika 
 
     public void ChangePassword(string oldPassword, string newPassword)
     {

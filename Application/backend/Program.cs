@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using backend.Api.Hubs;
 using backend.Api.Middleware;
 using backend.Application.Interfaces;
@@ -31,6 +32,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
 // Swagger / OpenAPI

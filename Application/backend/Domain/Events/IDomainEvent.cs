@@ -1,8 +1,9 @@
 namespace backend.Domain.Events;
 
+//INTERFEJS ZA DOMEN DOGADJAJE
 //ovo pravimo jer samo ovde kazemo sta se desilo u domenu, da ne zna za signalR.., ali da bi omogucili da neko odreaguje na promene u domenu
 public interface IDomainEvent
 {
-    //trenutak kada se desila promena u domenu
+    //trenutak kada se desila promena u domenu, kada se dogadja desio
     DateTime OccurredAt { get; }
 }

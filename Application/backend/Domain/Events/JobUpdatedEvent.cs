@@ -1,7 +1,6 @@
 namespace backend.Domain.Events;
 
-
-//ovo nam kaze da je neki podatak na job-u primenjen, kreira se u job-u
+//ovo nam kaze da je neki podatak na job-u primenjen, implementra IDomainEvent
 public class JobUpdatedEvent : IDomainEvent
 {
     public Guid JobId { get; }
@@ -13,7 +12,7 @@ public class JobUpdatedEvent : IDomainEvent
         OccurredAt = DateTime.UtcNow;
     }
 
-    /// <summary>Za deserijalizaciju iz RabbitMQ (System.Text.Json).</summary>
+    //Za deserijalizaciju iz RabbitMQ (System.Text.Json)
     public JobUpdatedEvent(Guid jobId, DateTime occurredAt)
     {
         JobId = jobId;

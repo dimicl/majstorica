@@ -2,6 +2,35 @@ using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;
 
+/*DA PRATI TRENUTNO STANJE KORISNIKA, NE TRAJNE PODATKE
+Predstavlja aktivnu sesiju korisnika:
+-ko je korisnik
+-koja mu je role
+-koju SignalR konekciju ima
+-koji posao trenutno gleda
+-koji chat trenutno gleda
+-kada je poslednji put bio aktivan
+
+Služi za:
+-realtime prisustvo korisnika
+-online/offline status
+-write ownership nad dokumentom/poslom
+-praćenje otvorenog chata ili posla
+-SignalR vezu sa konkretnim korisnikom
+
+Koristi se u:
+-SessionService
+-RedisSessionRepository
+-DocumentHub
+-ChatService
+-SignalR logici
+
+U praksi:
+-korisnik se poveže → kreira se ili update-uje UserSession
+-uđe u posao → CurrentJobId
+-uđe u chat → CurrentConversationId
+-backend zna gde je korisnik i kome da šalje realtime event
+*/
 public class UserSession
 {
     public string Id { get; internal set; } = default!;
@@ -14,6 +43,7 @@ public class UserSession
 
     protected UserSession() { }
 
+    //korisnik se uloguje, kreira se userSession i cuva u redis
     public UserSession(string id, Guid userId, UserRole role, string connectionId)
     {
         Id = id ?? throw new ArgumentNullException(nameof(id));
@@ -23,6 +53,7 @@ public class UserSession
         LastSeen = DateTime.UtcNow;
     }
 
+    //isto kao rehydrate za citanje iz baze
     public static UserSession FromPersistence(
         string id,
         Guid userId,
@@ -44,6 +75,8 @@ public class UserSession
         };
     }
 
+
+    // ---------------- DOMENSKE OPERACIJE ----------------
     public void SetCurrentJob(Guid? jobId)
     {
         CurrentJobId = jobId;

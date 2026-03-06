@@ -2,6 +2,35 @@ using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;
 
+
+/*ODVAJA KORISNICKI NALOG OD ULOGE MAJSTORA KOJI IZVRSAVA POSLOVE
+Predstavlja profesionalni profil majstora:
+-biografija
+-kategorija
+-iskustvo
+-ocena
+-recenzije
+
+Služi da backend zna:
+-čime se majstor bavi
+-koliko iskustva ima
+-kakvu reputaciju ima
+-u kojoj kategoriji može da prima poslove
+
+Koristi se u:
+-pretrazi majstora
+-slanju zahteva majstorima
+-prihvatanju poslova
+-sistemu recenzija i ocenjivanja
+-graf bazi za veze sa poslovima i klijentima
+
+U praksi:
+-napravi se User
+-napravi se Master
+-klijent šalje zahtev majstoru
+-majstor prihvati posao
+-posle završetka dobije review i rating
+*/
 public class Master
 {
     public Guid Id { get; internal set; }
@@ -55,6 +84,8 @@ public class Master
         };
     }
 
+    // ---------------- DOMENSKE OPERACIJE ----------------
+    //ove peracije nigde jos ne koristimo mislim da vtreba da se doda MasterService
     public void UpdateBio(string? bio)
     {
         Bio = bio;
@@ -80,5 +111,5 @@ public class Master
         Rating = averageRating;
         UpdatedAt = DateTime.UtcNow;
     }
-           
+
 }

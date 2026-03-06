@@ -1,8 +1,6 @@
 namespace backend.Domain.Events;
 
-/// <summary>
-/// Omotac za domain event u RabbitMQ poruci – omogućava consumeru da deserijalizuje na pravi tip.
-/// </summary>
+// Omotac za domain event u RabbitMQ poruci – omogućava consumeru da deserijalizuje na pravi tip.
 public class DomainEventEnvelope
 {
     public string EventType { get; set; } = string.Empty;

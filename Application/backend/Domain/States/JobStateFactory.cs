@@ -14,5 +14,7 @@ public static class JobStateFactory
         JobStatus.InProgress => new InProgressState(),
         JobStatus.Completed => new CompletedState(),
         _ => throw new ArgumentOutOfRangeException(nameof(status), $"Nepodržano stanje posla: {status}")
+
+        //TREBA DA SE DODA CANCELLEDSTATE
     };
 }
