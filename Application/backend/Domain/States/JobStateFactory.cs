@@ -1,18 +1,22 @@
-using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Exceptions;
 
 namespace backend.Domain.States;
 
-//da spojimo state klase sa poslovima
 public static class JobStateFactory
 {
-    public static IJobState Create(JobStatus status) => status switch
+    public static IJobState Create(JobStatus status)
     {
-        JobStatus.Created => new CreatedState(),
-        JobStatus.Pending => new PendingState(),
-        JobStatus.Accepted => new AcceptedState(),
-        JobStatus.InProgress => new InProgressState(),
-        JobStatus.Completed => new CompletedState(),
-        _ => throw new ArgumentOutOfRangeException(nameof(status), $"Nepodržano stanje posla: {status}")
-    };
+        return status switch
+        {
+            JobStatus.Draft => new DraftState(),
+            JobStatus.Published => new PublishedState(),
+            JobStatus.Assigned => new AssignedState(),
+            JobStatus.InProgress => new InProgressState(),
+            JobStatus.Completed => new CompletedState(),
+            JobStatus.Cancelled => new CancelledState(),
+            JobStatus.Expired => new ExpiredState(),
+            _ => throw new DomainException($"Unsupported job status: {status}")
+        };
+    }
 }

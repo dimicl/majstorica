@@ -4,5 +4,5 @@ namespace backend.Domain.Strategies;
 
 public interface IBookingStrategy
 {
-    void Apply(Job job);
+    void Apply(Job job, DateTime? preferredDateUtc, string? preferredTimeNote);
 }
