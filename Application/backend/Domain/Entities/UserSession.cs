@@ -1,96 +1,104 @@
 using backend.Domain.Enums;
+using backend.Domain.Exceptions;
 
 namespace backend.Domain.Entities;
 
-/*DA PRATI TRENUTNO STANJE KORISNIKA, NE TRAJNE PODATKE
-Predstavlja aktivnu sesiju korisnika:
--ko je korisnik
--koja mu je role
--koju SignalR konekciju ima
--koji posao trenutno gleda
--koji chat trenutno gleda
--kada je poslednji put bio aktivan
-
-Služi za:
--realtime prisustvo korisnika
--online/offline status
--write ownership nad dokumentom/poslom
--praćenje otvorenog chata ili posla
--SignalR vezu sa konkretnim korisnikom
-
-Koristi se u:
--SessionService
--RedisSessionRepository
--DocumentHub
--ChatService
--SignalR logici
-
-U praksi:
--korisnik se poveže → kreira se ili update-uje UserSession
--uđe u posao → CurrentJobId
--uđe u chat → CurrentConversationId
--backend zna gde je korisnik i kome da šalje realtime event
-*/
 public class UserSession
 {
-    public string Id { get; internal set; } = default!;
-    public Guid UserId { get; internal set; }
-    public UserRole Role { get; internal set; }
-    public Guid? CurrentJobId { get; internal set; }
-    public Guid? CurrentConversationId { get; internal set; }
-    public string ConnectionId { get; internal set; } = default!;
-    public DateTime LastSeen { get; internal set; } = DateTime.UtcNow;
-
-    protected UserSession() { }
-
-    //korisnik se uloguje, kreira se userSession i cuva u redis
-    public UserSession(string id, Guid userId, UserRole role, string connectionId)
+    private UserSession()
     {
-        Id = id ?? throw new ArgumentNullException(nameof(id));
-        UserId = userId;
-        Role = role;
-        ConnectionId = connectionId ?? throw new ArgumentNullException(nameof(connectionId));
-        LastSeen = DateTime.UtcNow;
+        // potrebno za serializer / mapper / Mongo
     }
 
-    //isto kao rehydrate za citanje iz baze
-    public static UserSession FromPersistence(
-        string id,
+    public UserSession(
+        Guid id,
         Guid userId,
-        UserRole role,
-        Guid? currentJobId,
-        Guid? currentConversationId,
-        string connectionId,
-        DateTime lastSeen)
+        string token,
+        DateTime createdAtUtc,
+        DateTime expiresAtUtc)
     {
-        return new UserSession
-        {
-            Id = id,
-            UserId = userId,
-            Role = role,
-            CurrentJobId = currentJobId,
-            CurrentConversationId = currentConversationId,
-            ConnectionId = connectionId,
-            LastSeen = lastSeen
-        };
+        if (id == Guid.Empty)
+            throw new DomainException("Session id cannot be empty.");
+
+        if (userId == Guid.Empty)
+            throw new DomainException("User id cannot be empty.");
+
+        if (string.IsNullOrWhiteSpace(token))
+            throw new DomainException("Session token is required.");
+
+        if (expiresAtUtc <= createdAtUtc)
+            throw new DomainException("Session expiration must be after creation time.");
+
+        Id = id;
+        UserId = userId;
+        Token = token.Trim();
+
+        CreatedAtUtc = createdAtUtc;
+        ExpiresAtUtc = expiresAtUtc;
+
+        Status = SessionStatus.Active;
     }
 
+    public Guid Id { get; private set; }
 
-    // ---------------- DOMENSKE OPERACIJE ----------------
-    public void SetCurrentJob(Guid? jobId)
+    public Guid UserId { get; private set; }
+
+    public string Token { get; private set; } = string.Empty;
+
+    public SessionStatus Status { get; private set; }
+
+    public DateTime CreatedAtUtc { get; private set; }
+
+    public DateTime ExpiresAtUtc { get; private set; }
+
+    public bool IsActive() => Status == SessionStatus.Active;
+
+    public bool IsExpired(DateTime nowUtc) => ExpiresAtUtc <= nowUtc;
+
+    public bool IsUsable(DateTime nowUtc)
     {
-        CurrentJobId = jobId;
-        LastSeen = DateTime.UtcNow;
+        return Status == SessionStatus.Active && ExpiresAtUtc > nowUtc;
     }
 
-    public void SetCurrentConversation(Guid? conversationId)
+    public void ReplaceToken(string token)
     {
-        CurrentConversationId = conversationId;
-        LastSeen = DateTime.UtcNow;
+        EnsureActive();
+
+        if (string.IsNullOrWhiteSpace(token))
+            throw new DomainException("Session token is required.");
+
+        Token = token.Trim();
     }
 
-    public void Touch()
+    public void Extend(DateTime newExpirationUtc)
     {
-        LastSeen = DateTime.UtcNow;
+        EnsureActive();
+
+        if (newExpirationUtc <= ExpiresAtUtc)
+            throw new DomainException("New expiration must be later than current expiration.");
+
+        ExpiresAtUtc = newExpirationUtc;
+    }
+
+    public void Revoke()
+    {
+        if (Status == SessionStatus.Revoked)
+            return;
+
+        Status = SessionStatus.Revoked;
+    }
+
+    public void MarkExpired()
+    {
+        if (Status == SessionStatus.Expired)
+            return;
+
+        Status = SessionStatus.Expired;
+    }
+
+    private void EnsureActive()
+    {
+        if (Status != SessionStatus.Active)
+            throw new DomainException("Only active session can be modified.");
     }
 }

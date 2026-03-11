@@ -1,20 +1,39 @@
-using backend.Domain.Entities;
-using backend.Shared.Exceptions;
+using backend.Domain.Enums;
+using backend.Domain.Exceptions;
 
 namespace backend.Domain.States;
 
 public class CompletedState : IJobState
 {
-    public CompletedState() { }
+    public JobStatus Status => JobStatus.Completed;
 
-    public void SendRequests(Job job) => throw new DomainException("Završeni posao se ne menja.");
-    public void Accept(Job job, Guid masterId) => throw new DomainException("Završeni posao se ne menja.");
-    public void Start(Job job) => throw new DomainException("Završeni posao se ne može pokrenuti.");
-    public void Complete(Job job) => throw new DomainException("Posao je već završen.");
+    public void CanPublish()
+    {
+        throw new InvalidJobStateException("Completed job cannot be published.");
+    }
 
-    public void ChangeDescription(Job job, string description)
-        => throw new DomainException("Završeni posao se ne može menjati.");
+    public void CanAssign()
+    {
+        throw new InvalidJobStateException("Completed job cannot be assigned.");
+    }
 
-    public void ChangePrice(Job job, decimal? price)
-        => throw new DomainException("Završeni posao se ne može menjati.");
+    public void CanStart()
+    {
+        throw new InvalidJobStateException("Completed job cannot be started.");
+    }
+
+    public void CanComplete()
+    {
+        throw new InvalidJobStateException("Completed job cannot be completed again.");
+    }
+
+    public void CanCancel()
+    {
+        throw new InvalidJobStateException("Completed job cannot be cancelled.");
+    }
+
+    public void CanExpire()
+    {
+        throw new InvalidJobStateException("Completed job cannot expire.");
+    }
 }

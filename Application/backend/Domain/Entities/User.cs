@@ -1,135 +1,303 @@
 using backend.Domain.Enums;
-using backend.Shared.Exceptions;
+using backend.Domain.Exceptions;
+using backend.Domain.ValueObjects;
 using backend.Shared.Helpers;
 
 namespace backend.Domain.Entities;
 
-
-/*USER PREDSTAVLJA OSNOVNI NALOG KORISNIKA U SISTEMU, 
-Služi za: registraciju i login, JWT autentifikaciju, proveru role korisnika, promenu lozinke, promenu osnovnih podataka
-
-Koristi se u:
--AuthService za registraciju i login
--JwtHelper za pravljenje tokena
--UserService za izmene profila
--repozitorijumima za čuvanje i učitavanje user-a iz baze
-
-U praksi:
--korisnik se registruje → pravi se User
--korisnik se loguje → čita se User, proverava lozinka, izdaje token
--kad menja profil ili lozinku → pozivaju se domenske metode nad User
-
-trenutno treba da se pogleda treba li da se prosiri i mislim da treba i da se doda i novi entitet ADMIN
-*/
 public class User
 {
-    public Guid Id { get; private set; }
+    private User()
+    {
+        // Potrebno za serializer / mapper / Mongo
+    }
 
-    public string FirstName { get; private set; } = default!;
-    public string LastName { get; private set; } = default!;
-    public string Email { get; private set; } = default!;
-    public string Username { get; private set; } = default!;
-
-    public string PasswordHash { get; private set; } = default!;
-
-    public UserRole Role { get; private set; }
-
-    public bool IsActive { get; private set; }
-
-    public string? Phone { get; private set; }
-    public string? DeliveryAddress { get; private set; }
-
-    //protected da ne moze neko spolja da popuni polja, za ORM
-    protected User() { }
-
-    //kreiranje novog korisniika
     public User(
-        string firstName,
-        string lastName,
-        string email,
-        string username,
-        string plainPassword,
-        UserRole role,
-        string? phone = null,
-        string? deliveryAddress = null)
-    {
-        Id = Guid.NewGuid();
-
-        FirstName = firstName;
-        LastName = lastName;
-        Email = email;
-        Username = username;
-
-        PasswordHash = PasswordHasher.Hash(plainPassword);
-
-        Role = role;
-        IsActive = true;
-        Phone = phone;
-        DeliveryAddress = deliveryAddress;
-    }
-
-    // ---------------- DOMENSKE OPERACIJE ----------------
-    //ove operacije pravimo ovde jer entitet treba da zna pravila svog ponasanja, te metode kasnije koriste servisi, ove metode su ovde jer je to poslovna logika 
-
-    public void ChangePassword(string oldPassword, string newPassword)
-    {
-        if (!PasswordHasher.Verify(oldPassword, PasswordHash))
-            throw new InvalidCredentialsException("Pogrešna lozinka.");
-
-        PasswordHash = PasswordHasher.Hash(newPassword);
-    }
-
-    public void ChangeRole(UserRole newRole)
-    {
-        Role = newRole;
-    }
-
-    public void UpdateProfile(string firstName, string lastName)
-    {
-        FirstName = firstName;
-        LastName = lastName;
-    }
-
-    public void UpdateContact(string? phone, string? deliveryAddress)
-    {
-        Phone = phone;
-        DeliveryAddress = deliveryAddress;
-    }
-
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
-
-    public void Activate()
-    {
-        IsActive = true;
-    }
-
-    public static User Rehydrate(
         Guid id,
         string firstName,
         string lastName,
         string email,
-        string username,
+        string phoneNumber,
         string passwordHash,
         UserRole role,
-        bool isActive,
-        string? phone = null,
-        string? deliveryAddress = null)
+        DateTime createdAtUtc)
     {
-        return new User
+        if (id == Guid.Empty)
+            throw new DomainException("User id cannot be empty.");
+
+        ValidateInitialRole(role);
+
+        Id = id;
+        SetFirstName(firstName);
+        SetLastName(lastName);
+        SetEmail(email);
+        SetPhoneNumber(phoneNumber);
+        SetPasswordHash(passwordHash);
+
+        Role = role;
+        IsActive = true;
+        IsBlocked = false;
+
+        CreatedAtUtc = createdAtUtc;
+        UpdatedAtUtc = createdAtUtc;
+    }
+
+    public Guid Id { get; private set; }
+
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public string FullName => $"{FirstName} {LastName}".Trim();
+
+    public string Email { get; private set; } = string.Empty;
+    public string PhoneNumber { get; private set; } = string.Empty;
+    public string PasswordHash { get; private set; } = string.Empty;
+
+    public UserRole Role { get; private set; }
+
+    public bool IsActive { get; private set; }
+    public bool IsBlocked { get; private set; }
+
+    public Address? Address { get; private set; }
+    public GeoLocation? GeoLocation { get; private set; }
+
+    public ClientProfile? ClientProfile { get; private set; }
+    public MasterProfile? MasterProfile { get; private set; }
+
+    public DateTime CreatedAtUtc { get; private set; }
+    public DateTime UpdatedAtUtc { get; private set; }
+    public DateTime? LastLoginAtUtc { get; private set; }
+    public DateTime? BlockedAtUtc { get; private set; }
+
+    public bool IsClient() => Role == UserRole.Client;
+    public bool IsMaster() => Role == UserRole.Master;
+    public bool IsCompanyOwner() => Role == UserRole.CompanyOwner;
+    public bool IsCompanyWorker() => Role == UserRole.CompanyWorker;
+    public bool IsAdmin() => Role == UserRole.Admin;
+
+    public void UpdateBasicInfo(
+        string firstName,
+        string lastName,
+        string phoneNumber)
+    {
+        EnsureNotBlocked();
+
+        SetFirstName(firstName);
+        SetLastName(lastName);
+        SetPhoneNumber(phoneNumber);
+
+        Touch();
+    }
+
+    public void ChangeEmail(string email)
+    {
+        EnsureNotBlocked();
+        SetEmail(email);
+        Touch();
+    }
+
+    public void ChangePassword(string passwordHash)
+    {
+        EnsureNotBlocked();
+        SetPasswordHash(passwordHash);
+        Touch();
+    }
+
+    public void SetAddress(Address? address)
+    {
+        EnsureNotBlocked();
+        Address = address;
+        Touch();
+    }
+
+    public void SetGeoLocation(GeoLocation? geoLocation)
+    {
+        EnsureNotBlocked();
+        GeoLocation = geoLocation;
+        Touch();
+    }
+
+    public void SetClientProfile(ClientProfile clientProfile)
+    {
+        EnsureNotBlocked();
+
+        if (Role != UserRole.Client)
+            throw new DomainException("Only users with Client role can have client profile.");
+
+        ClientProfile = clientProfile ?? throw new DomainException("Client profile cannot be null.");
+        Touch();
+    }
+
+    public void SetMasterProfile(MasterProfile masterProfile)
+    {
+        EnsureNotBlocked();
+
+        if (Role != UserRole.Master && Role != UserRole.CompanyWorker)
+            throw new DomainException("Only Master or CompanyWorker can have master profile.");
+
+        MasterProfile = masterProfile ?? throw new DomainException("Master profile cannot be null.");
+        Touch();
+    }
+
+    public void RemoveClientProfile()
+    {
+        EnsureNotBlocked();
+
+        if (Role != UserRole.Client)
+            throw new DomainException("Only users with Client role can remove client profile.");
+
+        ClientProfile = null;
+        Touch();
+    }
+
+    public void RemoveMasterProfile()
+    {
+        EnsureNotBlocked();
+
+        if (Role != UserRole.Master && Role != UserRole.CompanyWorker)
+            throw new DomainException("Only Master or CompanyWorker can remove master profile.");
+
+        MasterProfile = null;
+        Touch();
+    }
+
+    public void PromoteMasterToCompanyWorker()
+    {
+        EnsureNotBlocked();
+
+        if (Role != UserRole.Master)
+            throw new DomainException("Only user with Master role can become CompanyWorker.");
+
+        if (MasterProfile is null)
+            throw new DomainException("Master profile is required before becoming CompanyWorker.");
+
+        Role = UserRole.CompanyWorker;
+        Touch();
+    }
+
+    public void ReturnCompanyWorkerToMaster()
+    {
+        EnsureNotBlocked();
+
+        if (Role != UserRole.CompanyWorker)
+            throw new DomainException("Only user with CompanyWorker role can return to Master.");
+
+        if (MasterProfile is null)
+            throw new DomainException("Master profile must exist when returning to Master.");
+
+        Role = UserRole.Master;
+        Touch();
+    }
+
+    public void Activate()
+    {
+        if (IsBlocked)
+            throw new DomainException("Blocked user cannot be activated.");
+
+        if (IsActive)
+            return;
+
+        IsActive = true;
+        Touch();
+    }
+
+    public void Deactivate()
+    {
+        if (!IsActive)
+            return;
+
+        IsActive = false;
+        Touch();
+    }
+
+    public void Block()
+    {
+        if (IsBlocked)
+            return;
+
+        IsBlocked = true;
+        IsActive = false;
+        BlockedAtUtc = DateTime.UtcNow;
+
+        Touch();
+    }
+
+    public void Unblock()
+    {
+        if (!IsBlocked)
+            return;
+
+        IsBlocked = false;
+        IsActive = true;
+        BlockedAtUtc = null;
+
+        Touch();
+    }
+
+    public void RecordLogin(DateTime loginAtUtc)
+    {
+        LastLoginAtUtc = loginAtUtc;
+        Touch();
+    }
+
+    private void ValidateInitialRole(UserRole role)
+    {
+        if (role != UserRole.Client &&
+            role != UserRole.Master &&
+            role != UserRole.CompanyOwner)
         {
-            Id = id,
-            FirstName = firstName,
-            LastName = lastName,
-            Email = email,
-            Username = username,
-            PasswordHash = passwordHash,
-            Role = role,
-            IsActive = isActive,
-            Phone = phone,
-            DeliveryAddress = deliveryAddress
-        };
+            throw new DomainException(
+                "At registration, user role must be Client, Master, or CompanyOwner.");
+        }
+    }
+
+    private void SetFirstName(string firstName)
+    {
+        if (string.IsNullOrWhiteSpace(firstName))
+            throw new DomainException("First name is required.");
+
+        FirstName = firstName.Trim();
+    }
+
+    private void SetLastName(string lastName)
+    {
+        if (string.IsNullOrWhiteSpace(lastName))
+            throw new DomainException("Last name is required.");
+
+        LastName = lastName.Trim();
+    }
+
+    private void SetEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new DomainException("Email is required.");
+
+        Email = email.Trim().ToLowerInvariant();
+    }
+
+    private void SetPhoneNumber(string phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            throw new DomainException("Phone number is required.");
+
+        PhoneNumber = phoneNumber.Trim();
+    }
+
+    private void SetPasswordHash(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new DomainException("Password hash is required.");
+
+        PasswordHash = passwordHash;
+    }
+
+    private void EnsureNotBlocked()
+    {
+        if (IsBlocked)
+            throw new DomainException("Blocked user cannot be modified.");
+    }
+
+    private void Touch()
+    {
+        UpdatedAtUtc = DateTime.UtcNow;
     }
 }
