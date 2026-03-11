@@ -23,7 +23,6 @@ import { LoginRequest, RegisterRequest } from '../interfaces';
 export class AuthSelectorService {
   private store = inject(Store);
 
-  /** User iz login/register (id, role) – na osnovu njega se zove client ili master */
   readonly userSelector$: Observable<User | null> =
     this.store.select(selectUser);
 
@@ -31,14 +30,8 @@ export class AuthSelectorService {
     selectIsAuthenticated
   );
 
-  /**
-   * Observable koji pokazuje da li je u toku login/register/logout
-   */
   readonly loading$: Observable<boolean> = this.store.select(selectAuthLoading);
 
-  /**
-   * Observable sa error porukom (ako postoji)
-   */
   readonly error$: Observable<string | null> =
     this.store.select(selectAuthError);
 
