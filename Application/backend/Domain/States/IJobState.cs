@@ -1,16 +1,15 @@
-using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Domain.States;
 
 public interface IJobState
 {
-    //fakticki dozvoljene akcije nad job-om
-    //job kao param jer state ne cuva pod samo vodi racuna o pravilima
-    void SendRequests(Job job);                 
-    void Accept(Job job, Guid masterId);        
-    void Start(Job job);                        
-    void Complete(Job job);                     
+    JobStatus Status { get; }
 
-    void ChangeDescription(Job job, string description);
-    void ChangePrice(Job job, decimal? price);
+    void CanPublish();
+    void CanAssign();
+    void CanStart();
+    void CanComplete();
+    void CanCancel();
+    void CanExpire();
 }
