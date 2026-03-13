@@ -1,3 +1,5 @@
+using backend.Domain.Exceptions;
+
 namespace backend.Shared.Exceptions;
 
 public class ConflictException : DomainException

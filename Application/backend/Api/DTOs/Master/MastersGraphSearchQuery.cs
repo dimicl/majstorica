@@ -2,7 +2,7 @@ namespace backend.Api.DTOs.Master;
 
 public class MastersGraphSearchQuery
 {
-    public string? CategoryIds { get; set; }
+    public string? CategoryNames { get; set; }
 
     public string? ZoneIds { get; set; }
 

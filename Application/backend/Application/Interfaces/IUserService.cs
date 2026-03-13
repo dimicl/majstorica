@@ -15,7 +15,7 @@ public interface IUserService
         string firstName,
         string lastName);
 
-    Task UpdateContact(Guid userId, string? phone, string? deliveryAddress);
+    Task UpdateContact(Guid userId, string? phone);
 
     /// <summary>Postavlja zonu korisnika u Neo4j (za pretragu po lokaciji). Ne čuva u MongoDB.</summary>
     Task SetUserZone(Guid userId, string zoneId, string zoneName);
@@ -30,7 +30,7 @@ public interface IUserService
 
     /// <summary>Složena pretraga majstora iz Neo4j grafa (kategorija, zona, min ocena). Rezultat iz grafa + podaci iz MongoDB.</summary>
     Task<List<MasterListItemResponse>> GetMastersByGraphSearch(
-        IReadOnlyList<int>? categoryIds = null,
+        IReadOnlyList<string>? categoryNames = null,
         IReadOnlyList<string>? zoneIds = null,
         decimal? minRating = null,
         int limit = 20);

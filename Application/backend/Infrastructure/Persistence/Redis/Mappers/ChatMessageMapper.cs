@@ -4,29 +4,28 @@ using backend.Infrastructure.Persistence.Redis.Entities;
 namespace backend.Infrastructure.Persistence.Redis.Mappers;
 public static class ChatMessageMapper
 {
-    public static ChatMessageDocument ToEntity(ChatMessage message)
+    public static ChatMessageDocument ToEntity(Message message)
     {
         return new ChatMessageDocument
         {
             Id = message.Id,
             ConversationId = message.ConversationId,
-            JobId = message.JobId,
-            SenderId = message.SenderId,
+            SenderId = message.SenderUserId,
+            Type = message.Type,
             Content = message.Content,
-            SentAt = message.SentAt,
-            IsSystemMessage = message.IsSystemMessage
+            SentAt = message.SentAtUtc,
         };
+
     }
 
-    public static ChatMessage ToDomain(ChatMessageDocument doc)
+    public static Message ToDomain(ChatMessageDocument doc)
     {
-        return ChatMessage.FromPersistence(
+        return new Message(
             doc.Id,
             doc.ConversationId,
-            doc.JobId,
             doc.SenderId,
+            doc.Type,
             doc.Content,
-            doc.SentAt,
-            doc.IsSystemMessage);
+            doc.SentAt        );
     }
 }

@@ -5,23 +5,24 @@ namespace backend.Infrastructure.Persistence.MongoDb.Mappers;
 
 public static class ClientMapper
 {
-    public static ClientDocument ToDocument(Client client)
+    public static ClientDocument ToDocument(Guid userId, ClientProfile client)
     {
         return new ClientDocument
         {
-            Id = client.Id,
-            UserId = client.UserId,
-            CreatedAt = client.CreatedAt,
-            UpdatedAt = client.UpdatedAt
+            Id = userId,
+            PreferredContactPhone = client.PreferredContactPhone,
+            Notes = client.Notes,
+            TotalJobsPosted = client.TotalJobsPosted,
+            CompletedJobs = client.CompletedJobs
         };
     }
 
-    public static Client ToDomain(ClientDocument doc)
+    public static ClientProfile ToDomain(ClientDocument doc)
     {
-        return Client.Rehydrate(
-            doc.Id,
-            doc.UserId,
-            doc.CreatedAt,
-            doc.UpdatedAt);
+        return new ClientProfile(
+            doc.PreferredContactPhone,
+            doc.Notes,
+            doc.TotalJobsPosted,
+            doc.CompletedJobs);
     }
 }

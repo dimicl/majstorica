@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
 using backend.Api.Hubs;
-using backend.Domain.Events;
 using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -15,6 +14,7 @@ namespace backend.Infrastructure.Messaging.RabbitMQ;
 public class RabbitMqSignalRHostedService : IHostedService, IDisposable
 {
     private const string ExchangeName = "domain-events";
+
     private readonly IConfiguration _configuration;
     private readonly IHubContext<DocumentHub> _hubContext;
     private readonly ILogger<RabbitMqSignalRHostedService> _logger;
@@ -78,7 +78,16 @@ public class RabbitMqSignalRHostedService : IHostedService, IDisposable
         {
             var body = ea.Body.ToArray();
             var json = Encoding.UTF8.GetString(body);
-            HandleMessageAsync(json, ea.DeliveryTag).GetAwaiter().GetResult();
+            _logger.LogDebug("Primljena RabbitMQ poruka: {Json}", json);
+
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            var eventType = root.TryGetProperty("EventType", out var et) ? et.GetString() : null;
+            var payloadStr = root.TryGetProperty("Payload", out var pl) ? pl.GetString() : null;
+            if (string.IsNullOrEmpty(eventType) || string.IsNullOrEmpty(payloadStr))
+                return;
+
+            ForwardToSignalR(eventType, payloadStr);
         }
         catch (Exception ex)
         {
@@ -90,41 +99,57 @@ public class RabbitMqSignalRHostedService : IHostedService, IDisposable
         }
     }
 
-    private async Task HandleMessageAsync(string json, ulong deliveryTag)
+    /// <summary>
+    /// Za poznate tipove domain eventa šalje notifikaciju odgovarajućim korisnicima preko SignalR.
+    /// Frontend može slušati npr. "JobAssigned", "JobCompleted", "JobPublished".
+    /// </summary>
+    private void ForwardToSignalR(string eventType, string payloadJson)
     {
-        DomainEventEnvelope? envelope;
         try
         {
-            envelope = JsonSerializer.Deserialize<DomainEventEnvelope>(json);
-        }
-        catch
-        {
-            _logger.LogWarning("Neispravan envelope format: {Json}", json);
-            return;
-        }
+            var payloadObj = JsonSerializer.Deserialize<object>(payloadJson);
+            using var payloadDoc = JsonDocument.Parse(payloadJson);
+            var p = payloadDoc.RootElement;
 
-        if (envelope == null || string.IsNullOrEmpty(envelope.EventType))
-        {
-            _logger.LogWarning("Prazan envelope ili EventType.");
-            return;
+            switch (eventType)
+            {
+                case "JobAssignedEvent":
+                    if (p.TryGetProperty("ClientUserId", out var clientIdEl) &&
+                        Guid.TryParse(clientIdEl.GetString(), out var clientId))
+                    {
+                        _ = _hubContext.Clients.User(clientId.ToString()).SendAsync("JobAssigned", payloadObj);
+                    }
+                    if (p.TryGetProperty("AssignedMasterId", out var masterIdEl) &&
+                        masterIdEl.ValueKind != JsonValueKind.Null &&
+                        Guid.TryParse(masterIdEl.GetString(), out var masterId) && masterId != Guid.Empty)
+                    {
+                        _ = _hubContext.Clients.User(masterId.ToString()).SendAsync("JobAssigned", payloadObj);
+                    }
+                    break;
+                case "JobCompletedEvent":
+                    if (p.TryGetProperty("ClientUserId", out var cIdEl) &&
+                        Guid.TryParse(cIdEl.GetString(), out var cId))
+                    {
+                        _ = _hubContext.Clients.User(cId.ToString()).SendAsync("JobCompleted", payloadObj);
+                    }
+                    if (p.TryGetProperty("AssignedMasterId", out var mIdEl) && mIdEl.ValueKind != JsonValueKind.Null)
+                    {
+                        var mStr = mIdEl.GetString();
+                        if (!string.IsNullOrEmpty(mStr) && Guid.TryParse(mStr, out var mId) && mId != Guid.Empty)
+                            _ = _hubContext.Clients.User(mId.ToString()).SendAsync("JobCompleted", payloadObj);
+                    }
+                    break;
+                case "JobPublishedEvent":
+                    _logger.LogDebug("JobPublishedEvent primljen, JobId: {JobId}", p.TryGetProperty("JobId", out var j) ? j.GetString() : null);
+                    break;
+                default:
+                    _logger.LogDebug("RabbitMQ event tip {EventType} nije mapiran na SignalR.", eventType);
+                    break;
+            }
         }
-
-        switch (envelope.EventType)
+        catch (Exception ex)
         {
-            case nameof(JobUpdatedEvent):
-                var jobUpdated = JsonSerializer.Deserialize<JobUpdatedEvent>(envelope.Payload);
-                if (jobUpdated != null)
-                {
-                    var groupName = $"job:{jobUpdated.JobId}";
-                    await _hubContext.Clients
-                        .Group(groupName)
-                        .SendAsync("JobUpdated", jobUpdated.JobId, jobUpdated.OccurredAt);
-                    _logger.LogDebug("SignalR JobUpdated poslato grupi {Group}", groupName);
-                }
-                break;
-            default:
-                _logger.LogDebug("Nepoznat EventType: {EventType}", envelope.EventType);
-                break;
+            _logger.LogWarning(ex, "SignalR forward za {EventType} nije uspeo.", eventType);
         }
     }
 

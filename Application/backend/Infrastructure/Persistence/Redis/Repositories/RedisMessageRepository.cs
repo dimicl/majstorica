@@ -16,13 +16,13 @@ public class RedisMessageRepository : IMessageRepository
         _messages = (RedisCollection<ChatMessageDocument>)provider.RedisCollection<ChatMessageDocument>();
     }
 
-    public async Task Save(ChatMessage message)
+    public async Task Save(Message message)
     {
         var doc = ChatMessageMapper.ToEntity(message);
         await _messages.InsertAsync(doc);
     }
 
-    public Task<List<ChatMessage>> GetByConversationId(Guid conversationId)
+    public Task<List<Message>> GetByConversationId(Guid conversationId)
     {
         var docs = _messages
             .Where(m => m.ConversationId == conversationId)
@@ -31,7 +31,7 @@ public class RedisMessageRepository : IMessageRepository
         return Task.FromResult(docs.Select(ChatMessageMapper.ToDomain).ToList());
     }
 
-    public Task<ChatMessage?> GetLastByConversationId(Guid conversationId)
+    public Task<Message?> GetLastByConversationId(Guid conversationId)
     {
         var doc = _messages
             .Where(m => m.ConversationId == conversationId)

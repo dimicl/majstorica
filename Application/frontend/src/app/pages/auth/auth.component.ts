@@ -117,9 +117,13 @@ export class AuthComponent {
     this.isLoginMode = isLogin;
     this.auth.dispatchClearError();
 
-    // Reset formi kada se menja mod
     this.loginForm.reset();
-    this.registerForm.reset();
+    this.registerForm.reset(
+      {
+        role: UserRole.Client,
+      },
+      { emitEvent: false }
+    );
   }
 
   // Submit login forme
@@ -147,9 +151,10 @@ export class AuthComponent {
         password,
         role,
       } = this.registerForm.value;
-      // role iz selecta dolazi kao string – backend očekuje number (UserRole enum)
+      // role iz selecta dolazi kao string ili number – backend očekuje 1 (Client), 2 (Master) ili 3 (CompanyOwner)
+      const raw = typeof role === 'string' ? Number(role) : (role as UserRole);
       const roleValue =
-        typeof role === 'string' ? Number(role) : (role as UserRole);
+        Number.isFinite(raw) && raw >= 1 && raw <= 5 ? raw : UserRole.Client;
       const registerRequest: RegisterRequest = {
         firstName,
         lastName,

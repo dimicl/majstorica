@@ -4,5 +4,5 @@ namespace backend.Application.Interfaces;
 
 public interface IMessagePublisher
 {
-    Task Publish(IDomainEvent domainEvent);
+    Task Publish(DomainEvent domainEvent);
 }

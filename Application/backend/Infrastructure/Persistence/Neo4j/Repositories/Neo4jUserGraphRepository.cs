@@ -40,7 +40,7 @@ public class Neo4jUserGraphRepository : IUserGraphSync
         await session.ExecuteWriteAsync(tx => tx.RunAsync(query, parameters));
     }
 
-    public async Task SyncMasterProfile(Guid masterUserId, MasterCategory? category, decimal? rating, int? yearsExperience)
+    public async Task SyncMasterProfile(Guid masterUserId, string? categoryDisplayName, decimal? rating, int? yearsExperience)
     {
         var id = masterUserId.ToString();
         await using var session = _driver.AsyncSession();
@@ -59,16 +59,15 @@ public class Neo4jUserGraphRepository : IUserGraphSync
             };
             await tx.RunAsync(mergeMaster, masterParams);
 
-            if (category.HasValue)
+            if (!string.IsNullOrWhiteSpace(categoryDisplayName))
             {
-                var skillNode = SkillGraphMapper.ToNode(category.Value);
+                var skillName = categoryDisplayName.Trim();
                 var mergeSkill = @"
                     MATCH (m:Master { id: $id })
-                    MERGE (s:Skill { id: $skillId })
-                    SET s.name = $skillName
+                    MERGE (s:Skill { name: $skillName })
                     MERGE (m)-[:HAS_SKILL]->(s)
                 ";
-                await tx.RunAsync(mergeSkill, new { id, skillId = skillNode.Id, skillName = skillNode.Name });
+                await tx.RunAsync(mergeSkill, new { id, skillName });
             }
             else
             {

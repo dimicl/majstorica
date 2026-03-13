@@ -9,7 +9,7 @@ public static class SkillGraphMapper
         return new SkillNode
         {
             Id = ((int)category).ToString(),
-            Name = MasterCategoryDisplay.ToDisplayName(category)
+            Name = category.ToString()
         };
     }
 

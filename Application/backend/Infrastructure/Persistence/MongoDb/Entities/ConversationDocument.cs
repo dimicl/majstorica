@@ -1,3 +1,4 @@
+using backend.Domain.Enums;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -8,8 +9,11 @@ public class ConversationDocument
     [BsonId]
     [BsonRepresentation(BsonType.String)]
     public Guid Id { get; set; }
-    public Guid JobId { get; set; }
+    public Guid? JobId { get; set; }
     public Guid ClientId { get; set; }
     public Guid MasterId { get; set; }
-    public bool IsActive { get; set; }
+
+    public ConversationType Type { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+    public Guid? CompanyId { get; set; }
 }

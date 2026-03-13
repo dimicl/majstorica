@@ -38,12 +38,12 @@ public class Neo4jGraphQueryRepository : IGraphQueryRepository
     }
 
     public async Task<IReadOnlyList<Guid>> SearchMastersAsync(
-        IReadOnlyList<int>? categoryIds = null,
+        IReadOnlyList<string>? categoryNames = null,
         IReadOnlyList<string>? zoneIds = null,
         decimal? minRating = null,
         int limit = 20)
     {
-        var categoryIdStrings = categoryIds?.Select(i => i.ToString()).ToList() ?? new List<string>();
+        var categoryNameList = categoryNames ?? new List<string>();
         var zoneIdList = zoneIds ?? new List<string>();
 
         var query = @"
@@ -51,10 +51,10 @@ public class Neo4jGraphQueryRepository : IGraphQueryRepository
             WHERE ($minRating IS NULL OR m.rating >= $minRating)
             WITH m
             OPTIONAL MATCH (m)-[:HAS_SKILL]->(s:Skill)
-            WITH m, collect(DISTINCT s.id) AS skills
+            WITH m, collect(DISTINCT s.name) AS skills
             OPTIONAL MATCH (m)<-[:IS_MASTER]-(u:User)-[:LOCATED_IN]->(z:Zone)
             WITH m, skills, collect(DISTINCT z.id) AS zones
-            WHERE (size($categoryIds) = 0 OR size([x IN skills WHERE x IN $categoryIds]) > 0)
+            WHERE (size($categoryNames) = 0 OR size([x IN skills WHERE x IN $categoryNames]) > 0)
               AND (size($zoneIds) = 0 OR size([x IN zones WHERE x IN $zoneIds]) > 0)
             RETURN m.id AS id
             ORDER BY m.rating DESC
@@ -62,7 +62,7 @@ public class Neo4jGraphQueryRepository : IGraphQueryRepository
         ";
         var parameters = new
         {
-            categoryIds = categoryIdStrings,
+            categoryNames = categoryNameList,
             zoneIds = zoneIdList,
             minRating = minRating.HasValue ? (double?)minRating.Value : null,
             limit

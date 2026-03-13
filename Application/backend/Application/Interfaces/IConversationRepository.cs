@@ -4,21 +4,21 @@ namespace backend.Application.Interfaces;
 
 public interface IConversationRepository
 {
-    Task Save(ChatConversation conversation);
+    Task Save(Conversation conversation);
 
-    Task SaveMany(IEnumerable<ChatConversation> conversations);
+    Task SaveMany(IEnumerable<Conversation> conversations);
 
-    Task<List<ChatConversation>> GetByJobId(Guid jobId);
+    Task<List<Conversation>> GetByJobId(Guid jobId);
 
-    Task<ChatConversation?> GetById(Guid id);
+    Task<Conversation?> GetById(Guid? id);
 
-    Task<List<ChatConversation>> GetByUserId(Guid userId);
+    Task<List<Conversation>> GetByUserId(Guid userId);
 
     /// <summary>Vraća bilo koju aktivnu konverzaciju između klijenta i majstora (sa poslom ili bez).</summary>
-    Task<ChatConversation?> GetActiveByClientAndMaster(Guid clientId, Guid masterId);
+    Task<Conversation?> GetActiveByClientAndMaster(Guid clientId, Guid masterId);
 
     /// <summary>Vraća bilo koju konverzaciju između klijenta i majstora (aktivnu ili zatvorenu).</summary>
-    Task<ChatConversation?> GetByClientAndMaster(Guid clientId, Guid masterId);
+    Task<Conversation?> GetByClientAndMaster(Guid clientId, Guid masterId);
 
     /// <summary>Broj nepročitanih poruka za korisnika u konverzaciji.</summary>
     Task<int> GetUnreadCountAsync(Guid conversationId, Guid userId);

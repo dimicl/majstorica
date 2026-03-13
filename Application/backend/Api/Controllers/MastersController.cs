@@ -3,6 +3,7 @@ using backend.Api.Extensions;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,11 +40,11 @@ public class MastersController : ControllerBase
     public async Task<ActionResult<List<MasterListItemResponse>>> SearchByGraph([FromQuery] MastersGraphSearchQuery? query = null)
     {
         query ??= new MastersGraphSearchQuery();
-        var categoryIds = ParseIntList(query.CategoryIds);
+        var categoryNames = ParseStringList(query.CategoryNames);
         var zoneIds = ParseStringList(query.ZoneIds);
         var limit = Math.Clamp(query.Limit, 1, 50);
         var result = await _userService.GetMastersByGraphSearch(
-            categoryIds.Count > 0 ? categoryIds : null,
+            categoryNames.Count > 0 ? categoryNames : null,
             zoneIds.Count > 0 ? zoneIds : null,
             query.MinRating,
             limit);
@@ -78,36 +79,27 @@ public class MastersController : ControllerBase
         var response = new MasterProfileResponse
         {
             User = user,
-            Category = master?.Category.HasValue == true
-                ? MasterCategoryDisplay.ToDisplayName(master.Category!.Value)
-                : null,
-            Rating = master?.Rating
+            Category = master?.ServiceCategories?.FirstOrDefault(),
+            Rating = master?.AverageRating?.Value
         };
         return Ok(response);
     }
 
-    /// <summary>Ažurira kategoriju majstora (npr. "Električar"). Prazan string ili null uklanja kategoriju. Ako Master dokument ne postoji, kreira se.</summary>
     [HttpPatch("category")]
     public async Task<IActionResult> UpdateCategory([FromBody] UpdateMasterCategoryRequest request)
     {
         var (userId, role) = User.GetUserIdAndRole();
-        if (role != UserRole.Master)
+        if (role != UserRole.Master && role != UserRole.CompanyWorker)
             return Forbid();
 
-        var category = MasterCategoryDisplay.FromDisplayName(request?.Category);
         var master = await _masterRepository.GetByUserId(userId);
         if (master == null)
-        {
-            master = new Master(userId, null, category, null);
-            await _masterRepository.Save(master);
-        }
-        else
-        {
-            master.UpdateCategory(category);
-            await _masterRepository.Save(master);
-        }
+            return NotFound();
 
-        await _userGraphSync.SyncMasterProfile(userId, master.Category, master.Rating, master.YearsExperience);
+        var categoryDisplayName = string.IsNullOrWhiteSpace(request?.Category) ? "Ostalo" : request.Category!.Trim();
+        master.ReplaceServiceCategories(new[] { categoryDisplayName });
+        await _masterRepository.Save(userId, master);
+        await _userGraphSync.SyncMasterProfile(userId, categoryDisplayName, master.AverageRating?.Value, master.YearsOfExperience);
         return NoContent();
     }
 

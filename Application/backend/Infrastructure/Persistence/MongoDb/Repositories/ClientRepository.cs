@@ -15,24 +15,23 @@ public class ClientRepository : IClientRepository
         _collection = database.GetCollection<ClientDocument>("clients");
     }
 
-    public async Task Save(Client client)
+    public async Task Save(Guid userId, ClientProfile client)
     {
-        var doc = ClientMapper.ToDocument(client);
+        var doc = ClientMapper.ToDocument(userId, client);
         await _collection.ReplaceOneAsync(
-            x => x.Id == doc.Id,
+        x => x.Id == doc.Id,
             doc,
             new ReplaceOptions { IsUpsert = true });
+        }
+
+    public async Task<ClientProfile?> GetById(Guid id)
+    {
+        return await GetByUserId(id);
     }
 
-    public async Task<Client?> GetById(Guid id)
+    public async Task<ClientProfile?> GetByUserId(Guid userId)
     {
-        var doc = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
-        return doc == null ? null : ClientMapper.ToDomain(doc);
-    }
-
-    public async Task<Client?> GetByUserId(Guid userId)
-    {
-        var doc = await _collection.Find(x => x.UserId == userId).FirstOrDefaultAsync();
+        var doc = await _collection.Find(x => x.Id == userId).FirstOrDefaultAsync();
         return doc == null ? null : ClientMapper.ToDomain(doc);
     }
 }

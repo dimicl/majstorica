@@ -4,9 +4,9 @@ namespace backend.Application.Interfaces;
 
 public interface IMessageRepository
 {
-    Task Save(ChatMessage message);
+    Task Save(Message message);
 
-    Task<List<ChatMessage>> GetByConversationId(Guid conversationId);
+    Task<List<Message>> GetByConversationId(Guid conversationId);
 
-    Task<ChatMessage?> GetLastByConversationId(Guid conversationId);
+    Task<Message?> GetLastByConversationId(Guid conversationId);
 }

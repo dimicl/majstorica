@@ -47,4 +47,15 @@ public class UserRepository : IUserRepository
         var docs = await _collection.Find(FilterDefinition<UserDocument>.Empty).ToListAsync();
         return docs.Select(UserMapper.ToDomain).ToList();
     }
+
+    public async Task<List<User>> GetByIds(IEnumerable<Guid> ids)
+    {
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0)
+            return new List<User>();
+
+        var filter = Builders<UserDocument>.Filter.In(x => x.Id, idList);
+        var docs = await _collection.Find(filter).ToListAsync();
+        return docs.Select(UserMapper.ToDomain).ToList();
+    }
 }

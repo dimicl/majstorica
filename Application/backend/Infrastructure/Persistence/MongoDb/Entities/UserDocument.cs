@@ -16,6 +16,10 @@ public class UserDocument
     public string PasswordHash { get; set; } = default!;
     public UserRole Role { get; set; }
     public bool IsActive { get; set; }
-    public string? Phone { get; set; }
-    public string? DeliveryAddress { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Address { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+    public DateTime UpdatedAtUtc { get; set; }
+
+    public MasterProfileDocument? MasterProfile { get; set; }
 }

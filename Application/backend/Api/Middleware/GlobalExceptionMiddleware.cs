@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using backend.Domain.Exceptions;
 using backend.Shared.Exceptions;
 
 namespace backend.Api.Middleware;

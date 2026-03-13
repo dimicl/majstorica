@@ -2,6 +2,7 @@ using backend.Domain.Entities;
 using backend.Infrastructure.Persistence.Redis.Entities;
 
 namespace backend.Infrastructure.Persistence.Redis.Mappers;
+
 public static class UserSessionMapper
 {
     public static UserSessionDocument ToEntity(UserSession session)
@@ -20,7 +21,7 @@ public static class UserSessionMapper
 
     public static UserSession ToDomain(UserSessionDocument doc)
     {
-        return UserSession.FromPersistence(
+        return new UserSession(
             doc.Id,
             doc.UserId,
             doc.Role,

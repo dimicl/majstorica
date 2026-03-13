@@ -39,6 +39,33 @@ public class MasterProfile
             SetServiceZones(serviceZones);
     }
 
+    /// <summary>Konstruktor za učitavanje iz persistence.</summary>
+    public MasterProfile(
+        string headline,
+        string? description,
+        int yearsOfExperience,
+        decimal hourlyRateAmount,
+        string hourlyRateCurrency,
+        bool isAvailable,
+        decimal? averageRatingValue,
+        int totalJobsCompleted,
+        int totalReviews,
+        IEnumerable<string>? serviceCategories = null,
+        IEnumerable<string>? serviceZones = null)
+        : this(
+            headline,
+            description,
+            yearsOfExperience,
+            new Money(hourlyRateAmount, hourlyRateCurrency),
+            isAvailable,
+            serviceCategories,
+            serviceZones)
+    {
+        if (averageRatingValue.HasValue && totalReviews >= 0)
+            UpdateRating(new Rating(averageRatingValue.Value), totalReviews);
+        SetStats(totalJobsCompleted, totalReviews);
+    }
+
     public string Headline { get; private set; } = string.Empty;
 
     public string? Description { get; private set; }
@@ -54,6 +81,12 @@ public class MasterProfile
     public int TotalJobsCompleted { get; private set; }
 
     public int TotalReviews { get; private set; }
+
+    internal void SetStats(int totalJobsCompleted, int totalReviews)
+    {
+        if (totalJobsCompleted >= 0) TotalJobsCompleted = totalJobsCompleted;
+        if (totalReviews >= 0) TotalReviews = totalReviews;
+    }
 
     public IReadOnlyCollection<string> ServiceCategories => _serviceCategories.AsReadOnly();
 

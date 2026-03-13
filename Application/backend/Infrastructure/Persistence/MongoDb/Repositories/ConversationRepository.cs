@@ -21,7 +21,7 @@ public class ConversationRepository : IConversationRepository
         _redis = redis.GetDatabase();
     }
 
-    public async Task Save(ChatConversation conversation)
+    public async Task Save(Conversation conversation)
     {
         var doc = ConversationMapper.ToDocument(conversation);
         await _collection.ReplaceOneAsync(
@@ -30,7 +30,7 @@ public class ConversationRepository : IConversationRepository
             new ReplaceOptions { IsUpsert = true });
     }
 
-    public async Task SaveMany(IEnumerable<ChatConversation> conversations)
+    public async Task SaveMany(IEnumerable<Conversation> conversations)
     {
         foreach (var conversation in conversations)
         {
@@ -38,19 +38,19 @@ public class ConversationRepository : IConversationRepository
         }
     }
 
-    public async Task<ChatConversation?> GetById(Guid id)
+    public async Task<Conversation?> GetById(Guid? id)
     {
         var doc = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         return doc == null ? null : ConversationMapper.ToDomain(doc);
     }
 
-    public async Task<List<ChatConversation>> GetByJobId(Guid jobId)
+    public async Task<List<Conversation>> GetByJobId(Guid jobId)
     {
         var docs = await _collection.Find(x => x.JobId == jobId).ToListAsync();
         return docs.Select(ConversationMapper.ToDomain).ToList();
     }
 
-    public async Task<List<ChatConversation>> GetByUserId(Guid userId)
+    public async Task<List<Conversation>> GetByUserId(Guid userId)
     {
         var filter = Builders<ConversationDocument>.Filter.Or(
             Builders<ConversationDocument>.Filter.Eq(x => x.ClientId, userId),
@@ -60,15 +60,15 @@ public class ConversationRepository : IConversationRepository
         return docs.Select(ConversationMapper.ToDomain).ToList();
     }
 
-    public async Task<ChatConversation?> GetActiveByClientAndMaster(Guid clientId, Guid masterId)
+    public async Task<Conversation?> GetActiveByClientAndMaster(Guid clientId, Guid masterId)
     {
         var doc = await _collection
-            .Find(x => x.ClientId == clientId && x.MasterId == masterId && x.IsActive)
+            .Find(x => x.ClientId == clientId && x.MasterId == masterId)
             .FirstOrDefaultAsync();
         return doc == null ? null : ConversationMapper.ToDomain(doc);
     }
 
-    public async Task<ChatConversation?> GetByClientAndMaster(Guid clientId, Guid masterId)
+    public async Task<Conversation?> GetByClientAndMaster(Guid clientId, Guid masterId)
     {
         var doc = await _collection
             .Find(x => x.ClientId == clientId && x.MasterId == masterId)

@@ -1,47 +1,39 @@
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
-using backend.Infrastructure.Persistence.MongoDb.Entities;
-using backend.Infrastructure.Persistence.MongoDb.Mappers;
-using MongoDB.Driver;
 
 namespace backend.Infrastructure.Persistence.MongoDb;
 
 public class MasterRepository : IMasterRepository
 {
-    private readonly IMongoCollection<MasterDocument> _collection;
+    private readonly IUserRepository _userRepository;
 
-    public MasterRepository(IMongoDatabase database)
+    public MasterRepository(IUserRepository userRepository)
     {
-        _collection = database.GetCollection<MasterDocument>("masters");
+        _userRepository = userRepository;
     }
 
-    public async Task Save(Master master)
+    public async Task Save(Guid userId, MasterProfile masterProfile)
     {
-        var masterEntity = MasterMapper.ToEntity(master);
-        await _collection.ReplaceOneAsync(
-            x => x.Id == masterEntity.Id,
-            masterEntity,
-            new ReplaceOptions { IsUpsert = true });
+        var user = await _userRepository.GetById(userId)
+            ?? throw new InvalidOperationException($"User {userId} not found. Cannot save master profile.");
+
+        user.SetMasterProfile(masterProfile);
+        await _userRepository.Save(user);
     }
 
-    public async Task<Master?> GetById(Guid id)
+    public async Task<MasterProfile?> GetByUserId(Guid userId)
     {
-        var doc = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
-        return doc == null ? null : MasterMapper.ToDomain(doc);
+        var user = await _userRepository.GetById(userId);
+        return user?.MasterProfile;
     }
 
-    public async Task<Master?> GetByUserId(Guid userId)
+    public async Task<IReadOnlyDictionary<Guid, MasterProfile?>> GetByUserIds(IEnumerable<Guid> userIds)
     {
-        var doc = await _collection.Find(x => x.UserId == userId).FirstOrDefaultAsync();
-        return doc == null ? null : MasterMapper.ToDomain(doc);
-    }
+        var idList = userIds.Distinct().ToList();
+        if (idList.Count == 0)
+            return new Dictionary<Guid, MasterProfile?>();
 
-    public async Task<List<Master>> GetByUserIds(IEnumerable<Guid> userIds)
-    {
-        var ids = userIds.Distinct().ToList();
-        if (ids.Count == 0) return new List<Master>();
-        var filter = Builders<MasterDocument>.Filter.In(x => x.UserId, ids);
-        var docs = await _collection.Find(filter).ToListAsync();
-        return docs.Select(MasterMapper.ToDomain).ToList();
+        var users = await _userRepository.GetByIds(idList);
+        return users.ToDictionary(u => u.Id, u => u.MasterProfile);
     }
 }

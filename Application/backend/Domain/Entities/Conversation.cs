@@ -15,7 +15,7 @@ public class Conversation
         Guid clientUserId,
         ConversationType type,
         DateTime createdAtUtc,
-        Guid? masterUserId = null,
+        Guid masterUserId,
         Guid? companyId = null,
         Guid? jobId = null)
     {
@@ -44,7 +44,7 @@ public class Conversation
 
     public Guid ClientUserId { get; private set; }
 
-    public Guid? MasterUserId { get; private set; }
+    public Guid MasterUserId { get; private set; }
 
     public Guid? CompanyId { get; private set; }
 
@@ -60,7 +60,7 @@ public class Conversation
 
     public DateTime? LastMessageAtUtc { get; private set; }
 
-    public bool IsWithMaster() => MasterUserId.HasValue;
+    public bool IsWithMaster() => MasterUserId != Guid.Empty;
 
     public bool IsWithCompany() => CompanyId.HasValue;
 
