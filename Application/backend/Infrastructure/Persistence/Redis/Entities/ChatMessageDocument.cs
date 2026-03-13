@@ -1,4 +1,5 @@
 using Redis.OM.Modeling;
+using backend.Domain.Enums;
 
 namespace backend.Infrastructure.Persistence.Redis.Entities;
 
@@ -6,16 +7,15 @@ namespace backend.Infrastructure.Persistence.Redis.Entities;
 public class ChatMessageDocument
 {
     [RedisIdField]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public Guid Id { get; set; }
 
     [Indexed]
     public Guid ConversationId { get; set; }
 
     [Indexed]
-    public Guid JobId { get; set; }
-
-    [Indexed]
     public Guid SenderId { get; set; }
+
+    public MessageType Type { get; set; }
 
     public string Content { get; set; } = default!;
 

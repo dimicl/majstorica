@@ -20,7 +20,6 @@ export class AvatarComponent {
     return first + last || '?';
   });
 
-  /** Kad nema pravih inicijala (prazno ili samo "?"), prikaži unisex placeholder. */
   showPlaceholder = computed(() => {
     const init = this.initials();
     return init === '' || init === '?';

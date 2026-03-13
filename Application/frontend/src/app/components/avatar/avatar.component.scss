@@ -1,5 +1,3 @@
-// Iste proporcije kao avatar-placeholder iz referentnog avatara:
-// .lg: head 46px, body 100px, body-top 50px na 74×82px → head ≈56%, body ≈122%, body-top ≈61%
 .avatar {
   min-width: 36px;
   min-height: 36px;
@@ -16,7 +14,6 @@
   position: relative;
   overflow: hidden;
 
-  // Unisex placeholder (::before + ::after) samo kad nema inicijala
   &--placeholder {
     &::before {
       content: "";

@@ -5,25 +5,31 @@ namespace backend.Infrastructure.Persistence.MongoDb.Mappers;
 
 public static class ConversationMapper
 {
-    public static ConversationDocument ToDocument(ChatConversation conversation)
+    public static ConversationDocument ToDocument(Conversation conversation)
     {
         return new ConversationDocument
         {
             Id = conversation.Id,
             JobId = conversation.JobId,
-            ClientId = conversation.ClientId,
-            MasterId = conversation.MasterId,
-            IsActive = conversation.IsActive
+            ClientId = conversation.ClientUserId,
+            MasterId = conversation.MasterUserId,
+            CompanyId = conversation.CompanyId,
+            Type = conversation.Type,
+            CreatedAtUtc = conversation.CreatedAtUtc
         };
     }
 
-    public static ChatConversation ToDomain(ConversationDocument doc)
+    public static Conversation ToDomain(ConversationDocument doc)
     {
-        return ChatConversation.Rehydrate(
+        return new Conversation(
             doc.Id,
-            doc.JobId,
             doc.ClientId,
+            doc.Type,
+            doc.CreatedAtUtc,
             doc.MasterId,
-            doc.IsActive);
+            doc.CompanyId,
+            doc.JobId
+            );
+        
     }
 }

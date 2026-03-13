@@ -6,16 +6,16 @@ using MongoDB.Driver;
 
 namespace backend.Infrastructure.Persistence.MongoDb;
 
-public class MongoMessageRepository : IMessageRepository
+public class MessageRepository : IMessageRepository
 {
     private readonly IMongoCollection<MessageDocument> _collection;
 
-    public MongoMessageRepository(IMongoDatabase database)
+    public MessageRepository(IMongoDatabase database)
     {
         _collection = database.GetCollection<MessageDocument>("messages");
     }
 
-    public async Task Save(ChatMessage message)
+    public async Task Save(Message message)
     {
         var doc = MessageMapper.ToDocument(message);
         await _collection.ReplaceOneAsync(
@@ -24,20 +24,20 @@ public class MongoMessageRepository : IMessageRepository
             new ReplaceOptions { IsUpsert = true });
     }
 
-    public async Task<List<ChatMessage>> GetByConversationId(Guid conversationId)
+    public async Task<List<Message>> GetByConversationId(Guid conversationId)
     {
         var docs = await _collection
             .Find(x => x.ConversationId == conversationId)
-            .SortBy(x => x.SentAt)
+            .SortBy(x => x.SentAtUtc)
             .ToListAsync();
         return docs.Select(MessageMapper.ToDomain).ToList();
     }
 
-    public async Task<ChatMessage?> GetLastByConversationId(Guid conversationId)
+    public async Task<Message?> GetLastByConversationId(Guid conversationId)
     {
         var doc = await _collection
             .Find(x => x.ConversationId == conversationId)
-            .SortByDescending(x => x.SentAt)
+            .SortByDescending(x => x.SentAtUtc)
             .FirstOrDefaultAsync();
         return doc == null ? null : MessageMapper.ToDomain(doc);
     }

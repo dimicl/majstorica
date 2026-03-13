@@ -1,5 +1,8 @@
 export enum UserRole {
-  Client = 0,
-  Master = 1,
-  Admin = 2
+  Client = 1,
+  Master = 2,
+  CompanyOwner = 3,
+  CompanyWorker = 4,
+  Admin = 5,
 }
+

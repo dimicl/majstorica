@@ -35,7 +35,7 @@ public class MongoJobRepository
     {
         var statusStrings = statuses.Select(s => s.ToString()).ToList();
         var filter = Builders<JobDocument>.Filter.And(
-            Builders<JobDocument>.Filter.Eq(x => x.MasterId, masterId),
+            Builders<JobDocument>.Filter.Eq(x => x.AssignedMasterId, masterId),
             Builders<JobDocument>.Filter.In(x => x.Status, statusStrings));
         var docs = await _collection.Find(filter).ToListAsync();
         return docs.Select(JobMapper.ToDomain).ToList();

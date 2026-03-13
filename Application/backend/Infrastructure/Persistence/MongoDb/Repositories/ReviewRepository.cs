@@ -1,5 +1,7 @@
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
+using backend.Domain.ValueObjects;
+using backend.Infrastructure.Persistence.MongoDb.Entities;
 using MongoDB.Driver;
 
 namespace backend.Infrastructure.Persistence.MongoDb;
@@ -19,12 +21,18 @@ public class ReviewRepository : IReviewRepository
         {
             Id = review.Id,
             JobId = review.JobId,
-            ClientId = review.ClientId,
-            MasterId = review.MasterId,
-            Rating = review.Rating,
+            ReviewerUserId = review.ReviewerUserId,
+            TargetType = review.TargetType,
+            TargetMasterId = review.TargetMasterId,
+            TargetCompanyId = review.TargetCompanyId,
+            Rating = review.Rating.Value,
             Comment = review.Comment,
-            CreatedAt = review.CreatedAt
+            IsEdited = review.IsEdited,
+            CreatedAtUtc = review.CreatedAtUtc,
+            UpdatedAtUtc = review.UpdatedAtUtc,
+            EditedAtUtc = review.EditedAtUtc
         };
+
         await _collection.ReplaceOneAsync(
             x => x.Id == review.Id,
             doc,
@@ -34,29 +42,51 @@ public class ReviewRepository : IReviewRepository
     public async Task<Review?> GetById(Guid id)
     {
         var doc = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
-        return doc == null ? null : Review.Rehydrate(doc.Id, doc.JobId, doc.ClientId, doc.MasterId, doc.Rating, doc.Comment, doc.CreatedAt);
+        return doc == null
+            ? null
+            : new Review(
+                doc.Id,
+                doc.JobId,
+                doc.ReviewerUserId,
+                doc.TargetType,
+                new Rating(doc.Rating),
+                doc.CreatedAtUtc,
+                doc.TargetMasterId,
+                doc.TargetCompanyId,
+                doc.Comment);
     }
 
     public async Task<List<Review>> GetByMasterId(Guid masterId)
     {
-        var docs = await _collection.Find(x => x.MasterId == masterId).SortByDescending(x => x.CreatedAt).ToListAsync();
-        return docs.Select(d => Review.Rehydrate(d.Id, d.JobId, d.ClientId, d.MasterId, d.Rating, d.Comment, d.CreatedAt)).ToList();
+        var docs = await _collection
+            .Find(x => x.TargetMasterId == masterId)
+            .SortByDescending(x => x.CreatedAtUtc)
+            .ToListAsync();
+
+        return docs.Select(d => new Review(
+            d.Id,
+            d.JobId,
+            d.ReviewerUserId,
+            d.TargetType,
+            new Rating(d.Rating),
+            d.CreatedAtUtc,
+            d.TargetMasterId,
+            d.TargetCompanyId,
+            d.Comment)).ToList();
     }
 
     public async Task<List<Review>> GetByJobId(Guid jobId)
     {
         var docs = await _collection.Find(x => x.JobId == jobId).ToListAsync();
-        return docs.Select(d => Review.Rehydrate(d.Id, d.JobId, d.ClientId, d.MasterId, d.Rating, d.Comment, d.CreatedAt)).ToList();
-    }
-
-    private class ReviewDocument
-    {
-        public Guid Id { get; set; }
-        public Guid JobId { get; set; }
-        public Guid ClientId { get; set; }
-        public Guid MasterId { get; set; }
-        public int Rating { get; set; }
-        public string? Comment { get; set; }
-        public DateTime CreatedAt { get; set; }
+        return docs.Select(d => new Review(
+            d.Id,
+            d.JobId,
+            d.ReviewerUserId,
+            d.TargetType,
+            new Rating(d.Rating),
+            d.CreatedAtUtc,
+            d.TargetMasterId,
+            d.TargetCompanyId,
+            d.Comment)).ToList();
     }
 }

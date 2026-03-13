@@ -49,8 +49,8 @@ public class UserService : IUserService
             FirstName = user.FirstName,
             LastName = user.LastName,
             Role = user.Role,
-            Phone = user.Phone,
-            DeliveryAddress = user.DeliveryAddress
+            Phone = user.PhoneNumber,
+            DeliveryAddress = user.Address?.ToString()
         };
     }
 
@@ -63,19 +63,19 @@ public class UserService : IUserService
         if (user == null)
             throw new NotFoundException("Korisnik nije pronađen.");
 
-        user.UpdateProfile(firstName, lastName);
+        user.UpdateBasicInfo(firstName, lastName, null);
 
         await _userRepository.Save(user);
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
 
-    public async Task UpdateContact(Guid userId, string? phone, string? deliveryAddress)
+    public async Task UpdateContact(Guid userId, string? phone)
     {
         var user = await _userRepository.GetById(userId);
         if (user == null)
             throw new NotFoundException("Korisnik nije pronađen.");
 
-        user.UpdateContact(phone, deliveryAddress);
+        if(phone != null) user.ChangeContact(phone);
         await _userRepository.Save(user);
     }
 
@@ -149,8 +149,7 @@ public class UserService : IUserService
             return new List<MasterListItemResponse>();
 
         var userIds = masterUsers.Select(u => u.Id).ToList();
-        var masters = await _masterRepository.GetByUserIds(userIds);
-        var masterByUserId = masters.ToDictionary(m => m.UserId);
+        var masterByUserId = await _masterRepository.GetByUserIds(userIds);
 
         return masterUsers
             .Select(u =>
@@ -162,8 +161,8 @@ public class UserService : IUserService
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Username = u.Username,
-                    Category = master?.Category.HasValue == true ? MasterCategoryDisplay.ToDisplayName(master.Category!.Value) : null,
-                    Rating = master?.Rating
+                    Category = master?.ServiceCategories?.FirstOrDefault(),
+                    Rating = master?.AverageRating?.Value
                 };
             })
             .ToList();
@@ -222,8 +221,7 @@ public class UserService : IUserService
             return new List<MasterListItemResponse>();
 
         var result = new List<MasterListItemResponse>();
-        var masters = await _masterRepository.GetByUserIds(ids.ToList());
-        var masterByUserId = masters.ToDictionary(m => m.UserId);
+        var masterByUserId = await _masterRepository.GetByUserIds(ids.ToList());
 
         foreach (var id in ids)
         {
@@ -237,8 +235,8 @@ public class UserService : IUserService
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Username = user.Username,
-                Category = master?.Category.HasValue == true ? MasterCategoryDisplay.ToDisplayName(master.Category!.Value) : null,
-                Rating = master?.Rating
+                Category = master?.ServiceCategories?.FirstOrDefault(),
+                Rating = master?.AverageRating?.Value
             });
         }
 
@@ -246,7 +244,7 @@ public class UserService : IUserService
     }
 
     public async Task<List<MasterListItemResponse>> GetMastersByGraphSearch(
-        IReadOnlyList<int>? categoryIds = null,
+        IReadOnlyList<string>? categoryNames = null,
         IReadOnlyList<string>? zoneIds = null,
         decimal? minRating = null,
         int limit = 20)
@@ -254,7 +252,7 @@ public class UserService : IUserService
         IReadOnlyList<Guid> ids;
         try
         {
-            ids = await _graphQueryRepository.SearchMastersAsync(categoryIds, zoneIds, minRating, limit);
+            ids = await _graphQueryRepository.SearchMastersAsync(categoryNames, zoneIds, minRating, limit);
         }
         catch
         {
@@ -265,8 +263,7 @@ public class UserService : IUserService
             return new List<MasterListItemResponse>();
 
         var result = new List<MasterListItemResponse>();
-        var masters = await _masterRepository.GetByUserIds(ids.ToList());
-        var masterByUserId = masters.ToDictionary(m => m.UserId);
+        var masterByUserId = await _masterRepository.GetByUserIds(ids.ToList());
 
         foreach (var id in ids)
         {
@@ -280,8 +277,8 @@ public class UserService : IUserService
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Username = user.Username,
-                Category = master?.Category.HasValue == true ? MasterCategoryDisplay.ToDisplayName(master.Category!.Value) : null,
-                Rating = master?.Rating
+                Category = master?.ServiceCategories?.FirstOrDefault(),
+                Rating = master?.AverageRating?.Value
             });
         }
 

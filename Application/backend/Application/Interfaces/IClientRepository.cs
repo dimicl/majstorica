@@ -4,7 +4,7 @@ namespace backend.Application.Interfaces;
 
 public interface IClientRepository
 {
-    Task Save(Client client);
-    Task<Client?> GetById(Guid id);
-    Task<Client?> GetByUserId(Guid userId);
+    Task Save(Guid userId, ClientProfile clientProfile);
+    Task<ClientProfile?> GetById(Guid userId);
+    Task<ClientProfile?> GetByUserId(Guid userId);
 }

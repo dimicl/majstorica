@@ -17,7 +17,9 @@ public class User
         string firstName,
         string lastName,
         string email,
+        string username,
         string phoneNumber,
+        Address? address,
         string passwordHash,
         UserRole role,
         DateTime createdAtUtc)
@@ -31,8 +33,10 @@ public class User
         SetFirstName(firstName);
         SetLastName(lastName);
         SetEmail(email);
+        SetUsername(username);
         SetPhoneNumber(phoneNumber);
         SetPasswordHash(passwordHash);
+        SetAddress(address);
 
         Role = role;
         IsActive = true;
@@ -49,6 +53,7 @@ public class User
     public string FullName => $"{FirstName} {LastName}".Trim();
 
     public string Email { get; private set; } = string.Empty;
+    public string Username { get; private set; } = string.Empty;
     public string PhoneNumber { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
 
@@ -75,16 +80,22 @@ public class User
     public bool IsAdmin() => Role == UserRole.Admin;
 
     public void UpdateBasicInfo(
-        string firstName,
-        string lastName,
-        string phoneNumber)
+        string? firstName,
+        string? lastName,
+        string? phoneNumber)
     {
         EnsureNotBlocked();
 
-        SetFirstName(firstName);
-        SetLastName(lastName);
-        SetPhoneNumber(phoneNumber);
+        if(firstName != null) SetFirstName(firstName);
+        if(lastName != null) SetLastName(lastName);
+        if(phoneNumber != null) SetPhoneNumber(phoneNumber);
 
+        Touch();
+    }
+
+    public void ChangeContact(string phoneNumber){
+        EnsureNotBlocked();
+        SetPhoneNumber(phoneNumber);
         Touch();
     }
 
@@ -274,6 +285,11 @@ public class User
         Email = email.Trim().ToLowerInvariant();
     }
 
+    private void SetUsername(string username){
+        if (string.IsNullOrWhiteSpace(username))
+            throw new DomainException("Username is required.");
+        Username = username.Trim();
+    }
     private void SetPhoneNumber(string phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(phoneNumber))

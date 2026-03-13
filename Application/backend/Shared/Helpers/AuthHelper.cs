@@ -3,6 +3,7 @@ using backend.Api.DTOs.User;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
 using backend.Shared.Exceptions;
 
 namespace backend.Shared.Helpers;
@@ -19,7 +20,7 @@ internal static class AuthHelper
         string password,
         UserRole role,
         string? phone,
-        string? deliveryAddress)
+        Address? deliveryAddress)
     {
         if (await users.GetByEmail(email) != null)
             throw new UserAlreadyExistsException("Email", email);
@@ -27,7 +28,8 @@ internal static class AuthHelper
         if (await users.GetByUsername(username) != null)
             throw new UserAlreadyExistsException("Username", username);
 
-        var user = new User(firstName, lastName, email, username, password, role, phone, deliveryAddress);
+        var passwordHash = PasswordHasher.Hash(password);
+        var user = new User(Guid.NewGuid(), firstName, lastName, email, username, phone ?? string.Empty, deliveryAddress, passwordHash, role, DateTime.UtcNow);
         await users.Save(user);
         await userGraphSync.SyncUserNode(user.Id, user.Role);
         return user;
@@ -49,8 +51,8 @@ internal static class AuthHelper
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Role = user.Role,
-                Phone = user.Phone,
-                DeliveryAddress = user.DeliveryAddress
+                Phone = user.PhoneNumber,
+                DeliveryAddress = user.Address?.ToString()
             }
         };
     }

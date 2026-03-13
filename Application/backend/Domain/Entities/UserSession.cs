@@ -7,98 +7,61 @@ public class UserSession
 {
     private UserSession()
     {
-        // potrebno za serializer / mapper / Mongo
+        Id = string.Empty;
     }
 
     public UserSession(
-        Guid id,
+        string id,
         Guid userId,
-        string token,
-        DateTime createdAtUtc,
-        DateTime expiresAtUtc)
+        UserRole role,
+        string connectionId)
     {
-        if (id == Guid.Empty)
+        if (string.IsNullOrWhiteSpace(id))
             throw new DomainException("Session id cannot be empty.");
-
         if (userId == Guid.Empty)
             throw new DomainException("User id cannot be empty.");
-
-        if (string.IsNullOrWhiteSpace(token))
-            throw new DomainException("Session token is required.");
-
-        if (expiresAtUtc <= createdAtUtc)
-            throw new DomainException("Session expiration must be after creation time.");
+        if (string.IsNullOrWhiteSpace(connectionId))
+            throw new DomainException("Connection id is required.");
 
         Id = id;
         UserId = userId;
-        Token = token.Trim();
-
-        CreatedAtUtc = createdAtUtc;
-        ExpiresAtUtc = expiresAtUtc;
-
-        Status = SessionStatus.Active;
+        Role = role;
+        ConnectionId = connectionId.Trim();
+        LastSeen = DateTime.UtcNow;
     }
 
-    public Guid Id { get; private set; }
+    /// <summary>Konstruktor za učitavanje iz persistence (Redis).</summary>
+    public UserSession(
+        string id,
+        Guid userId,
+        UserRole role,
+        Guid? currentJobId,
+        Guid? currentConversationId,
+        string connectionId,
+        DateTime lastSeen)
+        : this(id, userId, role, connectionId)
+    {
+        CurrentJobId = currentJobId;
+        CurrentConversationId = currentConversationId;
+        LastSeen = lastSeen;
+    }
+
+    public string Id { get; private set; }
 
     public Guid UserId { get; private set; }
 
-    public string Token { get; private set; } = string.Empty;
+    public UserRole Role { get; private set; }
 
-    public SessionStatus Status { get; private set; }
+    public Guid? CurrentJobId { get; set; }
 
-    public DateTime CreatedAtUtc { get; private set; }
+    public Guid? CurrentConversationId { get; set; }
 
-    public DateTime ExpiresAtUtc { get; private set; }
+    public string ConnectionId { get; set; } = string.Empty;
 
-    public bool IsActive() => Status == SessionStatus.Active;
+    public DateTime LastSeen { get; set; }
 
-    public bool IsExpired(DateTime nowUtc) => ExpiresAtUtc <= nowUtc;
-
-    public bool IsUsable(DateTime nowUtc)
+    public void Touch()
     {
-        return Status == SessionStatus.Active && ExpiresAtUtc > nowUtc;
-    }
-
-    public void ReplaceToken(string token)
-    {
-        EnsureActive();
-
-        if (string.IsNullOrWhiteSpace(token))
-            throw new DomainException("Session token is required.");
-
-        Token = token.Trim();
-    }
-
-    public void Extend(DateTime newExpirationUtc)
-    {
-        EnsureActive();
-
-        if (newExpirationUtc <= ExpiresAtUtc)
-            throw new DomainException("New expiration must be later than current expiration.");
-
-        ExpiresAtUtc = newExpirationUtc;
-    }
-
-    public void Revoke()
-    {
-        if (Status == SessionStatus.Revoked)
-            return;
-
-        Status = SessionStatus.Revoked;
-    }
-
-    public void MarkExpired()
-    {
-        if (Status == SessionStatus.Expired)
-            return;
-
-        Status = SessionStatus.Expired;
-    }
-
-    private void EnsureActive()
-    {
-        if (Status != SessionStatus.Active)
-            throw new DomainException("Only active session can be modified.");
+        LastSeen = DateTime.UtcNow;
     }
 }

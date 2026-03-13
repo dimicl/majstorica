@@ -2,23 +2,21 @@ using System.Text;
 using System.Text.Json;
 using backend.Application.Interfaces;
 using backend.Domain.Events;
+using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
 
 namespace backend.Infrastructure.Messaging.RabbitMQ;
 
 public class RabbitMqPublisher : IMessagePublisher, IDisposable
 {
+    private const string ExchangeName = "domain-events";
     private readonly IConnection _connection;
     private readonly IModel _channel;
 
-    private const string ExchangeName = "domain-events";
-
-    public RabbitMqPublisher()
+    public RabbitMqPublisher(IConfiguration configuration)
     {
-        var factory = new ConnectionFactory
-        {
-            HostName = "localhost"
-        };
+        var hostName = configuration["RabbitMQ:HostName"] ?? "localhost";
+        var factory = new ConnectionFactory { HostName = hostName };
 
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
@@ -30,14 +28,14 @@ public class RabbitMqPublisher : IMessagePublisher, IDisposable
         );
     }
 
-    public Task Publish(IDomainEvent domainEvent)
+    public Task Publish(DomainEvent domainEvent)
     {
         var payload = JsonSerializer.Serialize(domainEvent);
-        var envelope = new DomainEventEnvelope
-        {
+        var envelope = new {
             EventType = domainEvent.GetType().Name,
             Payload = payload
         };
+
         var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope));
 
         _channel.BasicPublish(

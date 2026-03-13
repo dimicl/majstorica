@@ -21,17 +21,34 @@ public static class PasswordHasher
 
     public static bool Verify(string password, string storedHash)
     {
+        if (string.IsNullOrEmpty(storedHash))
+            return false;
+
         var parts = storedHash.Split('.');
-        var salt = Convert.FromBase64String(parts[0]);
-        var expected = Convert.FromBase64String(parts[1]);
+        if (parts.Length != 2)
+        {
+            // Legacy: lozinka sačuvana kao običan tekst (pre ispravke registracije)
+            return password == storedHash;
+        }
 
-        var actual = KeyDerivation.Pbkdf2(
-            password,
-            salt,
-            KeyDerivationPrf.HMACSHA256,
-            iterationCount: 100_000,
-            numBytesRequested: 32);
+        try
+        {
+            var salt = Convert.FromBase64String(parts[0]);
+            var expected = Convert.FromBase64String(parts[1]);
 
-        return CryptographicOperations.FixedTimeEquals(actual, expected);
+            var actual = KeyDerivation.Pbkdf2(
+                password,
+                salt,
+                KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100_000,
+                numBytesRequested: 32);
+
+            return CryptographicOperations.FixedTimeEquals(actual, expected);
+        }
+        catch (FormatException)
+        {
+            // Stored hash not in expected format (e.g. legacy or corrupted) – treat as invalid password
+            return false;
+        }
     }
 }

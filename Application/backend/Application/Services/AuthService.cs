@@ -1,5 +1,6 @@
 using backend.Api.DTOs.Auth;
 using backend.Application.Interfaces;
+using backend.Domain.ValueObjects;
 using backend.Shared.Helpers;
 using backend.Shared.Exceptions;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +25,12 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> Register(RegisterRequest request)
     {
+        Address? address = null;
+        if (!string.IsNullOrWhiteSpace(request.DeliveryAddress))
+        {
+            address = new Address(request.DeliveryAddress, "Nepoznat grad");
+        }
+
         var user = await AuthHelper.CreateUserAndSync(
             _users,
             _userGraphSync,
@@ -34,7 +41,7 @@ public class AuthService : IAuthService
             request.Password,
             request.Role,
             request.Phone,
-            request.DeliveryAddress);
+            address);
 
         return AuthHelper.BuildAuthResponse(user, _config);
     }
@@ -47,6 +54,13 @@ public class AuthService : IAuthService
 
         if (user == null || !PasswordHasher.Verify(request.Password, user.PasswordHash))
             throw new InvalidCredentialsException();
+
+        // Ažuriraj heš ako je lozinka bila sačuvana kao običan tekst (legacy)
+        if (user.PasswordHash.IndexOf('.') < 0)
+        {
+            user.ChangePassword(PasswordHasher.Hash(request.Password));
+            await _users.Save(user);
+        }
 
         return AuthHelper.BuildAuthResponse(user, _config);
     }

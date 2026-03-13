@@ -1,38 +1,41 @@
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Infrastructure.Persistence.MongoDb.Entities;
 
 namespace backend.Infrastructure.Persistence.MongoDb.Mappers;
 
 public static class MasterMapper
 {
-    public static MasterDocument ToEntity(Master master)
+    public static MasterProfileDocument ToDocument(MasterProfile profile)
     {
-        return new MasterDocument
+        return new MasterProfileDocument
         {
-            Id = master.Id,
-            UserId = master.UserId,
-            Bio = master.Bio,
-            Category = master.Category is null ? null : (int)master.Category.Value,
-            Rating = master.Rating,
-            YearsExperience = master.YearsExperience,
-            CreatedAt = master.CreatedAt,
-            UpdatedAt = master.UpdatedAt
+            Headline = profile.Headline,
+            Description = profile.Description,
+            YearsOfExperience = profile.YearsOfExperience,
+            HourlyRateAmount = profile.HourlyRate.Amount,
+            HourlyRateCurrency = profile.HourlyRate.Currency,
+            IsAvailable = profile.IsAvailable,
+            AverageRatingValue = profile.AverageRating?.Value,
+            TotalJobsCompleted = profile.TotalJobsCompleted,
+            TotalReviews = profile.TotalReviews,
+            ServiceCategories = profile.ServiceCategories.ToList(),
+            ServiceZones = profile.ServiceZones.ToList()
         };
     }
 
-    public static Master ToDomain(MasterDocument doc)
+    public static MasterProfile ToDomain(MasterProfileDocument doc)
     {
-        var category = MasterCategoryDisplay.FromValue(doc.Category);
-
-        return Master.Rehydrate(
-            doc.Id,
-            doc.UserId,
-            doc.Bio,
-            category,
-            doc.Rating,
-            doc.YearsExperience,
-            doc.CreatedAt,
-            doc.UpdatedAt);
+        return new MasterProfile(
+            doc.Headline,
+            doc.Description,
+            doc.YearsOfExperience,
+            doc.HourlyRateAmount,
+            doc.HourlyRateCurrency ?? "RSD",
+            doc.IsAvailable,
+            doc.AverageRatingValue,
+            doc.TotalJobsCompleted,
+            doc.TotalReviews,
+            doc.ServiceCategories,
+            doc.ServiceZones);
     }
 }

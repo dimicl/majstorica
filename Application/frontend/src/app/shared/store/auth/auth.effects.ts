@@ -148,7 +148,7 @@ export class AuthEffects {
         ofType(AuthActions.loadUserSuccess),
         tap(() => {
           void this.signalr
-            .connect('http://localhost:5187/hubs/document', {
+            .connect(HUB_CHAT_URL, {
               accessTokenFactory: () => this.authService.getToken() ?? '',
             })
             .then(() => this.chatService.registerRealtimeHandlers());

@@ -4,8 +4,9 @@ namespace backend.Application.Interfaces;
 
 public interface IMasterRepository
 {
-    Task Save(Master master);
-    Task<Master?> GetById(Guid id);
-    Task<Master?> GetByUserId(Guid userId);
-    Task<List<Master>> GetByUserIds(IEnumerable<Guid> userIds);
+    Task Save(Guid userId, MasterProfile masterProfile);
+
+    Task<MasterProfile?> GetByUserId(Guid userId);
+
+    Task<IReadOnlyDictionary<Guid, MasterProfile?>> GetByUserIds(IEnumerable<Guid> userIds);
 }

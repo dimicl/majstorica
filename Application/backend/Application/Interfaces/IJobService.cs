@@ -17,7 +17,6 @@ public interface IJobService
 
     Task<bool> HasClientSentRequestToMaster(Guid clientId, Guid masterId);
 
-    /// <summary>Svi poslovi za korisnika: majstor = zahtevi na čekanju + dodeljeni, klijent = kreirani.</summary>
     Task<List<JobListItemResponse>> GetJobsForUser(Guid userId, UserRole role);
 
     Task AcceptJob(Guid jobId, Guid masterId);

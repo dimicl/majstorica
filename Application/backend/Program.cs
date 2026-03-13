@@ -81,7 +81,7 @@ builder.Services.AddScoped<IRedisListCache, RedisMastersListCache>();
 
 // Redis OM 
 builder.Services.AddSingleton<RedisConnectionProvider>();
-builder.Services.AddScoped<IMessageRepository, MongoMessageRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<ISessionRepository, RedisSessionRepository>();
 
 

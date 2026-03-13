@@ -26,6 +26,7 @@ public class Job
         JobRequestType requestType,
         ExecutorType executorType,
         DateTime createdAtUtc,
+        bool isEmergency,
         DateTime? preferredDateUtc = null,
         string? preferredTimeNote = null,
         Money? budget = null)
@@ -61,6 +62,42 @@ public class Job
 
         CreatedAtUtc = createdAtUtc;
         UpdatedAtUtc = createdAtUtc;
+
+        IsEmergency = isEmergency;
+    }
+
+    /// <summary>Konstruktor za učitavanje iz persistence (Mongo).</summary>
+    public Job(
+        Guid id,
+        Guid clientUserId,
+        string title,
+        string description,
+        bool isEmergency,
+        DateTime createdAtUtc,
+        DateTime updatedAtUtc,
+        DateTime? preferredDateUtc,
+        Money? budget,
+        string status,
+        Guid? assignedMasterId)
+        : this(
+            id,
+            clientUserId,
+            title,
+            description,
+            "Ostalo",
+            new Address("Nepoznata adresa", "Nepoznat grad"),
+            JobRequestType.Marketplace,
+            ExecutorType.Any,
+            createdAtUtc,
+            isEmergency,
+            preferredDateUtc,
+            null,
+            budget)
+    {
+        UpdatedAtUtc = updatedAtUtc;
+        AssignedMasterId = assignedMasterId == Guid.Empty ? null : assignedMasterId;
+        if (Enum.TryParse<JobStatus>(status, out var parsed))
+            Status = parsed;
     }
 
     public Guid Id { get; private set; }
@@ -72,6 +109,8 @@ public class Job
     public string Description { get; private set; } = string.Empty;
 
     public string ServiceCategory { get; private set; } = string.Empty;
+
+    public bool IsEmergency { get; private set; }
 
     public Address ServiceAddress { get; private set; } = null!;
 
