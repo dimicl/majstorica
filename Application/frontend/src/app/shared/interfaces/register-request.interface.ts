@@ -8,5 +8,6 @@ export interface RegisterRequest {
   password: string;
   role: UserRole;
   phone?: string | null;
-  deliveryAddress?: string | null;
+  deliveryAddress?: string | null; // street
+  city: string;
 }

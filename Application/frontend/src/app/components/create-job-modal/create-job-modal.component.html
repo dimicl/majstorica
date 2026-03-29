@@ -23,9 +23,6 @@
         <span class="create-job-modal__master-label">Izabrani majstor</span>
         <div class="create-job-modal__master-card">
           <span class="create-job-modal__master-name">{{ m.fullName }}</span>
-          <span class="create-job-modal__master-username">{{
-            m.username
-          }}</span>
         </div>
       </div>
       }
@@ -57,12 +54,6 @@
               [(ngModel)]="scheduledDate"
               name="scheduledDate"
             />
-          </div>
-          <div class="create-job-form__field create-job-form__field--half">
-            <span class="create-job-form__label">Adresa</span>
-            <p class="create-job-form__address">
-              {{ clientProfile()?.address || 'Adresa nije uneta u profilu.' }}
-            </p>
           </div>
         </div>
 

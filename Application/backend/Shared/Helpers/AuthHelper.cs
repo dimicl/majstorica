@@ -39,6 +39,7 @@ internal static class AuthHelper
     {
         var token = JwtHelper.Generate(user, config);
         var expiresAt = DateTime.UtcNow.AddHours(1);
+
         return new AuthResponse
         {
             Token = token,
@@ -52,7 +53,16 @@ internal static class AuthHelper
                 LastName = user.LastName,
                 Role = user.Role,
                 Phone = user.PhoneNumber,
-                DeliveryAddress = user.Address?.ToString()
+                Address = user.Address == null
+                    ? null
+                    : new AddressResponse
+                    {
+                        Street = user.Address.Street,
+                        City = user.Address.City,
+                        Zone = user.Address.Zone,
+                        PostalCode = user.Address.PostalCode,
+                        Country = user.Address.Country
+                    }
             }
         };
     }

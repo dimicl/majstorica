@@ -21,6 +21,7 @@ import { firstValueFrom } from 'rxjs';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 import { JobEditModalComponent } from '../../components/job-edit-modal/job-edit-modal.component';
+import { AddressDisplayPipe } from '../../shared/pipes/address-display.pipe';
 
 const HUB_URL = 'http://localhost:5187/hubs/document';
 
@@ -34,6 +35,7 @@ const HUB_URL = 'http://localhost:5187/hubs/document';
     FormsModule,
     SvgIconComponent,
     JobEditModalComponent,
+    AddressDisplayPipe,
   ],
   templateUrl: './profil.component.html',
   styleUrl: './profil.component.scss',
@@ -255,16 +257,24 @@ export class ProfilComponent implements OnInit, OnDestroy {
   openJobEdit(job: JobListItem): void {
     this.ensureSignalR();
     const jobId = job.jobId.toLowerCase();
-    const myUserId = (this.authService.getUserIdFromStorage() ?? '').toLowerCase();
+    const myUserId = (
+      this.authService.getUserIdFromStorage() ?? ''
+    ).toLowerCase();
 
     const onGranted = (...args: unknown[]) => {
       this.ngZone.run(() => {
         const id = args[0] != null ? String(args[0]).toLowerCase() : '';
         if (id !== jobId) return;
-        const nextUserId = args.length > 1 && args[1] != null ? String(args[1]).toLowerCase() : undefined;
+        const nextUserId =
+          args.length > 1 && args[1] != null
+            ? String(args[1]).toLowerCase()
+            : undefined;
         const isForMe = nextUserId === undefined || nextUserId === myUserId;
         if (!isForMe) return;
-        this.signalr.off('WriteGranted', onGranted as (...a: unknown[]) => void);
+        this.signalr.off(
+          'WriteGranted',
+          onGranted as (...a: unknown[]) => void
+        );
         this.signalr.off('WriteDenied', onDenied as (...a: unknown[]) => void);
         this.editLockToast.set(null);
         if (this.editLockToastTimer) {
@@ -293,7 +303,10 @@ export class ProfilComponent implements OnInit, OnDestroy {
     this.signalr.on('WriteDenied', onDenied as (p: unknown) => void);
     this.signalr.invoke('JoinJob', job.jobId).catch(() => {
       this.ngZone.run(() => {
-        this.signalr.off('WriteGranted', onGranted as (...a: unknown[]) => void);
+        this.signalr.off(
+          'WriteGranted',
+          onGranted as (...a: unknown[]) => void
+        );
         this.signalr.off('WriteDenied', onDenied as (...a: unknown[]) => void);
         this.editLockToast.set('Trenutno ne možete uređivati.');
         if (this.editLockToastTimer) clearTimeout(this.editLockToastTimer);

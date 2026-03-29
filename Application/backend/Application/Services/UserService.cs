@@ -41,6 +41,14 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetById(userId);
         if (user == null) return null;
+        var address = new AddressResponse
+        {
+            Street = user.Address?.Street ?? string.Empty,
+            City = user.Address?.City ?? string.Empty,
+            Zone = user.Address?.Zone ?? string.Empty,
+            PostalCode = user.Address?.PostalCode ?? string.Empty,
+            Country = user.Address?.Country ?? string.Empty
+        };
         return new UserRequest
         {
             Id = user.Id,
@@ -50,7 +58,7 @@ public class UserService : IUserService
             LastName = user.LastName,
             Role = user.Role,
             Phone = user.PhoneNumber,
-            DeliveryAddress = user.Address?.ToString()
+            Address = address
         };
     }
 

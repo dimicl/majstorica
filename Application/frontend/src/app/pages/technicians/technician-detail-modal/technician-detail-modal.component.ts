@@ -21,10 +21,17 @@ import { UserResponse } from '../../../shared/interfaces';
 import { AvatarComponent } from '../../../components/avatar/avatar.component';
 import { SharedSvgRoutes } from '../../../shared/constants/shared_svg_routes';
 import { SvgIconComponent } from 'angular-svg-icon';
+import { AddressDisplayPipe } from '../../../shared/pipes/address-display.pipe';
 
 @Component({
   selector: 'app-technician-detail-modal',
-  imports: [CommonModule, ButtonComponent, AvatarComponent, SvgIconComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    AvatarComponent,
+    SvgIconComponent,
+    AddressDisplayPipe,
+  ],
   templateUrl: './technician-detail-modal.component.html',
   styleUrl: './technician-detail-modal.component.scss',
 })

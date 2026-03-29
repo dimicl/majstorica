@@ -83,7 +83,7 @@
             </svg>
           </span>
           <span class="profile__meta-value profile__meta-value--address">{{
-            m.user.deliveryAddress?.trim() || "No Address"
+            m.user.address | addressDisplay
           }}</span>
         </div>
       </div>

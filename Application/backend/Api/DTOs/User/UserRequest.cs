@@ -11,5 +11,5 @@ public class UserRequest
     public string Email { get; set; } = default!;
     public UserRole Role { get; set; }
     public string? Phone { get; set; }
-    public string? DeliveryAddress { get; set; }
+    public AddressResponse? Address { get; set; }
 }

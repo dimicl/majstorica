@@ -73,6 +73,14 @@ export class AuthComponent {
           Validators.maxLength(200),
         ],
       ],
+      city: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(20),
+        ],
+      ],
       password: [
         '',
         [
@@ -148,6 +156,7 @@ export class AuthComponent {
         username,
         phone,
         deliveryAddress,
+        city,
         password,
         role,
       } = this.registerForm.value;
@@ -164,6 +173,7 @@ export class AuthComponent {
         role: roleValue,
         phone: phone || null,
         deliveryAddress: deliveryAddress || null,
+        city,
       };
 
       this.auth.dispatchRegister(registerRequest);

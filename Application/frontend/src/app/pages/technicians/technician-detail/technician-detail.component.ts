@@ -18,6 +18,7 @@ import { BUTTON_TYPES } from '../../../shared/types';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../../shared/constants/shared_svg_routes';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AddressDisplayPipe } from '../../../shared/pipes/address-display.pipe';
 
 @Component({
   selector: 'app-technician-detail',
@@ -28,6 +29,7 @@ import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
     CreateJobModalComponent,
     SvgIconComponent,
     NgbModule,
+    AddressDisplayPipe,
   ],
   templateUrl: './technician-detail.component.html',
   styleUrl: './technician-detail.component.scss',
