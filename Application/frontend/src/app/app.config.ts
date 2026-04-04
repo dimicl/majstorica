@@ -22,11 +22,13 @@ import { routes } from './app.routes';
 // Reducers
 import { authReducer } from './shared/store/auth/auth.reducer';
 import { clientReducer } from './shared/store/client/client.reducer';
+import { marketplaceReducer } from './shared/store/marketplace/marketplace.reducer';
 import { masterReducer } from './shared/store/master/master.reducer';
 
 // Effects
 import { AuthEffects } from './shared/store/auth/auth.effects';
 import { ClientEffects } from './shared/store/client/client.effects';
+import { MarketplaceEffects } from './shared/store/marketplace/marketplace.effects';
 import { MasterEffects } from './shared/store/master/master.effects';
 
 export const appConfig: ApplicationConfig = {
@@ -43,10 +45,11 @@ export const appConfig: ApplicationConfig = {
       auth: authReducer,
       client: clientReducer,
       master: masterReducer,
+      marketplace: marketplaceReducer,
     }),
 
     // NgRx Effects
-    provideEffects([AuthEffects, ClientEffects, MasterEffects]),
+    provideEffects([AuthEffects, ClientEffects, MasterEffects, MarketplaceEffects]),
 
     // NgRx DevTools - samo u development modu
     provideStoreDevtools({

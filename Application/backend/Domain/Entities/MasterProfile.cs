@@ -278,4 +278,18 @@ public class MasterProfile
 
         return value.Trim();
     }
+
+    /// <summary>
+    /// Registracija majstora / popuna starog user dokumenta bez embedded profila.
+    /// Kategorije i zone dodaje korisnik kasnije (npr. PATCH category).
+    /// </summary>
+    public static MasterProfile CreateDefaultShell() =>
+        new(
+            headline: "Majstor",
+            description: null,
+            yearsOfExperience: 0,
+            new Money(0m, "RSD"),
+            isAvailable: true,
+            serviceCategories: null,
+            serviceZones: null);
 }

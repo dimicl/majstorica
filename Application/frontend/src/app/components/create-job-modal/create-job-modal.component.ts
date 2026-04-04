@@ -16,6 +16,7 @@ import { JobService } from '../../shared/services/job.service';
 import { ButtonComponent } from '../button/button.component';
 import { BUTTON_TYPES } from '../../shared/types/button.type';
 import { selectClientProfile } from '../../shared/store';
+import { MASTER_CATEGORY_OPTIONS } from '../../shared/enums/master-category.enum';
 
 export interface CreateJobMaster {
   id: string;
@@ -46,13 +47,16 @@ export class CreateJobModalComponent {
   public eButtonType = BUTTON_TYPES;
 
   @Output() closed = new EventEmitter<void>();
-  @Output() created = new EventEmitter<{ jobId: string; masterId: string }>();
+  @Output() created = new EventEmitter<{ jobId: string; masterId?: string }>();
 
   title = '';
   description = '';
   scheduledDate = '';
   price: number | null = null;
   isEmergency = false;
+  /** Prikazno ime kategorije (marketplace); prazno dok korisnik ne izabere. */
+  serviceCategoryLabel = '';
+  readonly masterCategoryOptions = MASTER_CATEGORY_OPTIONS;
   isSubmitting = signal(false);
   submitError = signal<string | null>(null);
 
@@ -79,8 +83,11 @@ export class CreateJobModalComponent {
 
     const m = this.selectedMaster();
     if (!m) {
-      this.submitError.set('Nije izabran majstor.');
-      return;
+      const cat = this.serviceCategoryLabel.trim();
+      if (!cat) {
+        this.submitError.set('Izaberite kategoriju majstora.');
+        return;
+      }
     }
 
     this.isSubmitting.set(true);
@@ -91,10 +98,11 @@ export class CreateJobModalComponent {
         scheduledDate: this.scheduledDate || null,
         price: this.price ?? null,
         isEmergency: this.isEmergency,
+        serviceCategory: m ? undefined : this.serviceCategoryLabel.trim(),
       });
 
-      if (jobId) await this.jobService.sendRequests(jobId, [m.id]);
-      this.created.emit({ jobId, masterId: m.id });
+      if (jobId && m) await this.jobService.sendRequests(jobId, [m.id]);
+      this.created.emit(m ? { jobId, masterId: m.id } : { jobId });
       this.close();
     } catch (err) {
       this.submitError.set(

@@ -28,5 +28,8 @@ export const AuthActions = createActionGroup({
 
     // Clear Error
     'Clear Error': emptyProps(),
+
+    /** Delimično ažuriranje korisnika u sesiji (npr. kategorija majstora). */
+    'Patch User': props<{ partial: Partial<User> }>(),
   },
 });

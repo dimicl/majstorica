@@ -1,0 +1,62 @@
+@let page = (page$ | async) ?? 1; @let hasMore = (hasMore$ | async) ?? false;
+@let loading = (loading$ | async) ?? false; @let error = (error$ | async); @let
+jobs = (jobs$ | async) ?? [];
+
+<section class="marketplace-page">
+  <div class="marketplace-header">
+    <span>Marketplace</span>
+  </div>
+
+  <!--Toolbar-->
+  <div class="marketplace-toolbar"></div>
+
+  @if (loading) {
+  <p class="marketplace-state">Ucitavanje poslova...</p>
+  } @else if (error) {
+  <p class="marketplace-state marketplace-state--error">{{ error }}</p>
+  } @else if (jobs.length === 0) {
+  <p class="marketplace-state">Nema rezultata.</p>
+  } @else {
+  <div class="marketplace-jobs">
+    @for (job of jobs; track job.jobId) {
+    <div class="job-card">
+      <span>{{ job.jobTitle }}</span>
+      @if (job.serviceCategory) {
+      <span class="job-card__category">{{ job.serviceCategory }}</span>
+      }
+
+      <div class="job-meta">
+        <div class="job-meta-item">
+          <span class="job-meta-item-title">Opis</span>
+          <span> {{ job?.description }} </span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-item-title">Klijent</span>
+          <span> {{ job?.clientName }} </span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-item-title">Opciona cena</span>
+          <span> {{ job?.price }} RSD </span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-item-title">Kategorija</span>
+          <span> {{ job?.serviceCategory ?? "Nepoznato" }} </span>
+        </div>
+      </div>
+      <div class="job-actions">
+        <app-button
+          [buttonType]="eButtonType.POSITIVE"
+          [label]="'KONKURISI'"
+          (onButtonClick)="onCompeteJob()"
+        />
+      </div>
+    </div>
+
+    }
+  </div>
+  } @if (hasMore) {
+  <p class="show-more-label" role="button" tabindex="0" (click)="onShowMore()">
+    @if (loading) { Ucitavanje... } @else { Show more }
+  </p>
+  }
+</section>

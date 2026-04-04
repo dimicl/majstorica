@@ -30,6 +30,10 @@ internal static class AuthHelper
 
         var passwordHash = PasswordHasher.Hash(password);
         var user = new User(Guid.NewGuid(), firstName, lastName, email, username, phone ?? string.Empty, deliveryAddress, passwordHash, role, DateTime.UtcNow);
+
+        if (role == UserRole.Master || role == UserRole.CompanyWorker)
+            user.SetMasterProfile(MasterProfile.CreateDefaultShell());
+
         await users.Save(user);
         await userGraphSync.SyncUserNode(user.Id, user.Role);
         return user;

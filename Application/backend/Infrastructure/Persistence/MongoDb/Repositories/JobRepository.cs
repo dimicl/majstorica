@@ -1,16 +1,15 @@
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using backend.Infrastructure.Persistence.MongoDb;
 
 namespace backend.Infrastructure.Persistence.MongoDb;
 
 public class JobRepository : IJobRepository
 {
-    private readonly MongoJobRepository _mongo;
+    private readonly IMongoJobRepository _mongo;
     private readonly IJobGraphRepository _graph;
 
-    public JobRepository(MongoJobRepository mongo, IJobGraphRepository graph)
+    public JobRepository(IMongoJobRepository mongo, IJobGraphRepository graph)
     {
         _mongo = mongo;
         _graph = graph;
@@ -24,11 +23,17 @@ public class JobRepository : IJobRepository
     public Task<List<Job>> GetByClientId(Guid clientId) =>
         _mongo.GetByClientId(clientId);
 
+    public Task<List<Job>> GetAllPaginated(int page, int pageSize) =>
+        _mongo.GetAllPaginated(page, pageSize);
+
     public async Task Save(Job job)
     {
         await _mongo.Save(job);
         await _graph.MergeJobNode(job.Id);
     }
+
+    public Task MergeJobNode(Guid jobId) =>
+        _graph.MergeJobNode(jobId);
 
     public Task InviteMasters(Guid jobId, IEnumerable<Guid> masterIds) =>
         _graph.InviteMasters(jobId, masterIds);

@@ -1,20 +1,22 @@
 import { Component, computed, inject, NgZone, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { ChatPanelComponent } from '../../components/chat-panel/chat-panel.component';
+import { ButtonComponent } from '../../components/button/button.component';
 import { ChatService } from '../../shared/services/chat.service';
-import type { ChatMessage, ChatThread } from '../../shared/interfaces';
 import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { ButtonComponent } from '../../components/button/button.component';
-import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { BUTTON_TYPES, SIGNALR_STATUS } from '../../shared/types';
-import { ReceiveMessagePayload } from '../../shared/interfaces';
 import { HUB_CHAT_URL } from '../../shared/constants/api.constants';
-import { CommonModule } from '@angular/common';
+import type {
+  ChatMessage,
+  ChatThread,
+  ReceiveMessagePayload,
+} from '../../shared/interfaces';
 
 @Component({
   selector: 'app-chat',
-  imports: [ChatPanelComponent, ButtonComponent, AvatarComponent, CommonModule],
+  imports: [CommonModule, ChatPanelComponent, ButtonComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })
@@ -27,31 +29,34 @@ export class ChatComponent {
   private ngZone = inject(NgZone);
 
   realtimeError = this.signalr.lastError;
-
-  //enums
-  public eButtonType = BUTTON_TYPES;
-  isLoadingThreads = signal<boolean>(true);
+  eButtonType = BUTTON_TYPES;
+  isLoadingThreads = signal(true);
+  isLoadingMessages = signal(false);
   threads = signal<ChatThread[]>([]);
-  selectedThreadId = signal<string | null>(null);
-
-  isLoadingMessages = signal<boolean>(false);
   messagesByThread = signal<Record<string, ChatMessage[]>>({});
+  selectedThreadId = signal<string | null>(null);
 
   selectedThread = computed(() => {
     const id = this.selectedThreadId();
-    if (!id) return null;
-    return this.threads().find((t) => t.id === id) ?? null;
+    return id ? this.threads().find((t) => t.id === id) ?? null : null;
+  });
+
+  threadInitials = computed(() => {
+    const thread = this.selectedThread();
+    return thread
+      ? {
+          firstName: thread.title.split(' ')[0],
+          lastName: thread.title.split(' ')[1],
+        }
+      : null;
   });
 
   selectedMessages = computed(() => {
     const id = this.selectedThreadId();
-    if (!id) return null;
-    return this.messagesByThread()[id] ?? null;
+    return id ? this.messagesByThread()[id] ?? null : null;
   });
 
   constructor() {
-    // SignalR se konektuje pri login/register/loadUser (auth.effects) – ovde samo koristimo postojeću konekciju.
-    // Ako korisnik osveži stranicu na /chat, loadUserSuccess možda još nije izvršen – osiguraj konekciju.
     const token = this.auth.getToken();
     if (token && this.signalr.status() !== SIGNALR_STATUS.CONNECTED) {
       const options = {
@@ -59,7 +64,6 @@ export class ChatComponent {
       };
       void this.signalr.connect(HUB_CHAT_URL, options);
     }
-    // Ne disconnect-ujemo na izlasku sa chat stranice – korisnik ostaje online dok je ulogovan.
 
     this.signalr.on<ReceiveMessagePayload>('ReceiveMessage', (payload) => {
       this.ngZone.run(() => this.handleReceiveMessage(payload));
@@ -67,6 +71,10 @@ export class ChatComponent {
 
     void this.loadThreads();
   }
+
+  explore = (): void => {
+    void this.router.navigate(['/masters']);
+  };
 
   private handleReceiveMessage(payload: ReceiveMessagePayload): void {
     const id = payload.id ?? payload.Id ?? '';
@@ -87,7 +95,6 @@ export class ChatComponent {
       sentAt,
     };
     let current = this.messagesByThread()[convId] ?? [];
-    // Ako stigne naša poruka sa servera, ukloni optimističku sa istim tekstom da ne bude duplikat
     if (isFromMe) {
       current = current.filter(
         (m) => !(String(m.id).startsWith('opt-') && m.text === content)
@@ -117,7 +124,6 @@ export class ChatComponent {
         this.chat.setHasNewMessages(true);
       }
     } else if (convId) {
-      // Poruka za konverzaciju koja nije u listi – osveži listu da se prikaže
       void this.refreshThreads();
     }
   }
@@ -132,7 +138,6 @@ export class ChatComponent {
     );
   }
 
-  /** Samo vreme (HH:mm) za poruke u chatu */
   private formatTimeOnly(iso: string): string {
     const d = new Date(iso);
     const hh = String(d.getHours()).padStart(2, '0');
@@ -140,7 +145,6 @@ export class ChatComponent {
     return `${hh}:${mm}`;
   }
 
-  /** Za prikaz "Poslednje aktivan: danas 14:32" u listi i panelu. */
   private formatLastSeen(iso: string): string {
     const d = new Date(iso);
     const now = new Date();
@@ -154,7 +158,9 @@ export class ChatComponent {
       d.getDate() === yesterday.getDate() &&
       d.getMonth() === yesterday.getMonth() &&
       d.getFullYear() === yesterday.getFullYear();
-    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const time = `${String(d.getHours()).padStart(2, '0')}:${String(
+      d.getMinutes()
+    ).padStart(2, '0')}`;
     if (isToday) return `Poslednje aktivan: danas ${time}`;
     if (isYesterday) return `Poslednje aktivan: juče ${time}`;
     const day = String(d.getDate()).padStart(2, '0');
@@ -163,7 +169,6 @@ export class ChatComponent {
     return `Poslednje aktivan: ${day}.${month}.${year}. ${time}`;
   }
 
-  /** Danas: vreme (HH:mm), inače: datum (dd.MM.yyyy.) – za thread listu */
   private formatTimeOrDate(iso: string): string {
     const d = new Date(iso);
     const now = new Date();
@@ -182,7 +187,6 @@ export class ChatComponent {
     return `${day}.${month}.${year}.`;
   }
 
-  /** Minimalni thread kada otvaramo samo po open= u URL (nema u listi). */
   private threadPlaceholder(conversationId: string): ChatThread {
     return {
       id: conversationId,
@@ -196,19 +200,16 @@ export class ChatComponent {
     };
   }
 
-  /** Osveži listu threadova (npr. da se ažurira online/offline). */
   async refreshThreads(): Promise<void> {
     const list = await this.chat.getThreads();
     this.threads.set(list);
   }
 
-  /** Ažuriraj thread sa imenom/prezimenom iz GET /api/conversations/:id. */
   private async applyConversationDetails(
     conversationId: string
   ): Promise<void> {
     const conv = await this.chat.getConversation(conversationId);
     if (!conv) return;
-    const emptyJobId = '00000000-0000-0000-0000-000000000000';
     const list = this.threads();
     const idx = list.findIndex((t) => t.id === conversationId);
     if (idx === -1) return;
@@ -256,7 +257,6 @@ export class ChatComponent {
           queryParamsHandling: 'merge',
         });
       }
-      // Bez open= ne biramo nijedan chat – korisnik vidi listu sa brojem nepročitanih i bira sam
     } catch {
       if (openId) {
         this.threads.set([this.threadPlaceholder(openId)]);
@@ -275,14 +275,13 @@ export class ChatComponent {
   async selectThread(threadId: string): Promise<void> {
     this.selectedThreadId.set(threadId);
     await this.chat.markRead(threadId);
-    // Lokalno resetuj badge odmah
     this.setThreadUnread(threadId, 0);
     void this.chat.refreshUnreadIndicator();
 
     try {
       await this.signalr.invoke('JoinConversation', threadId);
     } catch {
-      // Hub može da odbije ako nisi autorizovan
+      // hub može odbiti ako nisi autorizovan
     }
 
     if (this.messagesByThread()[threadId]) return;
@@ -297,15 +296,6 @@ export class ChatComponent {
     } finally {
       this.isLoadingMessages.set(false);
     }
-  }
-
-  /** Iz naslova razgovora (npr. "Marko Marković") uzmi prvu i drugu reč za inicijale avatara. */
-  threadInitials(title: string): { firstName: string; lastName: string } {
-    const parts = (title ?? '').trim().split(/\s+/);
-    return {
-      firstName: parts[0] ?? '',
-      lastName: parts[1] ?? '',
-    };
   }
 
   async onSendMessage(text: string): Promise<void> {
@@ -324,7 +314,6 @@ export class ChatComponent {
     const conversationId = threadId;
     const jobId = thread.jobId;
 
-    // Optimistički prikaži poruku odmah
     const optId = `opt-${Date.now()}`;
     const sentAt = new Date().toISOString();
     const optimisticMsg: ChatMessage = {
@@ -348,7 +337,6 @@ export class ChatComponent {
       this.realtimeError.set(
         err instanceof Error ? err.message : 'Poruka nije poslata.'
       );
-      // Poruku ostavljamo u listi da korisnik vidi šta nije poslato (može ponovo da pošalje)
     }
   }
 }

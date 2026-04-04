@@ -123,7 +123,7 @@ builder.Services.AddScoped<IMasterRepository, MasterRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
-builder.Services.AddScoped<MongoJobRepository>();
+builder.Services.AddScoped<IMongoJobRepository, MongoJobRepository>();
 builder.Services.AddScoped<IJobGraphRepository, Neo4jJobGraphRepository>();
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 

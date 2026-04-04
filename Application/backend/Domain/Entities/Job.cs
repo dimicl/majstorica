@@ -64,6 +64,8 @@ public class Job
         UpdatedAtUtc = createdAtUtc;
 
         IsEmergency = isEmergency;
+
+        HasStoredServiceCategory = true;
     }
 
     /// <summary>Konstruktor za učitavanje iz persistence (Mongo).</summary>
@@ -77,6 +79,7 @@ public class Job
         DateTime updatedAtUtc,
         DateTime? preferredDateUtc,
         Money? budget,
+        string? serviceCategory,
         string status,
         Guid? assignedMasterId)
         : this(
@@ -84,7 +87,7 @@ public class Job
             clientUserId,
             title,
             description,
-            "Ostalo",
+            string.IsNullOrWhiteSpace(serviceCategory) ? "Ostalo" : serviceCategory,
             new Address("Nepoznata adresa", "Nepoznat grad"),
             JobRequestType.Marketplace,
             ExecutorType.Any,
@@ -98,6 +101,8 @@ public class Job
         AssignedMasterId = assignedMasterId == Guid.Empty ? null : assignedMasterId;
         if (Enum.TryParse<JobStatus>(status, out var parsed))
             Status = parsed;
+
+        HasStoredServiceCategory = !string.IsNullOrWhiteSpace(serviceCategory);
     }
 
     public Guid Id { get; private set; }
@@ -109,6 +114,9 @@ public class Job
     public string Description { get; private set; } = string.Empty;
 
     public string ServiceCategory { get; private set; } = string.Empty;
+
+    /// <summary>True ako je kategorija stvarno upisana u skladište (Mongo). Starim zapisima bez polja odgovara false — u API-ju ne treba prikazivati lažno "Ostalo".</summary>
+    public bool HasStoredServiceCategory { get; private set; }
 
     public bool IsEmergency { get; private set; }
 

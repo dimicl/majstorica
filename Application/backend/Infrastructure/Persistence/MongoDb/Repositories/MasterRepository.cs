@@ -1,5 +1,6 @@
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Infrastructure.Persistence.MongoDb;
 
@@ -24,7 +25,17 @@ public class MasterRepository : IMasterRepository
     public async Task<MasterProfile?> GetByUserId(Guid userId)
     {
         var user = await _userRepository.GetById(userId);
-        return user?.MasterProfile;
+        if (user == null)
+            return null;
+
+        if ((user.Role == UserRole.Master || user.Role == UserRole.CompanyWorker) &&
+            user.MasterProfile == null)
+        {
+            user.SetMasterProfile(MasterProfile.CreateDefaultShell());
+            await _userRepository.Save(user);
+        }
+
+        return user.MasterProfile;
     }
 
     public async Task<IReadOnlyDictionary<Guid, MasterProfile?>> GetByUserIds(IEnumerable<Guid> userIds)

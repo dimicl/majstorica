@@ -30,7 +30,8 @@ public class JobsController : ControllerBase
             request.Description,
             request.ScheduledDate,
             request.Price,
-            request.IsEmergency
+            request.IsEmergency,
+            request.ServiceCategory
         );
 
         return Ok(jobId);
@@ -66,6 +67,18 @@ public class JobsController : ControllerBase
             return Ok(new List<JobListItemResponse>());
         var (userId, role) = User.GetUserIdAndRole();
         var list = await _jobService.GetJobsForUser(userId, role);
+        return Ok(list);
+    }
+
+    [HttpGet("marketplace")]
+    public async Task<ActionResult<List<JobListItemResponse>>> GetMarketplaceJobs(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+            return Ok(new List<JobListItemResponse>());
+
+        var list = await _jobService.GetMarketplaceJobs(page, pageSize);
         return Ok(list);
     }
 

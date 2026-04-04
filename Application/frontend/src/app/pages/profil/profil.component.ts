@@ -1,7 +1,9 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, inject, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
+import { selectUser } from '../../shared/store/auth/auth.selectors';
 import { UserRole } from '../../shared/enums/user-role.enum';
 import {
   JobService,
@@ -17,30 +19,38 @@ import { NewJobRequestPayload } from '../../shared/interfaces';
 import { MASTER_CATEGORY_OPTIONS } from '../../shared/enums';
 import { FormsModule } from '@angular/forms';
 import { signal, computed } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 import { JobEditModalComponent } from '../../components/job-edit-modal/job-edit-modal.component';
 import { AddressDisplayPipe } from '../../shared/pipes/address-display.pipe';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
+import { CreateJobModalComponent } from '../../components/create-job-modal/create-job-modal.component';
 
 const HUB_URL = 'http://localhost:5187/hubs/document';
 
 @Component({
   selector: 'app-profil',
   imports: [
+    NgbTooltipModule,
     AsyncPipe,
     DatePipe,
     RouterLink,
     ButtonComponent,
+    AvatarComponent,
     FormsModule,
     SvgIconComponent,
     JobEditModalComponent,
+    CreateJobModalComponent,
     AddressDisplayPipe,
   ],
   templateUrl: './profil.component.html',
   styleUrl: './profil.component.scss',
 })
 export class ProfilComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
   private auth = inject(AuthSelectorService);
   private jobService = inject(JobService);
   private masterService = inject(MasterService);
@@ -61,11 +71,7 @@ export class ProfilComponent implements OnInit, OnDestroy {
   masterProfileLoading = signal(false);
   masterCategorySaving = signal(false);
   masterCategoryError = signal<string | null>(null);
-  /** Opcije za dropdown kategorije (iz enum-a). */
-  public categoryOptions = MASTER_CATEGORY_OPTIONS.map((o) => ({
-    value: o.label,
-    label: o.label,
-  }));
+  readonly masterCategoryOptions = MASTER_CATEGORY_OPTIONS;
 
   myJobs = signal<JobListItem[]>([]);
   loadingMyJobs = signal(false);
@@ -74,6 +80,7 @@ export class ProfilComponent implements OnInit, OnDestroy {
   jobEditModal = signal<JobListItem | null>(null);
   /** Toast kada Edit nije moguć (drugi uređuje) – samo poruka, bez modala. */
   editLockToast = signal<string | null>(null);
+  showCreateJobModal = signal(false);
 
   pendingRequests = computed(() =>
     this.myJobs().filter((j) => j.status === 'Pending')
@@ -85,6 +92,7 @@ export class ProfilComponent implements OnInit, OnDestroy {
 
   private newJobRequestHandlerRegistered = false;
   private editLockToastTimer: ReturnType<typeof setTimeout> | null = null;
+  private userContextSub?: Subscription;
 
   private ensureSignalR(): void {
     const token = this.authService.getToken();
@@ -102,59 +110,77 @@ export class ProfilComponent implements OnInit, OnDestroy {
         this.ngZone.run(() => this.addRequestFromPayload(payload));
       });
     }
-    this.auth.userSelector$.subscribe((user) => {
-      if (user?.role === UserRole.Master) {
-        this.ensureSignalR();
-        void this.loadJobs();
-        void this.loadMasterProfile();
-      } else if (user?.role === UserRole.Client) {
-        void this.loadJobs();
-      } else {
+    // Samo promena korisnika/uloge — ne i svaki patchUser({ category }) (inače petlja: profile → patch → emit → load…).
+    this.userContextSub = this.auth.userSelector$
+      .pipe(
+        map((u) => (u ? { id: u.id, role: u.role } : null)),
+        distinctUntilChanged((a, b) => a?.id === b?.id && a?.role === b?.role)
+      )
+      .subscribe((ctx) => {
+        if (ctx?.role === UserRole.Master) {
+          this.ensureSignalR();
+          void this.loadJobs();
+          this.loadMasterProfile();
+        } else if (ctx?.role === UserRole.Client) {
+          void this.loadJobs();
+        } else {
+          this.masterProfile.set(null);
+          this.auth.dispatchPatchUser({ category: null });
+        }
+      });
+  }
+
+  loadMasterProfile(): void {
+    this.masterProfileLoading.set(true);
+    this.masterCategoryError.set(null);
+    this.masterService.getMyMasterProfile().subscribe({
+      next: (res) => {
+        this.masterProfile.set({
+          category: res.category ?? null,
+          rating: res.rating ?? null,
+        });
+        this.auth.dispatchPatchUser({ category: res.category ?? null });
+        this.masterProfileLoading.set(false);
+      },
+      error: () => {
         this.masterProfile.set(null);
-      }
+        this.auth.dispatchPatchUser({ category: null });
+        this.masterProfileLoading.set(false);
+      },
     });
   }
 
-  async loadMasterProfile(): Promise<void> {
-    this.masterProfileLoading.set(true);
-    this.masterCategoryError.set(null);
-    try {
-      const res = await firstValueFrom(this.masterService.getMyMasterProfile());
-      this.masterProfile.set({
-        category: res.category ?? null,
-        rating: res.rating ?? null,
-      });
-    } catch {
-      this.masterProfile.set(null);
-    } finally {
-      this.masterProfileLoading.set(false);
-    }
-  }
+  /** PATCH kategorije, zatim ponovo učitavanje profila sa servera. */
+  updateCategory(value: string): void {
+    if (this.masterProfile()?.category?.trim()) return;
+    const category = (value ?? '').trim();
+    if (!category || this.masterCategorySaving()) return;
+    if (category === this.masterProfile()?.category) return;
 
-  async setMasterCategory(category: string): Promise<void> {
-    if (this.masterCategorySaving()) return;
     this.masterCategorySaving.set(true);
     this.masterCategoryError.set(null);
-    try {
-      await firstValueFrom(
-        this.masterService.updateMyCategory(category || null)
-      );
-      this.masterProfile.update((p) =>
-        p
-          ? { ...p, category: category || null }
-          : { category: category || null, rating: null }
-      );
-    } catch (err: unknown) {
-      const msg =
-        (err as { error?: { message?: string } })?.error?.message ??
-        'Nije moguće sačuvati kategoriju.';
-      this.masterCategoryError.set(msg);
-    } finally {
-      this.masterCategorySaving.set(false);
-    }
+
+    this.masterService
+      .updateCategory(category)
+      .pipe(switchMap(() => this.masterService.getMyMasterProfile()))
+      .subscribe({
+        next: (res) => {
+          this.masterProfile.set({
+            category: res.category ?? null,
+            rating: res.rating ?? null,
+          });
+          this.auth.dispatchPatchUser({ category: res.category ?? null });
+          this.masterCategorySaving.set(false);
+        },
+        error: () => {
+          this.masterCategoryError.set('Nije moguće sačuvati kategoriju.');
+          this.masterCategorySaving.set(false);
+        },
+      });
   }
 
   ngOnDestroy(): void {
+    this.userContextSub?.unsubscribe();
     if (this.editLockToastTimer) clearTimeout(this.editLockToastTimer);
   }
 
@@ -175,6 +201,7 @@ export class ProfilComponent implements OnInit, OnDestroy {
       conversationId,
       jobTitle,
       description,
+      serviceCategory: p.serviceCategory ?? null,
       clientName,
       masterName: null,
       date,
@@ -324,5 +351,18 @@ export class ProfilComponent implements OnInit, OnDestroy {
       this.signalr.invoke('LeaveJob', job.jobId).catch(() => {});
     }
     this.jobEditModal.set(null);
+  }
+
+  public onOpenCreateJobModal(): void {
+    this.showCreateJobModal.set(true);
+  }
+
+  public closeCreateJobModal(): void {
+    this.showCreateJobModal.set(false);
+  }
+
+  public onJobCreated(): void {
+    this.closeCreateJobModal();
+    this.loadJobs();
   }
 }

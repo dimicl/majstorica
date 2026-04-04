@@ -1,3 +1,4 @@
+using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Persistence.MongoDb.Entities;
@@ -6,7 +7,7 @@ using MongoDB.Driver;
 
 namespace backend.Infrastructure.Persistence.MongoDb;
 
-public class MongoJobRepository
+public class MongoJobRepository : IMongoJobRepository
 {
     private readonly IMongoCollection<JobDocument> _collection;
 
@@ -48,6 +49,23 @@ public class MongoJobRepository
             .Find(x => x.ClientId == clientId)
             .SortByDescending(x => x.CreatedAt)
             .ToListAsync();
+        return docs.Select(JobMapper.ToDomain).ToList();
+    }
+
+    /// <summary>Svi poslovi iz baze, paginirano.</summary>
+    public async Task<List<Job>> GetAllPaginated(int page, int pageSize)
+    {
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = pageSize < 1 ? 10 : pageSize;
+        var skip = (safePage - 1) * safePageSize;
+
+        var docs = await _collection
+            .Find(Builders<JobDocument>.Filter.Empty)
+            .SortByDescending(x => x.UpdatedAt)
+            .Skip(skip)
+            .Limit(safePageSize)
+            .ToListAsync();
+
         return docs.Select(JobMapper.ToDomain).ToList();
     }
 }

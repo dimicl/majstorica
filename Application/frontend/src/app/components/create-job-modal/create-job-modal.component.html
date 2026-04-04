@@ -28,6 +28,26 @@
       }
 
       <form class="create-job-form" (ngSubmit)="onSubmit()" #form="ngForm">
+        @if (!selectedMaster()) {
+        <div class="create-job-form__field create-job-form__field--required">
+          <label for="job-category" class="create-job-form__label"
+            >Kategorija majstora</label
+          >
+          <select
+            id="job-category"
+            class="create-job-form__input"
+            [(ngModel)]="serviceCategoryLabel"
+            name="serviceCategory"
+            required
+          >
+            <option value="">Izaberite kategoriju</option>
+            @for (opt of masterCategoryOptions; track opt.value) {
+            <option [value]="opt.label">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+        }
+
         <div class="create-job-form__field">
           <label for="job-title" class="create-job-form__label"
             >Naslov posla</label

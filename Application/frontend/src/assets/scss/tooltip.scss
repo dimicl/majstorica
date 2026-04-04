@@ -1,0 +1,12 @@
+@use "./variables" as *;
+
+// Stilovi na .tooltip-inner: ng-bootstrap na host-u (bs-tooltip-top/bottom) forsira padding-left/right: 0
+// radi strelice, pa padding na spoljašnjem .tooltip ne važi kako treba.
+.tooltip .tooltip-inner {
+  background-color: $color-black-2;
+  color: $color-white;
+  border-radius: 3px;
+  font-size: 9px;
+  padding: 4px 6px;
+  font-weight: 500;
+}

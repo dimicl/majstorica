@@ -6,5 +6,6 @@ public class CreateJobRequest
     public string Description { get; set; } = default!;
     public DateTime? ScheduledDate { get; set; }
     public decimal? Price { get; set; }
-    public bool IsEmergency { get; set; }
+    public bool IsEmergency { get; set; }    
+    public string? ServiceCategory { get; set; }
 }

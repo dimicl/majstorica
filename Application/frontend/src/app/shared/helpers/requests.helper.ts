@@ -215,6 +215,7 @@ export function jobListItemFromPayload(
     conversationId,
     jobTitle: p.jobTitle ?? '',
     description: p.description ?? '',
+    serviceCategory: p.serviceCategory ?? null,
     clientName: p.clientName ?? 'Klijent',
     masterName: null,
     date: p.date ?? now,

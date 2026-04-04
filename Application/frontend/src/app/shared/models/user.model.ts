@@ -15,4 +15,6 @@ export interface User {
     postalCode?: string | null;
     country?: string | null;
   } | null;
+  /** Majstor: sinhrono sa GET masters/profile (kategorija usluge). */
+  category?: string | null;
 }

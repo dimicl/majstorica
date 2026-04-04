@@ -1,0 +1,108 @@
+@use "../../../assets/scss/variables" as *;
+
+.marketplace-page {
+  min-height: 100vh;
+  background: #f6f8fc;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 32px 48px;
+}
+
+.marketplace-header {
+  font-weight: 900;
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  color: rgba(17, 24, 39, 0.95);
+}
+
+.marketplace-toolbar {
+  margin-top: 8px;
+  min-height: 34px;
+  background-color: $color-white;
+  border-radius: 3px;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+}
+
+.marketplace-state {
+  margin-top: 16px;
+  color: #374151;
+}
+
+.marketplace-state--error {
+  color: #b91c1c;
+}
+
+.marketplace-jobs {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.job-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .job-card__category {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+  }
+
+  p {
+    margin: 0;
+    color: #4b5563;
+  }
+}
+
+.job-meta {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.job-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 4px;
+  .job-meta-item-title {
+    font-size: 13px;
+    font-weight: 900;
+    color: #111827;
+  }
+}
+
+.job-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.show-more-label {
+  margin: 16px auto 0;
+  width: fit-content;
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

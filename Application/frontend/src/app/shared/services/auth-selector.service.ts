@@ -58,4 +58,8 @@ export class AuthSelectorService {
   readonly dispatchClearError = () => {
     this.store.dispatch(AuthActions.clearError());
   };
+
+  readonly dispatchPatchUser = (partial: Partial<User>) => {
+    this.store.dispatch(AuthActions.patchUser({ partial }));
+  };
 }

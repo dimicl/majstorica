@@ -49,12 +49,17 @@
               />
               <div>
                 <h3>{{ fullName(technician) }}</h3>
-                <p class="technician-card__location">{{ atUsername(technician) }}</p>
+                <p class="technician-card__location">
+                  {{ atUsername(technician) }}
+                </p>
                 @if (technician.category) {
-                <p class="technician-card__categories">{{ technician.category }}</p>
-                }
-                @if (technician.rating != null) {
-                <p class="technician-card__rating">★ {{ technician.rating | number:'1.1-1' }}</p>
+                <p class="technician-card__categories">
+                  {{ technician.category }}
+                </p>
+                } @if (technician.rating != null) {
+                <p class="technician-card__rating">
+                  ★ {{ technician.rating | number : "1.1-1" }}
+                </p>
                 }
               </div>
             </header>
@@ -62,7 +67,10 @@
           </div>
         </div>
         } @else {
-        <p class="recommended-section__empty">Trenutno nema preporuka. Angažujte majstora da bismo vam preporučili slične.</p>
+        <p class="recommended-section__empty">
+          Trenutno nema preporuka. Angažujte majstora da bismo vam preporučili
+          slične.
+        </p>
         }
       </section>
       <div class="technicians-search-wrap">
@@ -74,45 +82,57 @@
             (ngModelChange)="onSearchInput($event)"
           />
         </label>
-        <div class="technicians-search__filters" role="group" aria-label="Sortiranje">
+        <div
+          class="technicians-search__filters"
+          role="group"
+          aria-label="Sortiranje"
+        >
           @for (opt of sortOptions; track opt.value) {
-            <button
-              type="button"
-              class="technicians-search__chip"
-              [class.is-active]="listParams.sort === opt.value"
-              (click)="setSort(opt.value)"
-            >
-              {{ opt.label }}
-            </button>
+          <button
+            type="button"
+            class="technicians-search__chip"
+            [class.is-active]="listParams.sort === opt.value"
+            (click)="setSort(opt.value)"
+          >
+            {{ opt.label }}
+          </button>
           }
         </div>
         <div class="technicians-search__filter-row">
           <span class="technicians-search__filter-label">Kategorija:</span>
-          <div class="technicians-search__filters" role="group" aria-label="Kategorija">
+          <div
+            class="technicians-search__filters"
+            role="group"
+            aria-label="Kategorija"
+          >
             @for (opt of categoryOptions; track opt.value) {
-              <button
-                type="button"
-                class="technicians-search__chip"
-                [class.is-active]="listParams.category === opt.value"
-                (click)="setCategory(opt.value)"
-              >
-                {{ opt.label }}
-              </button>
+            <button
+              type="button"
+              class="technicians-search__chip"
+              [class.is-active]="listParams.category === opt.value"
+              (click)="setCategory(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
             }
           </div>
         </div>
         <div class="technicians-search__filter-row">
           <span class="technicians-search__filter-label">Ocena:</span>
-          <div class="technicians-search__filters" role="group" aria-label="Minimalna ocena">
+          <div
+            class="technicians-search__filters"
+            role="group"
+            aria-label="Minimalna ocena"
+          >
             @for (opt of ratingOptions; track opt.value ?? 'all') {
-              <button
-                type="button"
-                class="technicians-search__chip"
-                [class.is-active]="listParams.minRating === opt.value"
-                (click)="setMinRating(opt.value)"
-              >
-                {{ opt.label }}
-              </button>
+            <button
+              type="button"
+              class="technicians-search__chip"
+              [class.is-active]="listParams.minRating === opt.value"
+              (click)="setMinRating(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
             }
           </div>
         </div>
@@ -139,18 +159,23 @@
             />
             <div>
               <h3>{{ fullName(technician) }}</h3>
-              <p class="technician-card__location">
-                {{ atUsername(technician) }}
+
+              <p class="technician-card__categories">
+                {{ technician.category || "No category" }}
               </p>
-              @if (technician.category) {
-                <p class="technician-card__categories">{{ technician.category }}</p>
-              }
               @if (technician.rating != null) {
-                <p class="technician-card__rating">★ {{ technician.rating | number:'1.1-1' }}</p>
+              <p class="technician-card__rating">
+                ★ {{ technician.rating | number : "1.1-1" }}
+              </p>
               }
             </div>
           </header>
-          <span class="technician-card__link">Pogledaj profil →</span>
+          <app-button
+            [buttonType]="eButtonType.NEUTRAL"
+            [label]="'Pogledaj profil'"
+            [hasIcon]="false"
+            (onButtonClick)="openDetail(technician.id)"
+          />
         </div>
         <p class="empty-state" *ngIf="!filteredTechnicians.length">
           Nema majstora za odabranu pretragu.

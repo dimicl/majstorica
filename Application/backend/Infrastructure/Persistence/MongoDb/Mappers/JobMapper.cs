@@ -16,6 +16,7 @@ public static class JobMapper
             AssignedMasterId = job.AssignedMasterId ?? Guid.Empty,
             Title = job.Title,
             Description = job.Description,
+            ServiceCategory = job.ServiceCategory,
             PreferredDateUtc = job.PreferredDateUtc,
             Budget = job.Budget,
             IsEmergency = job.IsEmergency,
@@ -43,6 +44,7 @@ public static class JobMapper
             updatedAt,
             doc.PreferredDateUtc,
             doc.Budget,
+            doc.ServiceCategory,
             doc.Status,
             assignedMaster);
     }

@@ -16,13 +16,14 @@ import {
   MASTERS_LIST_RATING_OPTIONS,
 } from '../../shared/interfaces';
 import { mastersListParamsToCacheKey } from '../../shared/helpers/masters-cache-key.helper';
-import { TechnicianTab } from '../../shared/types';
+import { BUTTON_TYPES, TechnicianTab } from '../../shared/types';
 import { TechnicianDetailModalComponent } from './technician-detail-modal/technician-detail-modal.component';
 import {
   CreateJobModalComponent,
   type CreateJobMaster,
 } from '../../components/create-job-modal/create-job-modal.component';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
+import { ButtonComponent } from '../../components/button/button.component';
 
 @Component({
   selector: 'app-technicians',
@@ -33,6 +34,7 @@ import { AvatarComponent } from '../../components/avatar/avatar.component';
     TechnicianDetailModalComponent,
     CreateJobModalComponent,
     AvatarComponent,
+    ButtonComponent,
   ],
   templateUrl: './technicians.component.html',
   styleUrl: './technicians.component.scss',
@@ -45,6 +47,8 @@ export class TechniciansComponent implements OnInit {
   selectedMasterIdForDetail: string | null = null;
   showCreateJobModal = false;
   createJobMaster: CreateJobMaster | null = null;
+
+  public eButtonType = BUTTON_TYPES;
 
   public tabs: Record<'LIST' | 'MAP', TechnicianTab> = {
     LIST: 'list',
@@ -80,7 +84,6 @@ export class TechniciansComponent implements OnInit {
   }
 
   public get filteredTechnicians(): MasterListItem[] {
-    // Lista majstora je već filtrirana i sortirana na backendu (sa Redis keširanjem).
     return this.technicians;
   }
 

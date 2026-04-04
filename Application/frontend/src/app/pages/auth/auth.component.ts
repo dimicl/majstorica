@@ -60,19 +60,8 @@ export class AuthComponent {
           Validators.maxLength(30),
         ],
       ],
-      phone: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern(/^\d{10}$/),
-        ],
-      ],
-      deliveryAddress: [
-        '',
-        [
-          Validators.maxLength(200),
-        ],
-      ],
+      phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      deliveryAddress: ['', [Validators.maxLength(200)]],
       city: [
         '',
         [
@@ -160,10 +149,7 @@ export class AuthComponent {
         password,
         role,
       } = this.registerForm.value;
-      // role iz selecta dolazi kao string ili number – backend očekuje 1 (Client), 2 (Master) ili 3 (CompanyOwner)
-      const raw = typeof role === 'string' ? Number(role) : (role as UserRole);
-      const roleValue =
-        Number.isFinite(raw) && raw >= 1 && raw <= 5 ? raw : UserRole.Client;
+      const roleValue = this.normalizeRegisterRole(role);
       const registerRequest: RegisterRequest = {
         firstName,
         lastName,
@@ -178,5 +164,25 @@ export class AuthComponent {
 
       this.auth.dispatchRegister(registerRequest);
     }
+  }
+
+  private normalizeRegisterRole(role: unknown): UserRole {
+    const allowed = new Set<string>(
+      Object.values(UserRole).filter((v) => typeof v === 'string')
+    );
+    if (typeof role === 'string' && allowed.has(role)) {
+      return role as UserRole;
+    }
+    if (typeof role === 'number' && role >= 1 && role <= 5) {
+      const legacy: UserRole[] = [
+        UserRole.Client,
+        UserRole.Master,
+        UserRole.CompanyOwner,
+        UserRole.CompanyWorker,
+        UserRole.Admin,
+      ];
+      return legacy[role - 1] ?? UserRole.Client;
+    }
+    return UserRole.Client;
   }
 }

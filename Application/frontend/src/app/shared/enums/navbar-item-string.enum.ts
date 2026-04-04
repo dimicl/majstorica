@@ -4,6 +4,7 @@ export enum NavbarItemString {
   REQUESTS = 'requests',
   MESSAGES = 'chat',
   PROFILE = 'profile',
+  MARKETPLACE = 'marketplace',
 
   HOME_LABEL = 'Pocetna',
   MASTERS_LABEL = 'Majstori',
@@ -11,6 +12,7 @@ export enum NavbarItemString {
   MESSAGES_LABEL = 'Poruke',
   PROFILE_LABEL = 'Profil',
   LOGOUT_LABEL = 'Odjava',
+  MARKETPLACE_LABEL = 'Marketplace',
 
   LOGOUT = 'logout',
 }

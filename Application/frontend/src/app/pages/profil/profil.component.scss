@@ -29,7 +29,11 @@
   gap: 24px;
 }
 
-.profil-header h1 {
+.profil-header {
+  margin-bottom: 8px;
+}
+
+.profil-header-text {
   margin: 0;
   font-size: clamp(1.75rem, 3vw, 2.4rem);
   font-weight: 900;
@@ -38,19 +42,37 @@
 
 // —— Kartice (isti jezik kao chat/technicians) ——
 .profil-card {
-  background: #fff;
+  background: $color-white;
   border-radius: 6px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   padding: 28px 32px;
   flex: 1;
 }
 
+.profil-jobs {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.profil-jobs-container {
+  background: $color-white;
+  padding: 24px;
+  border-radius: 3px;
+}
+
 .profil-hero {
   padding: 0;
 }
 
+.profil-hero-avatar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 .profil-name {
-  margin: 0 0 8px;
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 900;
   color: rgba(17, 24, 39, 0.95);
@@ -60,6 +82,16 @@
 .profil-category-line {
   margin: 0 0 10px;
   font-size: 1rem;
+}
+
+.profil-category-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.45);
+  margin-bottom: 4px;
 }
 
 .profil-category-placeholder {
@@ -158,21 +190,37 @@
 
 // —— Sekcije (Rezervacije / Zahtevi) ——
 .profil-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 6px;
+  height: 34px;
+  background: $color-white;
   margin-bottom: 20px;
 }
 
 .profil-section-title {
-  margin: 0 0 6px;
   font-size: 1.35rem;
   font-weight: 900;
   color: rgba(17, 24, 39, 0.9);
+  line-height: 18px;
 }
 
-.profil-section-desc {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: rgba(17, 24, 39, 0.6);
+.profil-plus-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 3px;
+  background: $color-blue;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.03);
+    background: $color-blue-dark;
+  }
 }
 
 .profil-subsection {
@@ -190,12 +238,7 @@
   color: rgba(17, 24, 39, 0.85);
 }
 
-.profil-empty {
-  padding: 24px 0 0;
-  border-top: 1px solid rgba(17, 24, 39, 0.06);
-}
-
-.profil-empty p {
+.profil-empty-text {
   margin: 0 0 16px;
   font-weight: 600;
   color: rgba(17, 24, 39, 0.65);
