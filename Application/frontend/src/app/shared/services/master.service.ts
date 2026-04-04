@@ -21,19 +21,23 @@ export class MasterService {
 
   /** Profil trenutnog majstora (user + kategorija, ocena). GET api/masters/profile */
   getMyMasterProfile(): Observable<MasterProfileResponse> {
-    return this.http.get<MasterProfileResponse>(`${this.API_URL}/masters/profile`);
+    return this.http.get<MasterProfileResponse>(
+      `${this.API_URL}/masters/profile`
+    );
   }
 
-  /** Ažurira kategoriju majstora. category = prikazno ime (npr. "Električar") ili null da ukloni. */
-  updateMyCategory(category: string | null): Observable<void> {
+  updateCategory(category: string): Observable<void> {
     return this.http.patch<void>(`${this.API_URL}/masters/category`, {
-      category: category ?? null,
+      category,
     });
   }
 
   /** Preporučeni majstori za klijenta (Neo4j – ista veština kao već angažovani). Za ne-klijente backend vraća praznu listu. */
   getRecommendedMasters(limit = 10): Observable<MasterListItem[]> {
-    const url = `${this.API_URL}/masters/recommended?limit=${Math.min(20, Math.max(1, limit))}`;
+    const url = `${this.API_URL}/masters/recommended?limit=${Math.min(
+      20,
+      Math.max(1, limit)
+    )}`;
     return this.http.get<MasterListItem[]>(url);
   }
 

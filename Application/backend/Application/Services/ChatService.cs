@@ -49,7 +49,12 @@ public class ChatService : IChatService
         if (existing != null)
             return existing;
 
-        var conversation = new Conversation(Guid.Empty, clientId, ConversationType.Direct, DateTime.UtcNow, masterId);
+        var conversation = new Conversation(
+            Guid.NewGuid(),
+            clientId,
+            ConversationType.Direct,
+            DateTime.UtcNow,
+            masterId);
         await _conversationRepository.Save(conversation);
         return conversation;
     }

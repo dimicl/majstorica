@@ -7,6 +7,7 @@ public class JobListItemResponse
 
     public string JobTitle { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
+    public string? ServiceCategory { get; init; }
     public string ClientName { get; init; } = string.Empty;
     public string? MasterName { get; init; }
 

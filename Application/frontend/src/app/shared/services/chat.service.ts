@@ -26,8 +26,7 @@ export class ChatService {
     const emptyJobId = '00000000-0000-0000-0000-000000000000';
     return list.map((c) => {
       const isOnline = c.isOnline ?? c.IsOnline ?? false;
-      const lastSeenIso =
-        c.otherPartyLastSeen ?? c.OtherPartyLastSeen ?? null;
+      const lastSeenIso = c.otherPartyLastSeen ?? c.OtherPartyLastSeen ?? null;
       return {
         id: c.id,
         jobId: c.jobId,
@@ -40,9 +39,10 @@ export class ChatService {
         presence: isOnline
           ? ('online' as ChatPresence)
           : ('offline' as ChatPresence),
-        lastSeenText: !isOnline && lastSeenIso
-          ? this.formatLastSeen(lastSeenIso)
-          : undefined,
+        lastSeenText:
+          !isOnline && lastSeenIso
+            ? this.formatLastSeen(lastSeenIso)
+            : undefined,
       };
     });
   }
@@ -61,7 +61,9 @@ export class ChatService {
       d.getDate() === yesterday.getDate() &&
       d.getMonth() === yesterday.getMonth() &&
       d.getFullYear() === yesterday.getFullYear();
-    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const time = `${String(d.getHours()).padStart(2, '0')}:${String(
+      d.getMinutes()
+    ).padStart(2, '0')}`;
     if (isToday) return `Poslednje aktivan: danas ${time}`;
     if (isYesterday) return `Poslednje aktivan: juče ${time}`;
     const day = String(d.getDate()).padStart(2, '0');
@@ -126,7 +128,9 @@ export class ChatService {
   ): Promise<ConversationListItemApi | null> {
     try {
       return await firstValueFrom(
-        this.http.get<ConversationListItemApi>(`${API_BASE_URL}/conversations/${conversationId}`)
+        this.http.get<ConversationListItemApi>(
+          `${API_BASE_URL}/conversations/${conversationId}`
+        )
       );
     } catch {
       return null;
@@ -156,8 +160,8 @@ export class ChatService {
       from: m.isSystemMessage
         ? ('system' as const)
         : m.senderId === currentUserId
-          ? ('me' as const)
-          : ('them' as const),
+        ? ('me' as const)
+        : ('them' as const),
       text: m.content,
       time: this.formatTimeOnly(m.sentAt),
       sentAt: m.sentAt,
@@ -167,7 +171,10 @@ export class ChatService {
   async markRead(conversationId: string): Promise<void> {
     try {
       await firstValueFrom(
-        this.http.post<void>(`${API_BASE_URL}/conversations/${conversationId}/read`, {})
+        this.http.post<void>(
+          `${API_BASE_URL}/conversations/${conversationId}/read`,
+          {}
+        )
       );
     } catch {
       // ignorišemo greške (npr. offline)

@@ -106,4 +106,21 @@ public class Address
 
         Country = value;
     }
+
+    public override string ToString()
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(Street))
+            parts.Add(Street);
+        if (!string.IsNullOrWhiteSpace(City))
+            parts.Add(City);
+        if (!string.IsNullOrWhiteSpace(Zone))
+            parts.Add(Zone!);
+        if (!string.IsNullOrWhiteSpace(PostalCode))
+            parts.Add(PostalCode!);
+        if (!string.IsNullOrWhiteSpace(Country))
+            parts.Add(Country!);
+
+        return string.Join(", ", parts);
+    }
 }

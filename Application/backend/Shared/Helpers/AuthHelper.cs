@@ -30,6 +30,10 @@ internal static class AuthHelper
 
         var passwordHash = PasswordHasher.Hash(password);
         var user = new User(Guid.NewGuid(), firstName, lastName, email, username, phone ?? string.Empty, deliveryAddress, passwordHash, role, DateTime.UtcNow);
+
+        if (role == UserRole.Master || role == UserRole.CompanyWorker)
+            user.SetMasterProfile(MasterProfile.CreateDefaultShell());
+
         await users.Save(user);
         await userGraphSync.SyncUserNode(user.Id, user.Role);
         return user;
@@ -39,6 +43,7 @@ internal static class AuthHelper
     {
         var token = JwtHelper.Generate(user, config);
         var expiresAt = DateTime.UtcNow.AddHours(1);
+
         return new AuthResponse
         {
             Token = token,
@@ -52,7 +57,16 @@ internal static class AuthHelper
                 LastName = user.LastName,
                 Role = user.Role,
                 Phone = user.PhoneNumber,
-                DeliveryAddress = user.Address?.ToString()
+                Address = user.Address == null
+                    ? null
+                    : new AddressResponse
+                    {
+                        Street = user.Address.Street,
+                        City = user.Address.City,
+                        Zone = user.Address.Zone,
+                        PostalCode = user.Address.PostalCode,
+                        Country = user.Address.Country
+                    }
             }
         };
     }

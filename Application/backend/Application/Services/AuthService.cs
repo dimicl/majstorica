@@ -26,9 +26,17 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> Register(RegisterRequest request)
     {
         Address? address = null;
-        if (!string.IsNullOrWhiteSpace(request.DeliveryAddress))
+        if (!string.IsNullOrWhiteSpace(request.DeliveryAddress) ||
+            !string.IsNullOrWhiteSpace(request.City))
         {
-            address = new Address(request.DeliveryAddress, "Nepoznat grad");
+            var street = string.IsNullOrWhiteSpace(request.DeliveryAddress)
+                ? "Nepoznata adresa"
+                : request.DeliveryAddress;
+            var city = string.IsNullOrWhiteSpace(request.City)
+                ? "Nepoznat grad"
+                : request.City;
+
+            address = new Address(street, city);
         }
 
         var user = await AuthHelper.CreateUserAndSync(

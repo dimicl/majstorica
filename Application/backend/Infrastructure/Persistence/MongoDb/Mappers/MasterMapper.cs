@@ -25,6 +25,10 @@ public static class MasterMapper
 
     public static MasterProfile ToDomain(MasterProfileDocument doc)
     {
+        // Prazne liste iz Mongo-a ne smeju u SetServiceCategories/SetServiceZones (bacaju "mora bar jedna").
+        var categories = doc.ServiceCategories is { Count: > 0 } ? doc.ServiceCategories : null;
+        var zones = doc.ServiceZones is { Count: > 0 } ? doc.ServiceZones : null;
+
         return new MasterProfile(
             doc.Headline,
             doc.Description,
@@ -35,7 +39,7 @@ public static class MasterMapper
             doc.AverageRatingValue,
             doc.TotalJobsCompleted,
             doc.TotalReviews,
-            doc.ServiceCategories,
-            doc.ServiceZones);
+            categories,
+            zones);
     }
 }

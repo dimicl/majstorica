@@ -11,6 +11,8 @@ export interface CreateJobPayload {
   scheduledDate: string | null;
   price?: number | null;
   isEmergency: boolean;
+  /** Prikazno ime kategorije majstora (npr. Električar). Za marketplace; ako nije poslato, backend koristi Ostalo. */
+  serviceCategory?: string | null;
 }
 
 /** Jedan posao u listi (za majstora i klijenta). Status: Pending, Accepted, InProgress, Completed. */
@@ -19,6 +21,8 @@ export interface JobListItem {
   conversationId: string;
   jobTitle: string;
   description: string;
+  /** Kategorija traženog majstora (iz API-ja kao serviceCategory). */
+  serviceCategory?: string | null;
   clientName: string;
   masterName: string | null;
   date: string;
@@ -53,6 +57,9 @@ export class JobService {
         scheduledDate: payload.scheduledDate ?? null,
         price: payload.price ?? null,
         isEmergency: payload.isEmergency,
+        ...(payload.serviceCategory != null && payload.serviceCategory.trim() !== ''
+          ? { serviceCategory: payload.serviceCategory.trim() }
+          : {}),
       })
     );
     return res ?? '';
@@ -69,6 +76,16 @@ export class JobService {
   async getJobs(): Promise<JobListItem[]> {
     const list = await firstValueFrom(
       this.http.get<JobListItem[]>(`${API_URL}/jobs/list`)
+    );
+    return list ?? [];
+  }
+
+  /** Marketplace poslovi iz baze, paginirano. */
+  async getMarketplaceJobs(page: number, pageSize: number): Promise<JobListItem[]> {
+    const list = await firstValueFrom(
+      this.http.get<JobListItem[]>(
+        `${API_URL}/jobs/marketplace?page=${page}&pageSize=${pageSize}`
+      )
     );
     return list ?? [];
   }

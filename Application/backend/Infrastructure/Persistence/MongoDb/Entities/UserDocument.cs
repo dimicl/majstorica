@@ -21,5 +21,9 @@ public class UserDocument
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
 
+    [BsonIgnoreIfNull]
     public MasterProfileDocument? MasterProfile { get; set; }
+
+    [BsonIgnoreIfNull]
+    public ClientDocument? ClientProfile { get; set; }
 }

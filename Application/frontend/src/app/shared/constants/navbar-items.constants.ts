@@ -16,6 +16,13 @@ export const NAVBAR_ITEMS: NavbarItem[] = [
     userType: NavbarItemUserType.CLIENT,
   },
   {
+    id: NavbarItemString.MARKETPLACE,
+    icon: SharedSvgRoutes.MARKETPLACE_ICON,
+    label: NavbarItemString.MARKETPLACE_LABEL,
+    userType: NavbarItemUserType.MASTER || NavbarItemUserType.COMPANY,
+    isBottomPinned: false,
+  },
+  {
     id: NavbarItemString.MESSAGES,
     icon: SharedSvgRoutes.MESSAGE_ICON,
     label: NavbarItemString.MESSAGES_LABEL,

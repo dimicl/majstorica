@@ -7,6 +7,7 @@ import { ProfilComponent } from './pages/profil/profil.component';
 import { RequestsComponent } from './pages/requests/requests.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { profileLoadUserResolver } from './shared/resolvers/profile-load-user.resolver';
+import { MarketplaceComponent } from './pages/marketplace/marketplace.component';
 
 export const routes: Routes = [
   {
@@ -42,6 +43,11 @@ export const routes: Routes = [
     component: ProfilComponent,
     canActivate: [authGuard],
     resolve: { _: profileLoadUserResolver },
+  },
+  {
+    path: 'marketplace',
+    component: MarketplaceComponent,
+    canActivate: [authGuard],
   },
   {
     path: '',

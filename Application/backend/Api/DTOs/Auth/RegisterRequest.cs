@@ -35,4 +35,8 @@ public class RegisterRequest
 
     [StringLength(200)]
     public string? DeliveryAddress { get; set; }
+
+    [Required(ErrorMessage = "Grad je obavezan")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "Grad mora biti između 2 i 100 karaktera")]
+    public string City { get; set; } = default!;
 }

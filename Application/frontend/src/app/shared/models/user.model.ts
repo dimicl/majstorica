@@ -7,6 +7,14 @@ export interface User {
   lastName: string;
   role: UserRole;
   phone?: string | null;
-  deliveryAddress?: string | null;
   email?: string | null;
+  address?: {
+    street: string;
+    city: string;
+    zone?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+  } | null;
+  /** Majstor: sinhrono sa GET masters/profile (kategorija usluge). */
+  category?: string | null;
 }

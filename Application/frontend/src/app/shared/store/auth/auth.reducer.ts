@@ -1,6 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
 import { AuthActions } from './auth.actions';
 import { initialAuthState } from './auth.state';
+import { User } from '../../models';
 
 export const authReducer = createReducer(
   initialAuthState,
@@ -80,5 +81,11 @@ export const authReducer = createReducer(
   on(AuthActions.clearError, (state) => ({
     ...state,
     error: null,
-  }))
+  })),
+
+  on(AuthActions.patchUser, (state, { partial }): typeof state => {
+    if (!state.user) return state;
+    const user: User = { ...state.user, ...partial };
+    return { ...state, user };
+  })
 );

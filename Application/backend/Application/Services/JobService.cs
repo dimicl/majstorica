@@ -44,7 +44,8 @@ public class JobService : IJobService
         string description,
         DateTime? scheduledDate,
         decimal? price,
-        bool isEmergency)
+        bool isEmergency,
+        string? serviceCategory = null)
     {
         var now = DateTime.UtcNow;
 
@@ -56,12 +57,16 @@ public class JobService : IJobService
             ? new Money(price.Value, "RSD")
             : null;
 
+        var category = string.IsNullOrWhiteSpace(serviceCategory)
+            ? "Ostalo"
+            : serviceCategory.Trim();
+
         var job = new Job(
             id: Guid.NewGuid(),
             clientUserId: clientId,
             title: title,
             description: description,
-            serviceCategory: "Ostalo",
+            serviceCategory: category,
             serviceAddress: address,
             requestType: JobRequestType.Marketplace,
             executorType: ExecutorType.Any,
@@ -175,6 +180,19 @@ public class JobService : IJobService
         return await GetJobsForClient(userId);
     }
 
+    public async Task<List<JobListItemResponse>> GetMarketplaceJobs(int page, int pageSize)
+    {
+        var jobs = await _jobRepository.GetAllPaginated(page, pageSize);
+        var result = new List<JobListItemResponse>();
+
+        foreach (var job in jobs)
+        {
+            result.Add(await BuildJobListItem(job, includeAssignedMasterName: true));
+        }
+
+        return result;
+    }
+
     private async Task<List<JobListItemResponse>> GetPendingRequestsForMaster(Guid masterId)
     {
         var conversations = await _conversationRepository.GetByUserId(masterId);
@@ -192,22 +210,11 @@ public class JobService : IJobService
             var client = await _userRepository.GetById(conv.ClientUserId);
             var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
 
-            result.Add(new JobListItemResponse
-            {
-                JobId = job.Id,
-                ConversationId = conv.Id,
-                JobTitle = job.Title,
-                Description = job.Description,
-                ClientName = clientName,
-                MasterName = null,
-                Date = job.CreatedAtUtc,
-                ClientId = job.ClientUserId,
-                Price = job.Budget?.Amount,
-                IsEmergency = job.IsEmergency,
-                Status = JobStatus.InProgress.ToString(),
-                CreatedAt = job.CreatedAtUtc,
-                UpdatedAt = job.UpdatedAtUtc
-            });
+            result.Add(await BuildJobListItem(
+                job,
+                forcedConversationId: conv.Id,
+                forcedClientName: clientName,
+                forcedStatus: JobStatus.InProgress.ToString()));
         }
 
         return result;
@@ -239,29 +246,7 @@ public class JobService : IJobService
         var result = new List<JobListItemResponse>();
         foreach (var job in jobsById.Values.OrderByDescending(j => j.UpdatedAtUtc))
         {
-            var convs = await _conversationRepository.GetByJobId(job.Id);
-                var conv = convs.FirstOrDefault(c => c.MasterUserId == masterId);
-            var conversationId = conv?.Id ?? Guid.Empty;
-
-            var client = await _userRepository.GetById(job.ClientUserId);
-            var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
-
-            result.Add(new JobListItemResponse
-            {
-                JobId = job.Id,
-                ConversationId = conversationId,
-                JobTitle = job.Title,
-                Description = job.Description,
-                ClientName = clientName,
-                MasterName = null,
-                Date = job.CreatedAtUtc,
-                ClientId = job.ClientUserId,
-                Price = job.Budget?.Amount,
-                IsEmergency = job.IsEmergency,
-                Status = job.Status.ToString(),
-                CreatedAt = job.CreatedAtUtc,
-                UpdatedAt = job.UpdatedAtUtc
-            });
+            result.Add(await BuildJobListItem(job, conversationMasterId: masterId));
         }
 
         return result;
@@ -274,36 +259,7 @@ public class JobService : IJobService
 
         foreach (var job in jobs.OrderByDescending(j => j.UpdatedAtUtc))
         {
-            var client = await _userRepository.GetById(job.ClientUserId);
-            var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
-
-            string? masterName = null;
-            var conversationId = Guid.Empty;
-            if (job.AssignedMasterId.HasValue)
-            {
-                var master = await _userRepository.GetById(job.AssignedMasterId.Value);
-                masterName = UserDisplayNameHelper.GetDisplayName(master, "Majstor");
-                var convs = await _conversationRepository.GetByJobId(job.Id);
-                var conv = convs.FirstOrDefault(c => c.MasterUserId == job.AssignedMasterId.Value);
-                conversationId = conv?.Id ?? Guid.Empty;
-            }
-
-            result.Add(new JobListItemResponse
-            {
-                JobId = job.Id,
-                ConversationId = conversationId,
-                JobTitle = job.Title,
-                Description = job.Description,
-                ClientName = clientName,
-                MasterName = masterName,
-                Date = job.CreatedAtUtc,
-                ClientId = job.ClientUserId,
-                Price = job.Budget?.Amount,
-                IsEmergency = job.IsEmergency,
-                Status = job.Status.ToString(),
-                CreatedAt = job.CreatedAtUtc,
-                UpdatedAt = job.UpdatedAtUtc
-            });
+            result.Add(await BuildJobListItem(job, includeAssignedMasterName: true));
         }
 
         return result;
@@ -420,5 +376,58 @@ public class JobService : IJobService
             await _messagePublisher.Publish(domainEvent);
 
         job.ClearDomainEvents();
+    }
+
+    private async Task<JobListItemResponse> BuildJobListItem(
+        Job job,
+        Guid? conversationMasterId = null,
+        Guid? forcedConversationId = null,
+        string? forcedClientName = null,
+        string? forcedStatus = null,
+        bool includeAssignedMasterName = false)
+    {
+        var clientName = forcedClientName;
+        if (string.IsNullOrWhiteSpace(clientName))
+        {
+            var client = await _userRepository.GetById(job.ClientUserId);
+            clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
+        }
+
+        var conversationId = forcedConversationId ?? Guid.Empty;
+        if (conversationId == Guid.Empty)
+        {
+            var masterIdForConversation = conversationMasterId ?? job.AssignedMasterId;
+            if (masterIdForConversation.HasValue)
+            {
+                var convs = await _conversationRepository.GetByJobId(job.Id);
+                var conv = convs.FirstOrDefault(c => c.MasterUserId == masterIdForConversation.Value);
+                conversationId = conv?.Id ?? Guid.Empty;
+            }
+        }
+
+        string? masterName = null;
+        if (includeAssignedMasterName && job.AssignedMasterId.HasValue)
+        {
+            var master = await _userRepository.GetById(job.AssignedMasterId.Value);
+            masterName = UserDisplayNameHelper.GetDisplayName(master, "Majstor");
+        }
+
+        return new JobListItemResponse
+        {
+            JobId = job.Id,
+            ConversationId = conversationId,
+            JobTitle = job.Title,
+            Description = job.Description,
+            ServiceCategory = job.HasStoredServiceCategory ? job.ServiceCategory : null,
+            ClientName = clientName!,
+            MasterName = masterName,
+            Date = job.CreatedAtUtc,
+            ClientId = job.ClientUserId,
+            Price = job.Budget?.Amount,
+            IsEmergency = job.IsEmergency,
+            Status = forcedStatus ?? job.Status.ToString(),
+            CreatedAt = job.CreatedAtUtc,
+            UpdatedAt = job.UpdatedAtUtc
+        };
     }
 }

@@ -17,7 +17,13 @@ export interface MasterProfileResponse {
     lastName: string;
     role: string;
     phone?: string;
-    deliveryAddress?: string;
+    address?: {
+      street: string;
+      city: string;
+      zone?: string | null;
+      postalCode?: string | null;
+      country?: string | null;
+    } | null;
   };
   category: string | null;
   rating: number | null;

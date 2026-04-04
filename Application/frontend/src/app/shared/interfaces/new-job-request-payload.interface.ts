@@ -9,4 +9,5 @@ export interface NewJobRequestPayload {
   clientId?: string;
   price?: number | null;
   isEmergency?: boolean;
+  serviceCategory?: string | null;
 }

@@ -13,6 +13,8 @@ public class JobDocument
     public Guid AssignedMasterId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = default!;
+    /// <summary>Null ako dokument nema polje (stari zapisi pre uvođenja kategorije).</summary>
+    public string? ServiceCategory { get; set; }
     public DateTime? PreferredDateUtc { get; set; }
     public Money? Budget { get; set; }
     public bool IsEmergency { get; set; }

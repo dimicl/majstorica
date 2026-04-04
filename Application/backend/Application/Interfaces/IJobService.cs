@@ -11,13 +11,15 @@ public interface IJobService
         string description,
         DateTime? scheduledDate,
         decimal? price,
-        bool isEmergency);
+        bool isEmergency,
+        string? serviceCategory = null);
 
     Task SendRequests(Guid jobId, List<Guid> masterIds);
 
     Task<bool> HasClientSentRequestToMaster(Guid clientId, Guid masterId);
 
     Task<List<JobListItemResponse>> GetJobsForUser(Guid userId, UserRole role);
+    Task<List<JobListItemResponse>> GetMarketplaceJobs(int page, int pageSize);
 
     Task AcceptJob(Guid jobId, Guid masterId);
 
