@@ -27,4 +27,27 @@ export interface MasterProfileResponse {
   };
   category: string | null;
   rating: number | null;
+  employerCompanyId?: string | null;
+  employerCompanyName?: string | null;
+  yearsOfExperience: number;
+  hourlyRateAmount: number;
+  hourlyRateCurrency: string;
+  totalReviews: number;
+}
+
+export interface UpdateMasterProfileStatsPayload {
+  yearsOfExperience?: number;
+  hourlyRateAmount?: number;
+  hourlyRateCurrency?: string;
+}
+
+/** Stavka GET api/masters/profile/reviews */
+export interface MasterReviewListItem {
+  id: string;
+  jobId: string;
+  rating: number;
+  comment: string | null;
+  createdAtUtc: string;
+  reviewerName: string;
+  reviewerUsername: string | null;
 }

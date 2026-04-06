@@ -111,6 +111,11 @@ public class MasterProfile
         IsAvailable = isAvailable;
     }
 
+    public void UpdateYearsOfExperience(int yearsOfExperience)
+    {
+        SetYearsOfExperience(yearsOfExperience);
+    }
+
     public void SetHourlyRate(Money hourlyRate)
     {
         HourlyRate = hourlyRate ?? throw new DomainException("Hourly rate is required.");

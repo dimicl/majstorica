@@ -5,7 +5,6 @@
 .input-container {
   position: relative;
   width: 100%;
-  
 }
 
 .input-field {
@@ -74,10 +73,17 @@
   color: #0d6efd;
 }
 
-// Invalid state - CRVENI INPUT
+.input-wrapper.valid .input-field:focus {
+  color: #111827;
+}
+
 .input-wrapper.invalid .input-field {
   background-color: rgba(220, 53, 69, 0.15);
   border-color: #dc3545;
+}
+
+.input-wrapper.invalid .input-field:focus {
+  color: #111827;
 }
 
 .input-wrapper.invalid .input-label {
@@ -146,9 +152,16 @@
     color: #3e7dd7;
   }
 
-  // Invalid dark - CRVENI INPUT
+  &.valid .input-field:focus {
+    color: #ffffff;
+  }
+
   &.invalid .input-field {
     background-color: rgba(255, 107, 107, 0.25);
+  }
+
+  &.invalid .input-field:focus {
+    color: #ffffff;
   }
 
   &.invalid .input-label {

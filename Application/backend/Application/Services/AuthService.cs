@@ -72,4 +72,11 @@ public class AuthService : IAuthService
 
         return AuthHelper.BuildAuthResponse(user, _config);
     }
+
+    public async Task<AuthResponse> RefreshTokenAsync(Guid userId)
+    {
+        var user = await _users.GetById(userId)
+            ?? throw new NotFoundException("Korisnik nije pronađen.");
+        return AuthHelper.BuildAuthResponse(user, _config);
+    }
 }

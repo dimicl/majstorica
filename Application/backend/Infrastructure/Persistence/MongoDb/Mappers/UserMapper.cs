@@ -35,7 +35,8 @@ public static class UserMapper
             CreatedAtUtc = user.CreatedAtUtc,
             UpdatedAtUtc = user.UpdatedAtUtc,
             MasterProfile = masterProfile,
-            ClientProfile = clientProfile
+            ClientProfile = clientProfile,
+            EmployerCompanyId = user.EmployerCompanyId
         };
     }
 
@@ -84,6 +85,8 @@ public static class UserMapper
             var client = ClientMapper.ToDomain(doc.ClientProfile);
             user.SetClientProfile(client);
         }
+
+        user.RestoreEmployerCompanyFromPersistence(doc.EmployerCompanyId);
 
         return user;
     }

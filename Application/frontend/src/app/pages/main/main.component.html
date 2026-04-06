@@ -1,3 +1,7 @@
+@if (showCompanySetupModal()) {
+<app-company-setup-modal (completed)="onCompanySetupCompleted()" />
+}
+
 <section class="landing p-y-24 p-x-18">
   <div class="topbar d-flex align-items-center justify-content-between m-b-22">
     <div class="brand" routerLink="/home">

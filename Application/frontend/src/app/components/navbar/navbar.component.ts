@@ -65,11 +65,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private initItems(): void {
     this.auth.userSelector$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
-      const userType =
-        user?.role === UserRole.Master
-          ? NavbarItemUserType.MASTER
-          : NavbarItemUserType.CLIENT;
-      this.getNavbarItems(userType);
+      this.getNavbarItems(this.mapRoleToNavbarUserType(user?.role));
       this.syncNavbarWithRoute(this.router.url);
     });
     this.syncNavbarWithRoute(this.router.url);
@@ -98,6 +94,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     this.isExpanded.set(true);
     this.router.navigateByUrl(`/${item.id}`);
+  }
+
+  private mapRoleToNavbarUserType(role: UserRole | undefined): NavbarItemUserType {
+    switch (role) {
+      case UserRole.Master:
+      case UserRole.CompanyWorker:
+        return NavbarItemUserType.MASTER;
+      case UserRole.CompanyOwner:
+        return NavbarItemUserType.COMPANY_OWNER;
+      case UserRole.Admin:
+        return NavbarItemUserType.ADMIN;
+      case UserRole.Client:
+      default:
+        return NavbarItemUserType.CLIENT;
+    }
   }
 
   private getNavbarItems(userType: NavbarItemUserType): void {

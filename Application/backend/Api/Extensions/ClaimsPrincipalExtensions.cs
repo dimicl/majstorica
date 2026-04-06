@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using backend.Domain.Enums;
 using backend.Shared.Exceptions;
@@ -19,7 +20,9 @@ public static class ClaimsPrincipalExtensions
 
     private static (Guid userId, UserRole role) GetUserIdAndRoleCore(ClaimsPrincipal user)
     {
+        // JWT: često samo "sub"; NameIdentifier zavisi od MapInboundClaims / NameClaimType
         var userIdStr =
+            user.FindFirstValue(JwtRegisteredClaimNames.Sub) ??
             user.FindFirstValue(ClaimTypes.NameIdentifier) ??
             user.FindFirstValue(ClaimTypes.Name) ??
             user.FindFirstValue("sub");

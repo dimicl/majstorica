@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -121,6 +123,9 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IMasterRepository, MasterRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyInvitationRepository, CompanyInvitationRepository>();
+builder.Services.AddScoped<ICompanyInvitationRealtimeSender, SignalRCompanyInvitationSender>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMongoJobRepository, MongoJobRepository>();
@@ -136,6 +141,7 @@ builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IJobRequestRealtimeSender, backend.Api.Hubs.SignalRJobRequestSender>();
 builder.Services.AddScoped<backend.Application.Interfaces.IJobRequestNotifier, backend.Application.Services.JobRequestNotifier>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -179,15 +185,18 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-        )
+        ),
+        // JWT standard + usklađeno sa JwtHelper (Sub + Role)
+        NameClaimType = JwtRegisteredClaimNames.Sub,
+        RoleClaimType = ClaimTypes.Role
     };
-    // SignalR: negotiate šalje token u Authorization headeru, WebSocket u query stringu (access_token)
+    // SignalR: negotiate (Bearer header) + WebSocket (access_token u query) — svi hub-ovi ispod /hubs
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
             var path = context.HttpContext.Request.Path;
-            if (!path.StartsWithSegments("/hubs/document", StringComparison.OrdinalIgnoreCase))
+            if (!path.StartsWithSegments("/hubs", StringComparison.OrdinalIgnoreCase))
                 return Task.CompletedTask;
 
             var token = context.Request.Query["access_token"].FirstOrDefault()
@@ -197,7 +206,7 @@ builder.Services.AddAuthentication(options =>
                 context.Token = token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? token.Substring(7) : token;
                 return Task.CompletedTask;
             }
-            // WebSocket nema header; za negotiate klijent šalje Bearer u headeru – pročitaj ga
+
             var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 context.Token = authHeader.Substring(7);
@@ -234,7 +243,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+// Bez konfigurisanog HTTPS porta redirect samo loguje upozorenje i ne pomaže lokalnom http://localhost
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
@@ -242,6 +253,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<DocumentHub>("/hubs/document");
+app.MapHub<DocumentHub>("/hubs/document").RequireAuthorization();
 
 app.Run();

@@ -32,6 +32,16 @@ export class SignalrService {
     this.status.set(SIGNALR_STATUS.CONNECTING);
     this.lastError.set(null);
 
+    if (options?.accessTokenFactory) {
+      const raw = options.accessTokenFactory();
+      const token = typeof raw === 'string' ? raw : await raw;
+      if (!token?.trim()) {
+        this.status.set(SIGNALR_STATUS.ERROR);
+        this.lastError.set('Nema JWT tokena za SignalR.');
+        return;
+      }
+    }
+
     const builder = new HubConnectionBuilder()
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information);

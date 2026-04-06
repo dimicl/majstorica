@@ -16,3 +16,4 @@ export * from './chat-message-api.interface';
 export * from './map-marker-data.interface';
 export * from './filtered-navbar-items.interface';
 export * from './new-job-request-payload.interface';
+export * from './company.interface';

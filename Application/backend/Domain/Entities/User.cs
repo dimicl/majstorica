@@ -73,6 +73,9 @@ public class User
     public DateTime? LastLoginAtUtc { get; private set; }
     public DateTime? BlockedAtUtc { get; private set; }
 
+    /// <summary>Kada je majstor zaposlen u firmi (uloga CompanyWorker).</summary>
+    public Guid? EmployerCompanyId { get; private set; }
+
     public bool IsClient() => Role == UserRole.Client;
     public bool IsMaster() => Role == UserRole.Master;
     public bool IsCompanyOwner() => Role == UserRole.CompanyOwner;
@@ -171,9 +174,12 @@ public class User
         Touch();
     }
 
-    public void PromoteMasterToCompanyWorker()
+    public void PromoteMasterToCompanyWorker(Guid employerCompanyId)
     {
         EnsureNotBlocked();
+
+        if (employerCompanyId == Guid.Empty)
+            throw new DomainException("Employer company id is required.");
 
         if (Role != UserRole.Master)
             throw new DomainException("Only user with Master role can become CompanyWorker.");
@@ -182,6 +188,7 @@ public class User
             throw new DomainException("Master profile is required before becoming CompanyWorker.");
 
         Role = UserRole.CompanyWorker;
+        EmployerCompanyId = employerCompanyId;
         Touch();
     }
 
@@ -195,8 +202,15 @@ public class User
         if (MasterProfile is null)
             throw new DomainException("Master profile must exist when returning to Master.");
 
+        EmployerCompanyId = null;
         Role = UserRole.Master;
         Touch();
+    }
+
+    /// <summary>Samo za učitavanje iz baze (Mongo dokument bez polja).</summary>
+    public void RestoreEmployerCompanyFromPersistence(Guid? employerCompanyId)
+    {
+        EmployerCompanyId = employerCompanyId;
     }
 
     public void Activate()
@@ -254,10 +268,11 @@ public class User
     {
         if (role != UserRole.Client &&
             role != UserRole.Master &&
-            role != UserRole.CompanyOwner)
+            role != UserRole.CompanyOwner &&
+            role != UserRole.CompanyWorker)
         {
             throw new DomainException(
-                "At registration, user role must be Client, Master, or CompanyOwner.");
+                "User role must be Client, Master, CompanyOwner, or CompanyWorker.");
         }
     }
 

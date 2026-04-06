@@ -1,7 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
-import { MasterProfile, MasterProfileResponse } from '../models/master.model';
+import {
+  MasterProfile,
+  MasterProfileResponse,
+  type MasterReviewListItem,
+  type UpdateMasterProfileStatsPayload,
+} from '../models/master.model';
 import { MasterListItem, type MastersListParams } from '../interfaces';
 import { UserResponse } from '../interfaces';
 import { AuthService } from './auth.service';
@@ -26,10 +31,26 @@ export class MasterService {
     );
   }
 
+  /** Recenzije na trenutnog majstora (Master / CompanyWorker). */
+  getMyMasterReviews(): Observable<MasterReviewListItem[]> {
+    return this.http.get<MasterReviewListItem[]>(
+      `${this.API_URL}/masters/profile/reviews`
+    );
+  }
+
   updateCategory(category: string): Observable<void> {
     return this.http.patch<void>(`${this.API_URL}/masters/category`, {
       category,
     });
+  }
+
+  patchProfileStats(
+    payload: UpdateMasterProfileStatsPayload
+  ): Observable<void> {
+    return this.http.patch<void>(
+      `${this.API_URL}/masters/profile/stats`,
+      payload
+    );
   }
 
   /** Preporučeni majstori za klijenta (Neo4j – ista veština kao već angažovani). Za ne-klijente backend vraća praznu listu. */

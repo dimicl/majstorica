@@ -3,5 +3,5 @@ export enum NavbarItemUserType {
   ADMIN = 'admin',
   MASTER = 'master',
   CLIENT = 'client',
-  COMPANY = 'company',
+  COMPANY_OWNER = 'company_owner',
 }
