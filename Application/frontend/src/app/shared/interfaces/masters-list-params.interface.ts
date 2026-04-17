@@ -1,8 +1,13 @@
+export type MastersEntityFilter = 'all' | 'masters' | 'companies';
+
 export interface MastersListParams {
   search: string;
   sort: MastersListSort;
   category: string;
   minRating: number | null;
+  entityType: MastersEntityFilter;
+  page: number;
+  pageSize: number;
 }
 
 export type MastersListSort = 'name-asc' | 'name-desc';
@@ -37,9 +42,21 @@ export const MASTERS_LIST_RATING_OPTIONS: {
   { value: 1, label: 'Ocena 1+' },
 ];
 
+export const MASTERS_ENTITY_FILTER_OPTIONS: {
+  value: MastersEntityFilter;
+  label: string;
+}[] = [
+  { value: 'all', label: 'Sve' },
+  { value: 'masters', label: 'Majstori' },
+  { value: 'companies', label: 'Firme' },
+];
+
 export const DEFAULT_MASTERS_LIST_PARAMS: MastersListParams = {
   search: '',
   sort: 'name-asc',
   category: '',
   minRating: null,
+  entityType: 'all',
+  page: 1,
+  pageSize: 12,
 };

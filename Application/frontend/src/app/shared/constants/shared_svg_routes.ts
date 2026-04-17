@@ -17,4 +17,5 @@ export class SharedSvgRoutes {
   static EMAIL_ICON = '/assets/icons/email-icon.svg';
   static ADDRESS_ICON = '/assets/icons/address-icon.svg';
   static PLUS_ICON = '/assets/icons/plus.svg';
+  static TRASH_ICON = '/assets/icons/trash-icon.svg';
 }

@@ -23,7 +23,7 @@ public interface IUserService
     Task Deactivate(Guid userId);
     Task Activate(Guid userId);
 
-    Task<List<MasterListItemResponse>> GetMastersList(MastersListQuery? query = null);
+    Task<MastersListPageResponse> GetMastersList(MastersListQuery? query = null);
 
     /// <summary>Preporučeni majstori za klijenta (Neo4j: ista veština kao već angažovani). Vraća praznu listu ako nema preporuka.</summary>
     Task<List<MasterListItemResponse>> GetRecommendedMasters(Guid clientId, int limit = 10);

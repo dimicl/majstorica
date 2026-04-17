@@ -8,6 +8,7 @@ export * from './client-state.interface';
 export * from './receive-message-payload.interface';
 export * from './master-list-item.interface';
 export * from './masters-list-params.interface';
+export * from './masters-list-page.interface';
 export * from './user-response.interface';
 export * from './chat-message.interface';
 export * from './chat-thread.interface';

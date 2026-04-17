@@ -7,6 +7,6 @@ public class ChatMessageResponse
     public Guid? JobId { get; init; }
     public Guid SenderId { get; init; }
     public string Content { get; init; } = string.Empty;
-    public DateTime SentAtUtc { get; init; }
+    public DateTime SentAt { get; init; }
     public bool IsSystemMessage { get; init; }
 }

@@ -15,21 +15,27 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IUserGraphSync _userGraphSync;
     private readonly IMasterRepository _masterRepository;
+    private readonly ICompanyRepository _companyRepository;
     private readonly IRedisListCache _redisListCache;
     private readonly IGraphQueryRepository _graphQueryRepository;
+    private readonly IAccountActivityStore _accountActivity;
 
     public UserService(
         IUserRepository userRepository,
         IUserGraphSync userGraphSync,
         IMasterRepository masterRepository,
+        ICompanyRepository companyRepository,
         IRedisListCache redisListCache,
-        IGraphQueryRepository graphQueryRepository)
+        IGraphQueryRepository graphQueryRepository,
+        IAccountActivityStore accountActivity)
     {
         _userRepository = userRepository;
         _userGraphSync = userGraphSync;
         _masterRepository = masterRepository;
+        _companyRepository = companyRepository;
         _redisListCache = redisListCache;
         _graphQueryRepository = graphQueryRepository;
+        _accountActivity = accountActivity;
     }
 
     public async Task<User?> GetById(Guid userId)
@@ -75,6 +81,13 @@ public class UserService : IUserService
 
         await _userRepository.Save(user);
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
+        try
+        {
+            await _accountActivity.RecordAsync(userId, "profile_update", "basic_info");
+        }
+        catch
+        {
+        }
     }
 
     public async Task UpdateContact(Guid userId, string? phone)
@@ -85,6 +98,13 @@ public class UserService : IUserService
 
         if(phone != null) user.ChangeContact(phone);
         await _userRepository.Save(user);
+        try
+        {
+            await _accountActivity.RecordAsync(userId, "profile_update", "contact");
+        }
+        catch
+        {
+        }
     }
 
     public async Task SetUserZone(Guid userId, string zoneId, string zoneName)
@@ -92,6 +112,13 @@ public class UserService : IUserService
         if (string.IsNullOrWhiteSpace(zoneId) || string.IsNullOrWhiteSpace(zoneName))
             throw new ArgumentException("ZoneId i zoneName su obavezni.");
         await _userGraphSync.SyncUserZone(userId, zoneId.Trim(), zoneName.Trim());
+        try
+        {
+            await _accountActivity.RecordAsync(userId, "profile_update", "zone");
+        }
+        catch
+        {
+        }
     }
 
     public async Task Deactivate(Guid userId)
@@ -103,6 +130,13 @@ public class UserService : IUserService
         user.Deactivate();
         await _userRepository.Save(user);
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
+        try
+        {
+            await _accountActivity.RecordAsync(userId, "account_deactivate");
+        }
+        catch
+        {
+        }
     }
 
     public async Task Activate(Guid userId)
@@ -114,40 +148,72 @@ public class UserService : IUserService
         user.Activate();
         await _userRepository.Save(user);
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
+        try
+        {
+            await _accountActivity.RecordAsync(userId, "account_activate");
+        }
+        catch
+        {
+        }
     }
 
-    public async Task<List<MasterListItemResponse>> GetMastersList(MastersListQuery? query = null)
+    public async Task<MastersListPageResponse> GetMastersList(MastersListQuery? query = null)
     {
         query ??= new MastersListQuery();
         var key = RedisListCacheKey.Create(query);
 
+        List<MasterListItemResponse> filtered;
         try
         {
             var cached = await _redisListCache.GetAsync(key);
             if (cached != null)
-                return cached;
+                filtered = cached;
+            else
+            {
+                var list = await GetCombinedListFromDb();
+                filtered = ApplyFilterAndSort(list, query);
+                try
+                {
+                    await _redisListCache.SetAsync(key, filtered, RedisListCacheTtl);
+                }
+                catch
+                {
+                    // Redis nedostupan
+                }
+            }
         }
         catch
         {
-            // Redis nedostupan – nastavljamo bez keša
+            var list = await GetCombinedListFromDb();
+            filtered = ApplyFilterAndSort(list, query);
         }
 
-        var list = await GetMastersListFromDb();
-        var filtered = ApplyFilterAndSort(list, query);
+        var page = query.Page < 1 ? 1 : query.Page;
+        var pageSize = Math.Clamp(query.PageSize < 1 ? 12 : query.PageSize, 1, 50);
+        var total = filtered.Count;
+        var skip = (page - 1) * pageSize;
+        var items = filtered.Skip(skip).Take(pageSize).ToList();
 
-        try
+        return new MastersListPageResponse
         {
-            await _redisListCache.SetAsync(key, filtered, RedisListCacheTtl);
-        }
-        catch
-        {
-            // Redis nedostupan – ignorišemo, podaci su već učitani
-        }
-
-        return filtered;
+            Items = items,
+            TotalCount = total,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
-    private async Task<List<MasterListItemResponse>> GetMastersListFromDb()
+    private async Task<List<MasterListItemResponse>> GetCombinedListFromDb()
+    {
+        var masters = await GetMasterRowsFromDb();
+        var companies = await GetCompanyRowsFromDb();
+        var combined = new List<MasterListItemResponse>(masters.Count + companies.Count);
+        combined.AddRange(masters);
+        combined.AddRange(companies);
+        return combined;
+    }
+
+    private async Task<List<MasterListItemResponse>> GetMasterRowsFromDb()
     {
         var users = await _userRepository.GetAll();
         var masterUsers = users
@@ -163,14 +229,49 @@ public class UserService : IUserService
             .Select(u =>
             {
                 var master = masterByUserId.GetValueOrDefault(u.Id);
+                var cats = master?.ServiceCategories;
+                List<string>? catList = cats is { Count: > 0 }
+                    ? cats.ToList()
+                    : null;
                 return new MasterListItemResponse
                 {
+                    Kind = "master",
                     Id = u.Id,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Username = u.Username,
                     Category = master?.ServiceCategories?.FirstOrDefault(),
-                    Rating = master?.AverageRating?.Value
+                    Rating = master?.AverageRating?.Value,
+                    ServiceCategories = catList
+                };
+            })
+            .ToList();
+    }
+
+    private async Task<List<MasterListItemResponse>> GetCompanyRowsFromDb()
+    {
+        var companies = await _companyRepository.GetAllActive();
+        if (companies.Count == 0)
+            return new List<MasterListItemResponse>();
+
+        return companies
+            .Select(c =>
+            {
+                var cats = c.ServiceCategories.ToList();
+                return new MasterListItemResponse
+                {
+                    Kind = "company",
+                    Id = c.Id,
+                    FirstName = string.Empty,
+                    LastName = string.Empty,
+                    Username = string.Empty,
+                    CompanyName = c.Name,
+                    Description = c.Description,
+                    City = c.Address?.City,
+                    Email = c.Email,
+                    Category = cats.FirstOrDefault(),
+                    Rating = null,
+                    ServiceCategories = cats.Count > 0 ? cats : null
                 };
             })
             .ToList();
@@ -182,34 +283,73 @@ public class UserService : IUserService
         var category = (query.Category ?? "").Trim();
         var minRating = query.MinRating;
         var sortAsc = string.Equals(query.Sort, "name-desc", StringComparison.OrdinalIgnoreCase) ? false : true;
+        var entityType = (query.EntityType ?? "all").Trim().ToLowerInvariant();
 
         IEnumerable<MasterListItemResponse> result = list;
+
+        result = entityType switch
+        {
+            "masters" => result.Where(m => string.Equals(m.Kind, "master", StringComparison.OrdinalIgnoreCase)),
+            "companies" => result.Where(m => string.Equals(m.Kind, "company", StringComparison.OrdinalIgnoreCase)),
+            _ => result
+        };
 
         if (!string.IsNullOrEmpty(search))
         {
             result = result.Where(m =>
-                (m.FirstName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (m.LastName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (m.Username?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+            {
+                if (string.Equals(m.Kind, "company", StringComparison.OrdinalIgnoreCase))
+                {
+                    return (m.CompanyName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                           (m.Description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                           (m.Email?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                           (m.City?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false);
+                }
+
+                return (m.FirstName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                       (m.LastName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                       (m.Username?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false);
+            });
         }
 
         if (!string.IsNullOrEmpty(category))
-            result = result.Where(m => string.Equals(m.Category, category, StringComparison.OrdinalIgnoreCase));
+        {
+            result = result.Where(m =>
+            {
+                if (m.ServiceCategories is { Count: > 0 })
+                {
+                    return m.ServiceCategories.Any(c =>
+                        string.Equals(c, category, StringComparison.OrdinalIgnoreCase));
+                }
+
+                return string.Equals(m.Category, category, StringComparison.OrdinalIgnoreCase);
+            });
+        }
 
         if (minRating.HasValue && minRating.Value >= 1 && minRating.Value <= 5)
-            result = result.Where(m => m.Rating.HasValue && m.Rating.Value >= minRating.Value);
-
-        var sorted = result.OrderBy(m =>
         {
-            var name = $"{m.FirstName} {m.LastName}".Trim();
-            if (string.IsNullOrEmpty(name)) name = m.Username ?? "";
-            return name;
-        }, StringComparer.OrdinalIgnoreCase).ToList();
+            result = result.Where(m =>
+                string.Equals(m.Kind, "company", StringComparison.OrdinalIgnoreCase)
+                    ? false
+                    : m.Rating.HasValue && m.Rating.Value >= minRating.Value);
+        }
+
+        var sorted = result.OrderBy(GetSortDisplayName, StringComparer.OrdinalIgnoreCase).ToList();
 
         if (!sortAsc)
             sorted.Reverse();
 
         return sorted;
+    }
+
+    private static string GetSortDisplayName(MasterListItemResponse m)
+    {
+        if (string.Equals(m.Kind, "company", StringComparison.OrdinalIgnoreCase))
+            return m.CompanyName ?? "";
+
+        var name = $"{m.FirstName} {m.LastName}".Trim();
+        if (string.IsNullOrEmpty(name)) name = m.Username ?? "";
+        return name;
     }
 
     public async Task<List<MasterListItemResponse>> GetRecommendedMasters(Guid clientId, int limit = 10)
@@ -237,14 +377,20 @@ public class UserService : IUserService
             if (user == null || !user.IsActive || user.Role != UserRole.Master)
                 continue;
             var master = masterByUserId.GetValueOrDefault(id);
+            var cats = master?.ServiceCategories;
+            List<string>? catList = cats is { Count: > 0 }
+                ? cats.ToList()
+                : null;
             result.Add(new MasterListItemResponse
             {
+                Kind = "master",
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Username = user.Username,
                 Category = master?.ServiceCategories?.FirstOrDefault(),
-                Rating = master?.AverageRating?.Value
+                Rating = master?.AverageRating?.Value,
+                ServiceCategories = catList
             });
         }
 
@@ -279,14 +425,20 @@ public class UserService : IUserService
             if (user == null || !user.IsActive || user.Role != UserRole.Master)
                 continue;
             var master = masterByUserId.GetValueOrDefault(id);
+            var cats = master?.ServiceCategories;
+            List<string>? catList = cats is { Count: > 0 }
+                ? cats.ToList()
+                : null;
             result.Add(new MasterListItemResponse
             {
+                Kind = "master",
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Username = user.Username,
                 Category = master?.ServiceCategories?.FirstOrDefault(),
-                Rating = master?.AverageRating?.Value
+                Rating = master?.AverageRating?.Value,
+                ServiceCategories = catList
             });
         }
 

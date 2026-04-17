@@ -22,6 +22,16 @@ public class CompanyController : ControllerBase
         _authService = authService;
     }
 
+    [HttpGet("{id:guid}/public")]
+    public async Task<ActionResult<CompanyPublicResponse>> GetPublic(Guid id)
+    {
+        var response = await _companyService.GetPublicById(id);
+        if (response == null)
+            return NotFound();
+
+        return Ok(response);
+    }
+
     [HttpGet("mine")]
     public async Task<ActionResult<CompanyResponse>> GetMine()
     {

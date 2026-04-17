@@ -7,6 +7,19 @@ export interface CompanyDto {
   ownerUserId: string;
 }
 
+/** GET api/companies/{id}/public */
+export interface CompanyPublicDto {
+  id: string;
+  /** Vlasnik firme – za chat i kreiranje posla. */
+  ownerUserId: string;
+  name: string;
+  description?: string | null;
+  phoneNumber: string;
+  email: string;
+  city?: string | null;
+  serviceCategories: string[];
+}
+
 export interface CreateCompanyPayload {
   name: string;
   phoneNumber: string;

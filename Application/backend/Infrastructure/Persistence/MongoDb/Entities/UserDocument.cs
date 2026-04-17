@@ -27,7 +27,6 @@ public class UserDocument
     [BsonIgnoreIfNull]
     public ClientDocument? ClientProfile { get; set; }
 
-    /// <summary>Majstor zaposlen u firmi (CompanyWorker).</summary>
     [BsonIgnoreIfNull]
     [BsonRepresentation(BsonType.String)]
     public Guid? EmployerCompanyId { get; set; }

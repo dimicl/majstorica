@@ -11,6 +11,7 @@ import { AuthResponse } from '../interfaces/auth-response.interface';
 import {
   CompanyDto,
   CompanyInvitationPending,
+  CompanyPublicDto,
   CompanyWorkerMember,
   CreateCompanyPayload,
   MasterSearchForInviteItem,
@@ -22,6 +23,10 @@ import {
 export class CompanyService {
   private http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/companies`;
+
+  getPublicCompany(id: string): Observable<CompanyPublicDto> {
+    return this.http.get<CompanyPublicDto>(`${this.base}/${id}/public`);
+  }
 
   getMyCompany(): Observable<CompanyDto | null> {
     return this.http.get<CompanyDto>(`${this.base}/mine`).pipe(

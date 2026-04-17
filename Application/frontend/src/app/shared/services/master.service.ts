@@ -1,13 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   MasterProfile,
   MasterProfileResponse,
   type MasterReviewListItem,
   type UpdateMasterProfileStatsPayload,
 } from '../models/master.model';
-import { MasterListItem, type MastersListParams } from '../interfaces';
+import {
+  DEFAULT_MASTERS_LIST_PARAMS,
+  MasterListItem,
+  type MastersListPage,
+  type MastersListParams,
+} from '../interfaces';
 import { UserResponse } from '../interfaces';
 import { AuthService } from './auth.service';
 import { API_BASE_URL } from '../constants/api.constants';
@@ -62,24 +68,40 @@ export class MasterService {
     return this.http.get<MasterListItem[]>(url);
   }
 
-  /** Lista majstora – opciono sa parametrima za filter/sort (keš na backendu). */
-  getMasters(params?: MastersListParams): Observable<MasterListItem[]> {
+  /** Lista majstora i firmi – paginacija, filteri (keš na backendu). */
+  getMasters(params?: MastersListParams): Observable<MastersListPage> {
+    const p = params ?? DEFAULT_MASTERS_LIST_PARAMS;
     let url = `${this.API_URL}/masters`;
-    if (params) {
-      const q = new URLSearchParams();
-      if (params.search?.trim()) q.set('search', params.search.trim());
-      if (params.sort) q.set('sort', params.sort);
-      if (params.category?.trim()) q.set('category', params.category.trim());
-      if (
-        params.minRating != null &&
-        params.minRating >= 1 &&
-        params.minRating <= 5
-      )
-        q.set('minRating', String(params.minRating));
-      const queryString = q.toString();
-      if (queryString) url += '?' + queryString;
-    }
-    return this.http.get<MasterListItem[]>(url);
+    const q = new URLSearchParams();
+    if (p.search?.trim()) q.set('search', p.search.trim());
+    if (p.sort) q.set('sort', p.sort);
+    if (p.category?.trim()) q.set('category', p.category.trim());
+    if (
+      p.minRating != null &&
+      p.minRating >= 1 &&
+      p.minRating <= 5
+    )
+      q.set('minRating', String(p.minRating));
+    if (p.entityType && p.entityType !== 'all')
+      q.set('entityType', p.entityType);
+    q.set('page', String(Math.max(1, p.page ?? 1)));
+    q.set(
+      'pageSize',
+      String(Math.min(50, Math.max(1, p.pageSize ?? 12)))
+    );
+    const queryString = q.toString();
+    if (queryString) url += '?' + queryString;
+    return this.http.get<MastersListPage>(url).pipe(
+      map((page) => ({
+        ...page,
+        items: page.items.map((item) => this.normalizeListItem(item)),
+      }))
+    );
+  }
+
+  private normalizeListItem(item: MasterListItem): MasterListItem {
+    const kind = item.kind === 'company' ? 'company' : 'master';
+    return { ...item, kind };
   }
 
   async getMasterById(id: string): Promise<UserResponse | null> {

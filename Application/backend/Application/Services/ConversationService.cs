@@ -138,7 +138,7 @@ public class ConversationService : IConversationService
             JobId = conversation.JobId,
             SenderId = message.SenderUserId,
             Content = message.Content,
-            SentAtUtc = message.SentAtUtc,
+            SentAt = message.SentAtUtc,
             IsSystemMessage = message.Type == MessageType.System
         }).ToList();
     }

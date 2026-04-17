@@ -34,7 +34,7 @@ public class MastersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<MasterListItemResponse>>> GetMasters([FromQuery] MastersListQuery? query = null)
+    public async Task<ActionResult<MastersListPageResponse>> GetMasters([FromQuery] MastersListQuery? query = null)
     {
         var result = await _userService.GetMastersList(query);
         return Ok(result);

@@ -19,7 +19,11 @@ public class RedisMessageRepository : IMessageRepository
     public async Task Save(Message message)
     {
         var doc = ChatMessageMapper.ToEntity(message);
-        await _messages.InsertAsync(doc);
+        var existing = await _messages.FindByIdAsync(doc.Id.ToString());
+        if (existing is null)
+            await _messages.InsertAsync(doc);
+        else
+            await _messages.UpdateAsync(doc);
     }
 
     public Task<List<Message>> GetByConversationId(Guid conversationId)

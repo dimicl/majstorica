@@ -80,10 +80,13 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
 builder.Services.AddScoped<IRedisLockService, RedisLockService>();
 builder.Services.AddScoped<IRedisListCache, RedisMastersListCache>();
+builder.Services.AddScoped<IRedisJsonCache, RedisJsonStringCache>();
+builder.Services.AddScoped<IAccountActivityStore, RedisAccountActivityStore>();
+builder.Services.AddScoped<IAuthServerSessionStore, RedisAuthServerSessionStore>();
 
 // Redis OM 
 builder.Services.AddSingleton<RedisConnectionProvider>();
-builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IMessageRepository, RedisMessageRepository>();
 builder.Services.AddScoped<ISessionRepository, RedisSessionRepository>();
 
 
@@ -186,11 +189,9 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
         ),
-        // JWT standard + usklađeno sa JwtHelper (Sub + Role)
         NameClaimType = JwtRegisteredClaimNames.Sub,
         RoleClaimType = ClaimTypes.Role
     };
-    // SignalR: negotiate (Bearer header) + WebSocket (access_token u query) — svi hub-ovi ispod /hubs
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>

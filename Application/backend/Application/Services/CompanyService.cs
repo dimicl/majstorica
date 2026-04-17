@@ -1,4 +1,5 @@
 using backend.Api.DTOs.Company;
+using backend.Application.Helpers;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -10,12 +11,16 @@ namespace backend.Application.Services;
 
 public class CompanyService : ICompanyService
 {
+    private static readonly TimeSpan CompanyPublicCacheTtl = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan InviteSearchCacheTtl = TimeSpan.FromMinutes(3);
+
     private readonly ICompanyRepository _companies;
     private readonly ICompanyInvitationRepository _invitations;
     private readonly IUserRepository _users;
     private readonly IMasterRepository _masters;
     private readonly ICompanyInvitationRealtimeSender _realtime;
     private readonly IUserGraphSync _userGraphSync;
+    private readonly IRedisJsonCache _redisJsonCache;
 
     public CompanyService(
         ICompanyRepository companies,
@@ -23,7 +28,8 @@ public class CompanyService : ICompanyService
         IUserRepository users,
         IMasterRepository masters,
         ICompanyInvitationRealtimeSender realtime,
-        IUserGraphSync userGraphSync)
+        IUserGraphSync userGraphSync,
+        IRedisJsonCache redisJsonCache)
     {
         _companies = companies;
         _invitations = invitations;
@@ -31,12 +37,53 @@ public class CompanyService : ICompanyService
         _masters = masters;
         _realtime = realtime;
         _userGraphSync = userGraphSync;
+        _redisJsonCache = redisJsonCache;
     }
 
     public async Task<CompanyResponse?> GetMineForOwner(Guid ownerUserId)
     {
         var company = await _companies.GetByOwnerUserId(ownerUserId);
         return company is null ? null : BuildCompanyResponse(company);
+    }
+
+    public async Task<CompanyPublicResponse?> GetPublicById(Guid companyId)
+    {
+        var cacheKey = CompanyPublicCacheKey.ForCompany(companyId);
+        try
+        {
+            var cached = await _redisJsonCache.GetAsync<CompanyPublicResponse>(cacheKey);
+            if (cached != null)
+                return cached;
+        }
+        catch
+        {
+        }
+
+        var company = await _companies.GetById(companyId);
+        if (company is null || !company.IsActive)
+            return null;
+
+        var dto = new CompanyPublicResponse
+        {
+            Id = company.Id,
+            OwnerUserId = company.OwnerUserId,
+            Name = company.Name,
+            Description = company.Description,
+            PhoneNumber = company.PhoneNumber,
+            Email = company.Email,
+            City = company.Address?.City,
+            ServiceCategories = company.ServiceCategories.ToList()
+        };
+
+        try
+        {
+            await _redisJsonCache.SetAsync(cacheKey, dto, CompanyPublicCacheTtl);
+        }
+        catch
+        {
+        }
+
+        return dto;
     }
 
     public async Task<CompanyResponse> CreateForOwner(
@@ -84,14 +131,26 @@ public class CompanyService : ICompanyService
         int limit)
     {
         _ = await RequireCompanyForOwner(ownerUserId);
-        var list = await _users.SearchMastersForCompanyInvite(query ?? string.Empty, limit, ownerUserId);
+        var q = query ?? string.Empty;
+        var searchKey = CompanyInviteSearchCacheKey.Create(ownerUserId, q, limit);
+        try
+        {
+            var cached = await _redisJsonCache.GetAsync<List<MasterSearchForInviteResponse>>(searchKey);
+            if (cached != null)
+                return cached;
+        }
+        catch
+        {
+        }
+
+        var list = await _users.SearchMastersForCompanyInvite(q, limit, ownerUserId);
         if (list.Count == 0)
             return new List<MasterSearchForInviteResponse>();
 
         var ids = list.Select(u => u.Id).ToList();
         var profiles = await _masters.GetByUserIds(ids);
 
-        return list.Select(u =>
+        var result = list.Select(u =>
         {
             profiles.TryGetValue(u.Id, out var profile);
             var headline = profile?.Headline;
@@ -104,6 +163,16 @@ public class CompanyService : ICompanyService
                 Headline = string.IsNullOrWhiteSpace(headline) ? null : headline
             };
         }).ToList();
+
+        try
+        {
+            await _redisJsonCache.SetAsync(searchKey, result, InviteSearchCacheTtl);
+        }
+        catch
+        {
+        }
+
+        return result;
     }
 
     public async Task InviteMaster(Guid ownerUserId, Guid masterUserId)

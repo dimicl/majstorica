@@ -1,4 +1,5 @@
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Persistence.Redis.Entities;
 
 namespace backend.Infrastructure.Persistence.Redis.Mappers;
@@ -14,6 +15,7 @@ public static class ChatMessageMapper
             Type = message.Type,
             Content = message.Content,
             SentAt = message.SentAtUtc,
+            IsSystemMessage = message.Type == MessageType.System
         };
 
     }

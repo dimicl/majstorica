@@ -28,7 +28,7 @@ public class ChatService : IChatService
         if (conversation == null || conversation.IsClosed)
             throw new ConflictException("Chat je zatvoren.");
 
-        var message = new Message(conversationId, jobId, senderId, MessageType.Text, content, DateTime.UtcNow);
+        var message = new Message(Guid.NewGuid(), conversationId, senderId, MessageType.Text, content, DateTime.UtcNow);
         await _messageRepository.Save(message);
 
         var recipientId = conversation.ClientUserId == senderId ? conversation.MasterUserId : conversation.ClientUserId;

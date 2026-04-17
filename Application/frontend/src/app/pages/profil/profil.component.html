@@ -1,9 +1,7 @@
 <!--
-  Profil — redosled po ulozi (desna kolona @switch):
-  1) Client — poslovi
-  2) CompanyOwner — firma (pozivi + zaposleni)
-  3) Master — desno zahtevi + recenzije (pozivi u firmu: stranica Zahtevi)
-  4) CompanyWorker — zahtevi + recenzije (jedna desna kolona)
+  Profil — raspored po ulozi:
+  @switch (user.role) u profil-shell-main: leva glavna kartica (profilHeroCard),
+  zatim kolone specifične za ulogu (ng-template ispod).
 -->
 <section class="profil-page">
   @if (editLockToast()) {
@@ -17,7 +15,48 @@
   <div class="profil-shell">
     @if (user$ | async; as user) {
     <div class="profil-shell-main">
-      <!-- —— LEVA KOLONA: zajednički profil (sve uloge) —— -->
+      @switch (user.role) {
+        @case (userRole.Client) {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
+          />
+          <ng-container *ngTemplateOutlet="profilClientJobsColumn" />
+        }
+        @case (userRole.CompanyOwner) {
+          <ng-container
+            *ngTemplateOutlet="
+              profilCompanyOwnerLeftColumn;
+              context: { user: user }
+            "
+          />
+          <ng-container *ngTemplateOutlet="profilCompanyOwnerFirma" />
+        }
+        @case (userRole.Master) {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
+          />
+          <div class="profil-card profil-card--master-work">
+            <ng-container *ngTemplateOutlet="masterZahteviCard" />
+          </div>
+        }
+        @case (userRole.CompanyWorker) {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
+          />
+          <div class="profil-card profil-card--master-work">
+            <ng-container *ngTemplateOutlet="masterZahteviCard" />
+          </div>
+        }
+        @default {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
+          />
+        }
+      }
+    </div>
+
+    <!-- Glavna kartica (sve uloge) -->
+    <ng-template #profilHeroCard let-user="user">
       <div class="profil-card">
         <div class="profil-hero">
           <div class="profil-hero-avatar">
@@ -287,11 +326,66 @@
           }
         </div>
       </div>
+    </ng-template>
 
-      <!-- —— DESNA KOLONA: sadržaj po ulozi —— -->
-      @switch (user.role) {
-      <!-- —— KLIJENT —— -->
-      @case (userRole.Client) {
+    <!-- Vlasnik firme: leva kolona (profil + pozivi) -->
+    <ng-template #profilCompanyOwnerLeftColumn let-user="user">
+      <div class="profil-company-owner-main">
+        <ng-container *ngTemplateOutlet="profilHeroCard; context: { user: user }" />
+        <ng-container *ngTemplateOutlet="profilCompanyOwnerInvite" />
+      </div>
+    </ng-template>
+
+    <!-- Vlasnik firme: pozivi -->
+    <ng-template #profilCompanyOwnerInvite>
+      <div class="profil-invite-block">
+        <h3 class="profil-subsection-title profil-invite-block-title">
+          Pozovi majstore
+        </h3>
+        <div class="profil-invite-input-wrap">
+          <app-input
+            id="master-invite-search"
+            type="search"
+            label="Ime, @korisnik ili e-mail"
+            (onValueChange)="onMasterSearchInput($event ?? '')"
+          />
+        </div>
+        @if (masterInviteLoading()) {
+        <p class="profil-loading">Pretraga…</p>
+        } @if (masterInviteError()) {
+        <p class="profil-error" role="alert">{{ masterInviteError() }}</p>
+        } @if (masterSearchResults().length > 0) {
+        <ul class="profil-master-suggest profil-scroll-area" role="listbox">
+          @for (m of masterSearchResults(); track m.userId) {
+          <li class="profil-master-suggest-item" role="option">
+            <div class="profil-master-suggest-info">
+              <span class="profil-master-suggest-name"
+                >{{ m.firstName }} {{ m.lastName }}</span
+              >
+              <span class="profil-master-suggest-meta"
+                >&#64;{{ m.username }}</span
+              >
+              @if (m.headline) {
+              <span class="profil-master-suggest-headline">{{
+                m.headline
+              }}</span>
+              }
+            </div>
+            <app-button
+              [buttonType]="inviteMasterButtonType(m)"
+              [label]="inviteMasterButtonLabel(m)"
+              [disabled]="inviteMasterButtonDisabled(m)"
+              (onButtonClick)="inviteMasterToCompany(m.userId)"
+            />
+          </li>
+          }
+        </ul>
+        }
+      </div>
+    </ng-template>
+
+    <!-- Klijent: poslovi -->
+    <ng-template #profilClientJobsColumn>
       <div class="profil-jobs">
         <div class="profil-section-head">
           <span class="profil-section-title">Poslovi</span>
@@ -314,56 +408,56 @@
           <p class="profil-loading">Učitavanje poslova...</p>
           } @else if (myJobs().length > 0) {
           <div class="profil-table-scroll">
-          <table class="profil-requests-table">
-            <thead>
-              <tr>
-                <th>Majstor</th>
-                <th>Naslov</th>
-                <th>Datum</th>
-                <th>Cena</th>
-                <th>Hitnost</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (job of myJobs(); track job.jobId) {
-              <tr class="profil-request-row">
-                <td>{{ job.masterName || "—" }}</td>
-                <td class="profil-request-desc-cell">
-                  {{ job.jobTitle || "—" }}
-                </td>
-                <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
-                <td>
-                  {{ job.price != null ? job.price + " RSD" : "—" }}
-                </td>
-                <td>
-                  <ng-container
-                    *ngTemplateOutlet="
-                      hitnostBadge;
-                      context: { emergency: job.isEmergency }
-                    "
-                  />
-                </td>
-                <td>
-                  <span class="profil-request-status">
-                    {{ statusLabel(job.status) }}
-                  </span>
-                </td>
-                <td class="profil-request-actions-cell">
-                  @if (job.status === 'Accepted' || job.status === 'InProgress')
-                  {
-                  <app-button
-                    [buttonType]="eButtonType.NEUTRAL"
-                    [label]="'Edit'"
-                    (onButtonClick)="openJobEdit(job)"
-                  />
-                  }
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
+            <table class="profil-requests-table">
+              <thead>
+                <tr>
+                  <th>Majstor</th>
+                  <th>Naslov</th>
+                  <th>Datum</th>
+                  <th>Cena</th>
+                  <th>Hitnost</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (job of myJobs(); track job.jobId) {
+                <tr class="profil-request-row">
+                  <td>{{ job.masterName || "—" }}</td>
+                  <td class="profil-request-desc-cell">
+                    {{ job.jobTitle || "—" }}
+                  </td>
+                  <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
+                  <td>
+                    {{ job.price != null ? job.price + " RSD" : "—" }}
+                  </td>
+                  <td>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        hitnostBadge;
+                        context: { emergency: job.isEmergency }
+                      "
+                    />
+                  </td>
+                  <td>
+                    <span class="profil-request-status">
+                      {{ statusLabel(job.status) }}
+                    </span>
+                  </td>
+                  <td class="profil-request-actions-cell">
+                    @if (job.status === 'Accepted' || job.status ===
+                    'InProgress') {
+                    <app-button
+                      [buttonType]="eButtonType.NEUTRAL"
+                      [label]="'Edit'"
+                      (onButtonClick)="openJobEdit(job)"
+                    />
+                    }
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
           </div>
           } @else {
           <div class="profil-empty">
@@ -377,9 +471,10 @@
           }
         </div>
       </div>
-      }
-      <!-- —— VLASNIK FIRME —— -->
-      @case (userRole.CompanyOwner) {
+    </ng-template>
+
+    <!-- Vlasnik firme: firma + zaposleni -->
+    <ng-template #profilCompanyOwnerFirma>
       <div class="profil-card profil-card--company-owner">
         @if (companyTeam() === undefined) {
         <div class="profil-section-head">
@@ -415,88 +510,36 @@
               </p>
               }
               <div class="profil-company-contact">
-                <span>{{ companyTeam()!.email }}</span>
-                <span class="profil-company-contact-sep" aria-hidden="true"
-                  >·</span
-                >
-                <span>{{ companyTeam()!.phoneNumber }}</span>
+                <span class="profil-company-contact-line">{{
+                  companyTeam()!.email
+                }}</span>
+                <span class="profil-company-contact-line">{{
+                  companyTeam()!.phoneNumber
+                }}</span>
               </div>
             </div>
-            <div class="profil-invite-block">
-              <h3 class="profil-subsection-title profil-invite-block-title">
-                Pozovi majstore
-              </h3>
-              <div class="profil-invite-input-wrap">
-                <app-input
-                  id="master-invite-search"
-                  type="search"
-                  label="Ime, @korisnik ili e-mail"
-                  (onValueChange)="onMasterSearchInput($event ?? '')"
-                />
-              </div>
-              @if (masterInviteLoading()) {
-              <p class="profil-loading">Pretraga…</p>
-              } @if (masterInviteError()) {
-              <p class="profil-error" role="alert">{{ masterInviteError() }}</p>
-              }               @if (masterSearchResults().length > 0) {
-              <ul
-                class="profil-master-suggest profil-scroll-area"
-                role="listbox"
-              >
-                @for (m of masterSearchResults(); track m.userId) {
-                <li class="profil-master-suggest-item" role="option">
-                  <div class="profil-master-suggest-info">
-                    <span class="profil-master-suggest-name"
-                      >{{ m.firstName }} {{ m.lastName }}</span
-                    >
-                    <span class="profil-master-suggest-meta"
-                      >&#64;{{ m.username }}</span
-                    >
-                    @if (m.headline) {
-                    <span class="profil-master-suggest-headline">{{
-                      m.headline
-                    }}</span>
-                    }
-                  </div>
-                  <app-button
-                    [buttonType]="inviteMasterButtonType(m)"
-                    [label]="inviteMasterButtonLabel(m)"
-                    [disabled]="inviteMasterButtonDisabled(m)"
-                    (onButtonClick)="inviteMasterToCompany(m.userId)"
-                  />
-                </li>
-                }
-              </ul>
-              }
-            </div>
-          </div>
-          <div class="profil-company-owner-main">
+
             <div class="profil-subsection profil-subsection--company-members">
-              <h3 class="profil-subsection-title">Zaposleni</h3>
+              <div class="profil-subsection-title">Zaposleni</div>
               @if (loadingCompanyMembers()) {
               <p class="profil-loading">Učitavanje…</p>
               } @else if (companyMembers().length === 0) {
               <p class="profil-empty-inline">Nema majstora.</p>
               } @else {
-              <div
-                class="profil-workers-table-wrap profil-scroll-area"
-                role="region"
-                aria-label="Tabela zaposlenih majstora"
-                tabindex="0"
-              >
+              <div class="profil-workers-table-wrap profil-scroll-area">
                 <table
                   class="profil-workers-table profil-workers-table--compact"
                 >
                   <thead>
                     <tr>
-                      <th scope="col">Majstor</th>
-                      <th scope="col">Kontakt</th>
-                      <th scope="col">Naslov</th>
+                      <th scope="col">Ime i prezime</th>
+                      <th scope="col">Telefon</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Kategorija</th>
                       <th scope="col">God.</th>
                       <th scope="col">Satnica</th>
-                      <th scope="col">Dost.</th>
-                      <th scope="col">Kategorija</th>
                       <th scope="col">Ocena</th>
+                      <th scope="col"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -506,26 +549,30 @@
                         w.description?.trim() ? 'Opis: ' + w.description : null
                       "
                     >
-                      <td
-                        class="profil-workers-cell profil-workers-cell--stack"
-                      >
-                        <span class="profil-workers-name"
-                          >{{ w.firstName }} {{ w.lastName }}</span
-                        >
-                        <span class="profil-workers-user"
-                          >&#64;{{ w.username }}</span
-                        >
+                      <td class="profil-workers-cell">
+                        <div class="profil-workers-cell--stack">
+                          <span class="profil-workers-name"
+                            >{{ w.firstName }} {{ w.lastName }}</span
+                          >
+                        </div>
                       </td>
                       <td
-                        class="profil-workers-cell profil-workers-cell--stack profil-workers-cell--small"
+                        class="profil-workers-cell profil-workers-cell--small"
                       >
-                        <span>{{ w.phoneNumber || "—" }}</span>
-                        <span>{{ w.email || "—" }}</span>
+                        <div class="profil-workers-cell--stack">
+                          <span>{{ w.phoneNumber || "—" }}</span>
+                        </div>
+                      </td>
+                      <td class="profil-workers-cell">
+                        <div class="profil-workers-cell--stack">
+                          <span>{{ w.email || "—" }}</span>
+                        </div>
                       </td>
                       <td
                         class="profil-workers-cell profil-workers-cell--multiline"
+                        [attr.title]="workerCategoriesLine(w)"
                       >
-                        {{ w.headline || "—" }}
+                        {{ workerCategoriesLine(w) }}
                       </td>
                       <td>{{ w.yearsOfExperience }}</td>
                       <td
@@ -534,19 +581,28 @@
                         {{ w.hourlyRateAmount | number : "1.0-2" }}
                         {{ w.hourlyRateCurrency || "RSD" }}
                       </td>
-                      <td>{{ w.isAvailable ? "Da" : "Ne" }}</td>
-                      <td
-                        class="profil-workers-cell profil-workers-cell--multiline"
-                        [attr.title]="workerCategoriesLine(w)"
-                      >
-                        {{ workerCategoriesLine(w) }}
-                      </td>
                       <td>
                         {{
                           w.averageRating != null
                             ? (w.averageRating | number : "1.1-1")
                             : "—"
                         }}
+                      </td>
+                      <td class="profil-workers-actions">
+                        <div
+                          class="profil-workers-actions-icon"
+                          (click)="onDeleteCompanyWorker()"
+                          ngbTooltip="Obrisi"
+                          tooltipClass="tooltip"
+                          placement="bottom"
+                          container="body"
+                        >
+                          <svg-icon
+                            [src]="sharedSvgRoutes.TRASH_ICON"
+                            class="d-flex align-items-center svg-size-18"
+                          >
+                          </svg-icon>
+                        </div>
                       </td>
                     </tr>
                     }
@@ -559,22 +615,9 @@
         </div>
         }
       </div>
-      }
-      <!-- —— MAJSTOR: desno zahtevi + recenzije —— -->
-      @case (userRole.Master) {
-      <div class="profil-card profil-card--master-work">
-        <ng-container *ngTemplateOutlet="masterZahteviCard" />
-      </div>
-      }
-      <!-- —— MAJSTOR U FIRMI: desno zahtevi + recenzije —— -->
-      @case (userRole.CompanyWorker) {
-      <div class="profil-card profil-card--master-work">
-        <ng-container *ngTemplateOutlet="masterZahteviCard" />
-      </div>
-      } }
-    </div>
+    </ng-template>
 
-    <!-- —— Šablon: zahtevi, čekanje, recenzije (Master / CompanyWorker) —— -->
+    <!-- Majstor / majstor u firmi: zahtevi + recenzije -->
     <ng-template #masterZahteviCard>
       <div class="profil-master-work-layout">
         <div class="profil-master-work-primary">
@@ -592,56 +635,56 @@
             <p class="profil-loading">Učitavanje poslova...</p>
             } @else if (assignedJobs().length > 0) {
             <div class="profil-table-scroll">
-            <table class="profil-requests-table">
-              <thead>
-                <tr>
-                  <th>Klijent</th>
-                  <th>Naslov</th>
-                  <th>Datum</th>
-                  <th>Cena</th>
-                  <th>Hitnost</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (job of assignedJobs(); track job.jobId) {
-                <tr class="profil-request-row">
-                  <td>{{ job.clientName }}</td>
-                  <td class="profil-request-desc-cell">
-                    {{ job.jobTitle || "—" }}
-                  </td>
-                  <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
-                  <td>
-                    {{ job.price != null ? job.price + " RSD" : "—" }}
-                  </td>
-                  <td>
-                    <ng-container
-                      *ngTemplateOutlet="
-                        hitnostBadge;
-                        context: { emergency: job.isEmergency }
-                      "
-                    />
-                  </td>
-                  <td>
-                    <span class="profil-request-status">
-                      {{ statusLabel(job.status) }}
-                    </span>
-                  </td>
-                  <td class="profil-request-actions-cell">
-                    @if (job.status === 'Accepted' || job.status ===
-                    'InProgress') {
-                    <app-button
-                      [buttonType]="eButtonType.NEUTRAL"
-                      [label]="'Edit'"
-                      (onButtonClick)="openJobEdit(job)"
-                    />
-                    }
-                  </td>
-                </tr>
-                }
-              </tbody>
-            </table>
+              <table class="profil-requests-table">
+                <thead>
+                  <tr>
+                    <th>Klijent</th>
+                    <th>Naslov</th>
+                    <th>Datum</th>
+                    <th>Cena</th>
+                    <th>Hitnost</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (job of assignedJobs(); track job.jobId) {
+                  <tr class="profil-request-row">
+                    <td>{{ job.clientName }}</td>
+                    <td class="profil-request-desc-cell">
+                      {{ job.jobTitle || "—" }}
+                    </td>
+                    <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
+                    <td>
+                      {{ job.price != null ? job.price + " RSD" : "—" }}
+                    </td>
+                    <td>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          hitnostBadge;
+                          context: { emergency: job.isEmergency }
+                        "
+                      />
+                    </td>
+                    <td>
+                      <span class="profil-request-status">
+                        {{ statusLabel(job.status) }}
+                      </span>
+                    </td>
+                    <td class="profil-request-actions-cell">
+                      @if (job.status === 'Accepted' || job.status ===
+                      'InProgress') {
+                      <app-button
+                        [buttonType]="eButtonType.NEUTRAL"
+                        [label]="'Edit'"
+                        (onButtonClick)="openJobEdit(job)"
+                      />
+                      }
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
             </div>
             } @else {
             <p class="profil-empty-inline">Nema dodeljenih poslova.</p>
@@ -656,60 +699,60 @@
             <p class="profil-loading">Učitavanje zahteva...</p>
             } @else if (pendingRequests().length > 0) {
             <div class="profil-table-scroll">
-            <table class="profil-requests-table">
-              <thead>
-                <tr>
-                  <th>Ime</th>
-                  <th>Naslov</th>
-                  <th>Datum</th>
-                  <th>Cena</th>
-                  <th>Hitnost</th>
-                  <th>Stanje</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (req of pendingRequests(); track req.conversationId) {
-                <tr class="profil-request-row">
-                  <td>{{ req.clientName }}</td>
-                  <td class="profil-request-desc-cell">
-                    {{ req.jobTitle || "—" }}
-                  </td>
-                  <td>{{ req.date | date : "dd.MM.yyyy." }}</td>
-                  <td>
-                    {{ req.price != null ? req.price + " RSD" : "—" }}
-                  </td>
-                  <td>
-                    <ng-container
-                      *ngTemplateOutlet="
-                        hitnostBadge;
-                        context: { emergency: req.isEmergency }
-                      "
-                    />
-                  </td>
-                  <td>
-                    <span class="profil-request-status"> Na čekanju </span>
-                  </td>
-                  <td class="profil-request-actions-cell">
-                    <div class="profil-request-actions">
-                      <app-button
-                        [buttonType]="eButtonType.POSITIVE"
-                        [label]="'Prihvati'"
-                        [disabled]="actingRequestId() !== null"
-                        (onButtonClick)="acceptRequest(req)"
+              <table class="profil-requests-table">
+                <thead>
+                  <tr>
+                    <th>Ime</th>
+                    <th>Naslov</th>
+                    <th>Datum</th>
+                    <th>Cena</th>
+                    <th>Hitnost</th>
+                    <th>Stanje</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (req of pendingRequests(); track req.conversationId) {
+                  <tr class="profil-request-row">
+                    <td>{{ req.clientName }}</td>
+                    <td class="profil-request-desc-cell">
+                      {{ req.jobTitle || "—" }}
+                    </td>
+                    <td>{{ req.date | date : "dd.MM.yyyy." }}</td>
+                    <td>
+                      {{ req.price != null ? req.price + " RSD" : "—" }}
+                    </td>
+                    <td>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          hitnostBadge;
+                          context: { emergency: req.isEmergency }
+                        "
                       />
-                      <app-button
-                        [buttonType]="eButtonType.NEUTRAL"
-                        [label]="'Odbij'"
-                        [disabled]="actingRequestId() !== null"
-                        (onButtonClick)="declineRequest(req)"
-                      />
-                    </div>
-                  </td>
-                </tr>
-                }
-              </tbody>
-            </table>
+                    </td>
+                    <td>
+                      <span class="profil-request-status"> Na čekanju </span>
+                    </td>
+                    <td class="profil-request-actions-cell">
+                      <div class="profil-request-actions">
+                        <app-button
+                          [buttonType]="eButtonType.POSITIVE"
+                          [label]="'Prihvati'"
+                          [disabled]="actingRequestId() !== null"
+                          (onButtonClick)="acceptRequest(req)"
+                        />
+                        <app-button
+                          [buttonType]="eButtonType.NEUTRAL"
+                          [label]="'Odbij'"
+                          [disabled]="actingRequestId() !== null"
+                          (onButtonClick)="declineRequest(req)"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
             </div>
             } @else {
             <p class="profil-empty-inline">Nema zahteva na čekanju.</p>
@@ -717,9 +760,7 @@
           </div>
         </div>
 
-        <aside
-          class="profil-master-reviews-panel"        
-        >
+        <aside class="profil-master-reviews-panel">
           <h3 class="profil-subsection-title profil-master-reviews-heading">
             Recenzije
           </h3>

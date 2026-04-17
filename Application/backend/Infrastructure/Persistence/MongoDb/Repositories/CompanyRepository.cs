@@ -27,6 +27,12 @@ public class CompanyRepository : ICompanyRepository
         return doc == null ? null : CompanyMapper.ToDomain(doc);
     }
 
+    public async Task<IReadOnlyList<Company>> GetAllActive()
+    {
+        var docs = await _collection.Find(x => x.IsActive).ToListAsync();
+        return docs.Select(CompanyMapper.ToDomain).ToList();
+    }
+
     public async Task Save(Company company)
     {
         var doc = CompanyMapper.ToDocument(company);

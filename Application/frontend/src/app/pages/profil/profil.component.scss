@@ -103,6 +103,11 @@
   min-width: 0;
 }
 
+.profil-shell-main > .profil-company-owner-main {
+  flex: 0 1 420px;
+  max-width: 100%;
+}
+
 .profil-master-work-layout {
   display: flex;
   flex-direction: column;
@@ -515,10 +520,10 @@
 }
 
 .profil-subsection-title {
-  margin: 0 0 14px;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: p(0.85);
+  margin-left: 12px;
+  font-size: 18px;
+  font-weight: 900;
+  color: #1d1d1d;
 }
 
 .profil-empty-text {
@@ -659,6 +664,198 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+// --- Company owner: dedicated right-side section styles ---
+.profil-card--company-owner {
+  flex: 1 1 680px;
+  min-width: 0;
+}
+
+.profil-company-owner-body {
+  display: block;
+}
+
+.profil-company-owner-aside,
+.profil-company-owner-main {
+  min-width: 0;
+}
+
+.profil-company-owner-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profil-section-head--company {
+  margin-bottom: 12px;
+  padding-left: 0;
+}
+
+.profil-company-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profil-company-name-title {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profil-company-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.profil-company-description {
+  margin: 0;
+  color: p(0.72);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.profil-company-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profil-company-contact-line {
+  display: block;
+  color: p(0.78);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.profil-invite-block {
+  width: 100%;
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 10px;
+}
+
+.profil-invite-block-title {
+  margin: 0 0 10px;
+}
+
+.profil-invite-input-wrap {
+  margin: 0;
+  text-align: left;
+}
+
+.profil-subsection--company-members {
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid p(0.08);
+}
+
+.profil-workers-table-wrap.profil-scroll-area {
+  max-height: var(--profil-scroll-max);
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.profil-workers-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.profil-workers-table th,
+.profil-workers-table td {
+  display: table-cell;
+  padding: 11px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.profil-workers-table th {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.profil-workers-cell--stack {
+  display: grid;
+  gap: 3px;
+}
+
+.profil-workers-name {
+  font-weight: 700;
+  color: p(0.86);
+}
+
+.profil-workers-cell--small {
+  min-width: 190px;
+}
+
+.profil-workers-cell--nowrap {
+  white-space: nowrap;
+}
+
+.profil-workers-cell--multiline {
+  min-width: 180px;
+  max-width: 260px;
+  word-break: break-word;
+}
+
+.profil-workers-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.profil-workers-trash-btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: rgba(220, 38, 38, 0.16);
+    border-color: rgba(220, 38, 38, 0.5);
+  }
+}
+
+.profil-workers-actions-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 2px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: background-color 0.2s ease;
+
+  svg path {
+    fill: #6a6a6a;
+    transition: fill 0.2s ease;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: #c2c2c2;
+
+    svg path {
+      fill: #d32929;
+    }
+  }
 }
 
 @media (max-width: 600px) {

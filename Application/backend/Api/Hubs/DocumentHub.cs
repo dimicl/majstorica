@@ -1,4 +1,5 @@
 using backend.Api.Extensions;
+using backend.Api.DTOs.Conversation;
 using backend.Application.Interfaces;
 using backend.Domain.Enums;
 using backend.Shared.Exceptions;
@@ -99,12 +100,23 @@ public class DocumentHub : Hub
             userId,
             content);
 
+        var response = new ChatMessageResponse
+        {
+            Id = message.Id,
+            ConversationId = message.ConversationId,
+            JobId = jobId == Guid.Empty ? null : jobId,
+            SenderId = message.SenderUserId,
+            Content = message.Content,
+            SentAt = message.SentAtUtc,
+            IsSystemMessage = message.Type == MessageType.System
+        };
+
         await Clients.Group(ConversationGroup(conversationId))
-            .SendAsync("ReceiveMessage", message);
+            .SendAsync("ReceiveMessage", response);
 
         var recipientId = await _conversationService.GetRecipientId(conversationId, userId);
         if (recipientId.HasValue)
-            await Clients.User(recipientId.Value.ToString()).SendAsync("ReceiveMessage", message);
+            await Clients.User(recipientId.Value.ToString()).SendAsync("ReceiveMessage", response);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

@@ -15,7 +15,7 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
@@ -77,7 +77,6 @@ import {
     DatePipe,
     DecimalPipe,
     NgTemplateOutlet,
-    RouterLink,
     ButtonComponent,
     AvatarComponent,
     InputComponent,
@@ -85,7 +84,6 @@ import {
     SvgIconComponent,
     JobEditModalComponent,
     CreateJobModalComponent,
-    AddressDisplayPipe,
   ],
   templateUrl: './profil.component.html',
   styleUrl: './profil.component.scss',
@@ -564,6 +562,13 @@ export class ProfilComponent implements OnInit, OnDestroy {
     return workerZonesLineHelper(w);
   }
 
+  public onCompanyMemberTrashClick(member: CompanyWorkerMember): void {
+    console.info(
+      '[CompanyOwner] Trash click placeholder for worker:',
+      member.userId
+    );
+  }
+
   public onMasterSearchInput(raw: string): void {
     const q = (raw ?? '').trim();
     if (this.masterSearchDebounce) clearTimeout(this.masterSearchDebounce);
@@ -721,4 +726,6 @@ export class ProfilComponent implements OnInit, OnDestroy {
     this.closeCreateJobModal();
     this.loadJobs();
   }
+
+  public onDeleteCompanyWorker(): void {}
 }

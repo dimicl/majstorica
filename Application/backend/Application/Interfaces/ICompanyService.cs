@@ -5,6 +5,8 @@ namespace backend.Application.Interfaces;
 public interface ICompanyService
 {
     Task<CompanyResponse?> GetMineForOwner(Guid ownerUserId);
+
+    Task<CompanyPublicResponse?> GetPublicById(Guid companyId);
     Task<CompanyResponse> CreateForOwner(
         Guid ownerUserId,
         string name,

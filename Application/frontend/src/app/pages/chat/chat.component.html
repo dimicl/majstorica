@@ -22,29 +22,61 @@
             <span class="text-color-black font-extra-bold font-size-18"
               >Nema razgovora</span
             >
+            @if (!hideExploreMastersButton()) {
             <app-button
               [buttonType]="eButtonType.POSITIVE"
               [label]="'Majstori'"
               (onButtonClick)="explore()"
             />
+            }
           </div>
           } @else {
-          <div class="thread-list thread-list--simple">
+          <div class="thread-list">
             @for (t of threads(); track t.id) {
-            <button
-              type="button"
-              class="thread-simple"
-              [class.thread-simple--on]="selectedThreadId() === t.id"
+            <div
+              class="thread"
+              [class.active]="selectedThreadId() === t.id"
               (click)="selectThread(t.id)"
             >
-              <span class="thread-simple__title">{{ t.title }}</span>
-              @if (t.unreadCount > 0) {
-              <span class="thread-simple__badge">{{
-                t.unreadCount > 9 ? "9+" : t.unreadCount
-              }}</span>
-              }
-              <span class="thread-simple__preview">{{ t.lastMessage }}</span>
-            </button>
+              <div class="thread-main">
+                <div class="thread-row">
+                  <div class="thread-title-wrap">
+                    <span
+                      class="thread-status-dot"
+                      [class.thread-status-dot--online]="
+                        t.presence === 'online'
+                      "
+                      [class.thread-status-dot--typing]="
+                        t.presence === 'typing'
+                      "
+                      [class.thread-status-dot--offline]="
+                        t.presence === 'offline'
+                      "
+                    ></span>
+                    <div class="thread-title">{{ t.title }}</div>
+                  </div>
+                  @if (t.updatedAt) {
+                  <div class="thread-row-right">
+                    <div class="thread-time">{{ t.updatedAt }}</div>
+                  </div>
+                  }
+                </div>
+
+                @if (t.lastMessage) {
+                <div class="thread-sub">
+                  {{ t.lastMessage }}
+                </div>
+                }
+
+                <div class="thread-meta">
+                  @if (t.unreadCount > 0) {
+                  <span class="thread-unread">{{
+                    t.unreadCount > 99 ? "99+" : t.unreadCount
+                  }}</span>
+                  }
+                </div>
+              </div>
+            </div>
             }
           </div>
           }
