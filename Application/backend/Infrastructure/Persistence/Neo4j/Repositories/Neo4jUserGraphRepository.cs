@@ -26,7 +26,7 @@ public class Neo4jUserGraphRepository : IUserGraphSync
                 MERGE (c:Client { id: $id })
                 MERGE (u)-[:IS_CLIENT]->(c)
             ",
-            UserRole.Master => @"
+            UserRole.Master or UserRole.CompanyWorker => @"
                 MERGE (u:User { id: $id })
                 MERGE (m:Master { id: $id })
                 MERGE (u)-[:IS_MASTER]->(m)

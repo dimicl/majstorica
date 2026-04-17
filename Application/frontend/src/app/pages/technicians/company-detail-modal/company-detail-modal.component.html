@@ -1,0 +1,58 @@
+<div class="company-detail-overlay" (click)="close()">
+  <div class="company-detail-modal" (click)="$event.stopPropagation()">
+    <header class="company-detail-modal__header">
+      <h2 class="company-detail-modal__title">{{ headerTitle() }}</h2>
+      <button
+        type="button"
+        class="company-detail-modal__close"
+        (click)="close(); $event.stopPropagation()"
+        aria-label="Zatvori"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </header>
+
+    <div class="company-detail-modal__body">
+      @if (isLoading()) {
+      <p class="company-detail-modal__loading">Učitavanje...</p>
+      } @else if (error()) {
+      <p class="company-detail-modal__error" role="alert">{{ error() }}</p>
+      } @else if (company()) {
+      @let c = company()!;
+      <article class="company-detail-card">
+        <div class="company-detail-actions">
+          <app-button
+            [buttonType]="eButtonType.POSITIVE"
+            [label]="isStartingChat() ? 'Otvaranje...' : 'Napiši poruku'"
+            [disabled]="isStartingChat()"
+            (onButtonClick)="onWriteMessage()"
+          />
+          <app-button
+            [buttonType]="eButtonType.NEUTRAL"
+            [label]="createJobButtonLabel()"
+            [hasIcon]="false"
+            [disabled]="hasRequestedOwner()"
+            (onButtonClick)="openCreateJobModal()"
+          />
+        </div>
+
+        @if (c.serviceCategories.length) {
+        <p class="company-detail-card__categories">
+          {{ c.serviceCategories.join(' · ') }}
+        </p>
+        }
+        @if (c.description) {
+        <p class="company-detail-card__desc">{{ c.description }}</p>
+        }
+        <ul class="company-detail-card__meta">
+          @if (c.city) {
+          <li><span class="label">Grad</span> {{ c.city }}</li>
+          }
+          <li><span class="label">Email</span> {{ c.email }}</li>
+          <li><span class="label">Telefon</span> {{ c.phoneNumber }}</li>
+        </ul>
+      </article>
+      }
+    </div>
+  </div>
+</div>

@@ -23,7 +23,6 @@ export class AddressDisplayPipe implements PipeTransform {
     if (!street && !city) return 'No Address';
 
     const parts = [street, city].filter((x) => !!x) as string[];
-    console.log(parts);
     return parts.join(', ');
   }
 }

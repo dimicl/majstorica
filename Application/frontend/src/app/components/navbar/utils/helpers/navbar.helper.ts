@@ -3,14 +3,18 @@ import { NavbarItemUserType } from '../../../../shared/enums';
 import type { FilteredNavbarItems } from '../../../../shared/interfaces';
 
 export class NavbarHelper {
-  static getFilteredNavbarItems(userType: NavbarItemUserType): FilteredNavbarItems {
+  static getFilteredNavbarItems(
+    userType: NavbarItemUserType
+  ): FilteredNavbarItems {
     const allItems = NAVBAR_ITEMS.filter(
-      item => item.userType === NavbarItemUserType.ALL || item.userType === userType
+      (item) =>
+        item.userType.includes(NavbarItemUserType.ALL) ||
+        item.userType.includes(userType)
     );
-  
+
     return {
-      menuItems: allItems.filter(item => !item.isBottomPinned),
-      bottomItems: allItems.filter(item => item.isBottomPinned)
+      menuItems: allItems.filter((item) => !item.isBottomPinned),
+      bottomItems: allItems.filter((item) => item.isBottomPinned),
     };
   }
 }

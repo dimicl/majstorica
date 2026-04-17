@@ -5,9 +5,10 @@ export function mastersListParamsToCacheKey(params: MastersListParams): string {
   const sort = params.sort ?? 'name-asc';
   const category = (params.category ?? '').trim();
   const minRating = params.minRating ?? '';
+  const entityType = params.entityType ?? 'all';
   return `search=${encodeURIComponent(
     search
   )}&sort=${sort}&category=${encodeURIComponent(
     category
-  )}&minRating=${minRating}`;
+  )}&minRating=${minRating}&entityType=${entityType}`;
 }

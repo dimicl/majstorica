@@ -1,0 +1,89 @@
+<div class="company-setup-overlay" role="presentation" aria-hidden="true"></div>
+<div
+  class="company-setup-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="company-setup-title"
+>
+  <header class="company-setup-modal__header">
+    <h2 id="company-setup-title" class="company-setup-modal__title">
+      Kreiraj firmu
+    </h2>
+  </header>
+
+  <form class="company-setup-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    @if (apiError) {
+    <div class="company-setup-form__error" role="alert">{{ apiError }}</div>
+    } @if (form.hasError('addressIncomplete') && (form.touched || form.dirty)) {
+    <div class="company-setup-form__error" role="alert">
+      Za adresu unesi i ulicu i grad, ili ostavi oba polja prazna.
+    </div>
+    }
+    <div class="company-setup-form__row">
+      <div class="company-setup-form__field">
+        <app-input
+          id="company-name"
+          type="text"
+          label="Naziv firme"
+          theme="light"
+          errorMessage="Naziv je obavezan (2–150 karaktera)"
+          formControlName="name"
+        />
+      </div>
+
+      <div class="company-setup-form__field">
+        <app-input
+          id="company-phone"
+          type="text"
+          label="Telefon firme"
+          theme="light"
+          errorMessage="Tačno 10 cifara"
+          formControlName="phoneNumber"
+        />
+      </div>
+    </div>
+
+    <div class="company-setup-form__field">
+      <app-input
+        id="company-email"
+        type="email"
+        label="Email firme"
+        theme="light"
+        errorMessage="Unesi validan email"
+        formControlName="email"
+      />
+    </div>
+    <div class="company-setup-form__row">
+      <div class="company-setup-form__field">
+        <app-input
+          id="company-street"
+          type="text"
+          label="Ulica"
+          theme="light"
+          errorMessage=""
+          formControlName="street"
+        />
+      </div>
+
+      <div class="company-setup-form__field">
+        <app-input
+          id="company-city"
+          type="text"
+          label="Grad"
+          theme="light"
+          errorMessage=""
+          formControlName="city"
+        />
+      </div>
+    </div>
+
+    <div class="company-setup-form__actions">
+      <app-button
+        [buttonType]="eButtonType.POSITIVE"
+        [label]="'Sacuvaj'"
+        [disabled]="submitting"
+        (click)="onSubmit()"
+      ></app-button>
+    </div>
+  </form>
+</div>

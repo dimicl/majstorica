@@ -21,6 +21,9 @@ public class AuthController : ControllerBase
         if (request.Role == Domain.Enums.UserRole.Admin)
             return BadRequest(new { message = "Ne možete se registrovati kao Admin." });
 
+        if (request.Role == Domain.Enums.UserRole.CompanyWorker)
+            return BadRequest(new { message = "Uloga zaposlenog u firmi nije dostupna pri registraciji." });
+
         var response = await _authService.Register(request);
         return StatusCode(201, response);
     }

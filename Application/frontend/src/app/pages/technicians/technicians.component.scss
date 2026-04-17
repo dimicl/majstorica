@@ -318,6 +318,74 @@
   grid-column: 1 / -1;
 }
 
+.technician-card--company {
+  border-color: rgba(62, 125, 215, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(62, 125, 215, 0.04)
+  );
+}
+
+.technician-card__company-desc {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(17, 24, 39, 0.62);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.technician-card--map-row {
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+}
+
+.technicians-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0 4px;
+}
+
+.technicians-pagination__btn {
+  border: 1px solid rgba(17, 24, 39, 0.15);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 700;
+  background: #fff;
+  color: rgba(17, 24, 39, 0.85);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: $color-blue;
+    background: rgba(62, 125, 215, 0.06);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.technicians-pagination__info {
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.75);
+  font-size: 0.95rem;
+}
+
+.technicians-pagination__total {
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.5);
+  margin-left: 4px;
+}
+
 @media (max-width: 1050px) {
   .technicians-map-mode {
     min-height: 520px;

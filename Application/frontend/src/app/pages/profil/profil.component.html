@@ -1,3 +1,8 @@
+<!--
+  Profil — raspored po ulozi:
+  @switch (user.role) u profil-shell-main: leva glavna kartica (profilHeroCard),
+  zatim kolone specifične za ulogu (ng-template ispod).
+-->
 <section class="profil-page">
   @if (editLockToast()) {
   <div class="profil-toast" role="status">{{ editLockToast() }}</div>
@@ -9,338 +14,828 @@
 
   <div class="profil-shell">
     @if (user$ | async; as user) {
-
-    <div class="profil-card">
-      <div class="profil-hero">
-        <div class="profil-hero-avatar">
-          <app-avatar
-            [firstName]="user.firstName"
-            [lastName]="user.lastName"
-            [width]="50"
-            [height]="50"
+    <div class="profil-shell-main">
+      @switch (user.role) {
+        @case (userRole.Client) {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
           />
-          <span class="profil-name"
-            >{{ user.firstName }} {{ user.lastName }}</span
-          >
-        </div>
+          <ng-container *ngTemplateOutlet="profilClientJobsColumn" />
+        }
+        @case (userRole.CompanyOwner) {
+          <ng-container
+            *ngTemplateOutlet="
+              profilCompanyOwnerLeftColumn;
+              context: { user: user }
+            "
+          />
+          <ng-container *ngTemplateOutlet="profilCompanyOwnerFirma" />
+        }
+        @case (userRole.Master) {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
+          />
+          <div class="profil-card profil-card--master-work">
+            <ng-container *ngTemplateOutlet="masterZahteviCard" />
+          </div>
+        }
+        @case (userRole.CompanyWorker) {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
+          />
+          <div class="profil-card profil-card--master-work">
+            <ng-container *ngTemplateOutlet="masterZahteviCard" />
+          </div>
+        }
+        @default {
+          <ng-container
+            *ngTemplateOutlet="profilHeroCard; context: { user: user }"
+          />
+        }
+      }
+    </div>
 
-        @if (user.role === userRole.Master) {
-        <div
-          class="profil-category-choices"
-          role="group"
-          aria-label="Kategorija"
-        >
-          @if (masterProfileLoading()) {
-          <p class="profil-category-placeholder">Učitavanje…</p>
-          } @else if (user.category?.trim()) {
-          <p class="profil-category-line">
-            <span class="profil-category-label">Kategorija</span>
-            <span class="profil-category-value">{{ user.category }}</span>
-          </p>
-          } @else {
-          <select
-            class="profil-category-select"
-            [value]="''"
-            [disabled]="masterCategorySaving()"
-            (change)="updateCategory($any($event.target).value)"
+    <!-- Glavna kartica (sve uloge) -->
+    <ng-template #profilHeroCard let-user="user">
+      <div class="profil-card">
+        <div class="profil-hero">
+          <div class="profil-hero-avatar">
+            <app-avatar
+              [firstName]="user.firstName"
+              [lastName]="user.lastName"
+              [width]="50"
+              [height]="50"
+            />
+            <span class="profil-name"
+              >{{ user.firstName }} {{ user.lastName }}</span
+            >
+          </div>
+
+          @if ( user.role === userRole.Master || user.role ===
+          userRole.CompanyWorker ) {
+          <div
+            class="profil-category-choices"
+            role="group"
+            aria-label="Kategorija"
           >
-            <option value="">Izaberite kategoriju</option>
-            @for (opt of masterCategoryOptions; track opt.value) {
-            <option [value]="opt.label">{{ opt.label }}</option>
-            }
-          </select>
-          @if (masterCategoryError()) {
-          <p class="profil-category-error" role="alert">
-            {{ masterCategoryError() }}
+            @if (masterProfileLoading()) {
+            <p class="profil-category-placeholder">Učitavanje…</p>
+            } @else if (user.category?.trim()) {
+            <p class="profil-category-line">
+              <span class="profil-category-label">Kategorija</span>
+              <span class="profil-category-value">{{ user.category }}</span>
+            </p>
+            } @else {
+            <select
+              class="profil-category-select"
+              [value]="''"
+              [disabled]="masterCategorySaving()"
+              (change)="updateCategory($any($event.target).value)"
+            >
+              <option value="">Izaberite kategoriju</option>
+              @for (opt of masterCategoryOptions; track opt.value) {
+              <option [value]="opt.label">{{ opt.label }}</option>
+              }
+            </select>
+            @if (masterCategoryError()) {
+            <p class="profil-category-error" role="alert">
+              {{ masterCategoryError() }}
+            </p>
+            } }
+          </div>
+          @if ( user.role === userRole.CompanyWorker &&
+          user.employerCompanyName?.trim() ) {
+          <p class="profil-employer-line">
+            <span class="profil-category-label">Firma</span>
+            <span class="profil-category-value">{{
+              user.employerCompanyName
+            }}</span>
           </p>
           } }
-        </div>
-        }
 
-        <!-- COMMON FOR ALL ROLES -->
-        <p class="profil-username">
-          Korisničko ime: <strong>{{ user.username }}</strong>
-        </p>
+          <!-- COMMON FOR ALL ROLES -->
+          <p class="profil-username">
+            Korisničko ime: <strong>{{ user.username }}</strong>
+          </p>
 
-        <span
-          class="profil-badge"
-          [class.profil-badge--client]="user.role === userRole.Client"
-          [class.profil-badge--master]="user.role === userRole.Master"
-        >
-          {{ user.role }}
-        </span>
-        <div class="profile-data">
-          <div class="profile-data-container">
-            <svg-icon
-              [src]="sharedSvgRoutes.PHONE_ICON"
-              class="d-flex align-items-center svg-size-18"
-            />
-            <span class="profile-value">{{
-              user.phone?.trim() || "No Phone"
-            }}</span>
-          </div>
-          <div class="profile-data-container">
-            <svg-icon
-              [src]="sharedSvgRoutes.ADDRESS_ICON"
-              class="d-flex align-items-center svg-size-18"
-            />
-            <span class="profile-value">{{
-              user.address | addressDisplay
-            }}</span>
-          </div>
-          <div class="profile-data-container">
-            <svg-icon
-              [src]="sharedSvgRoutes.EMAIL_ICON"
-              class="d-flex align-items-center svg-size-18"
-            />
-            <span class="profile-value">{{
-              user.email?.trim() ?? "No Email"
-            }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ROLE SWITCH -->
-    @switch (user.role) { @case (userRole.Client) {
-    <div class="profil-jobs">
-      <div class="profil-section-head">
-        <span class="profil-section-title">Poslovi</span>
-        <div
-          ngbTooltip="Kreiraj"
-          tooltipClass="tooltip"
-          placement="bottom"
-          class="profil-plus-icon"
-          (click)="onOpenCreateJobModal()"
-        >
-          <svg-icon
-            [src]="sharedSvgRoutes.PLUS_ICON"
-            class="d-flex align-items-center svg-size-18 svg-fill-white"
-          />
-        </div>
-      </div>
-
-      <div class="profil-jobs-container">
-        @if (loadingMyJobs()) {
-        <p class="profil-loading">Učitavanje poslova...</p>
-        } @else if (myJobs().length > 0) {
-        <table class="profil-requests-table">
-          <thead>
-            <tr>
-              <th>Majstor</th>
-              <th>Naslov</th>
-              <th>Datum</th>
-              <th>Cena</th>
-              <th>Hitnost</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (job of myJobs(); track job.jobId) {
-            <tr class="profil-request-row">
-              <td>{{ job.masterName || "—" }}</td>
-              <td class="profil-request-desc-cell">
-                {{ job.jobTitle || "—" }}
-              </td>
-              <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
-              <td>
-                {{ job.price != null ? job.price + " RSD" : "—" }}
-              </td>
-              <td>
-                @if (job.isEmergency) {
-                <span
-                  class="profil-request-badge profil-request-badge--emergency"
-                >
-                  Hitno
-                </span>
-                } @else {
-                <span class="profil-request-badge profil-request-badge--normal">
-                  Obično
-                </span>
-                }
-              </td>
-              <td>
-                <span class="profil-request-status">
-                  {{ statusLabel(job.status) }}
-                </span>
-              </td>
-              <td class="profil-request-actions-cell">
-                @if (job.status === 'Accepted' || job.status === 'InProgress') {
-                <app-button
-                  [buttonType]="eButtonType.NEUTRAL"
-                  [label]="'Edit'"
-                  (onButtonClick)="openJobEdit(job)"
-                />
-                }
-              </td>
-            </tr>
+          @if (user.role !== userRole.CompanyOwner) {
+          <span
+            class="profil-badge"
+            [class.profil-badge--client]="user.role === userRole.Client"
+            [class.profil-badge--master]="
+              user.role === userRole.Master ||
+              user.role === userRole.CompanyWorker
+            "
+          >
+            {{
+              user.role === userRole.CompanyWorker
+                ? "Majstor u firmi"
+                : user.role
+            }}
+          </span>
+          }
+          <div class="profile-data">
+            @for (row of contactRowDefs; track row.key) {
+            <div class="profile-data-container">
+              <svg-icon
+                [src]="row.icon"
+                class="d-flex align-items-center svg-size-18"
+              />
+              <span class="profile-value">{{
+                profileContactText(user, row.key)
+              }}</span>
+            </div>
             }
-          </tbody>
-        </table>
-        } @else {
-        <div class="profil-empty">
-          <p class="profil-empty-text">Nemate kreiranih poslova.</p>
-          <app-button
-            [buttonType]="eButtonType.POSITIVE"
-            [label]="'Pogledaj majstore'"
-            (onButtonClick)="navigateToMasters()"
-          />
-        </div>
-        }
-      </div>
-    </div>
-    } @case (userRole.Master) {
-    <div class="profil-card">
-      <div class="profil-section-head">
-        <span class="profil-section-title">Zahtevi i poslovi</span>
-      </div>
+          </div>
 
-      @if (requestError()) {
-      <p class="profil-error" role="alert">
-        {{ requestError() }}
-      </p>
-      }
-
-      <!-- MOJI POSLOVI -->
-      <div class="profil-subsection">
-        <h3 class="profil-subsection-title">Moji poslovi</h3>
-
-        @if (loadingMyJobs()) {
-        <p class="profil-loading">Učitavanje poslova...</p>
-        } @else if (assignedJobs().length > 0) {
-        <table class="profil-requests-table">
-          <thead>
-            <tr>
-              <th>Klijent</th>
-              <th>Naslov</th>
-              <th>Datum</th>
-              <th>Cena</th>
-              <th>Hitnost</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (job of assignedJobs(); track job.jobId) {
-            <tr class="profil-request-row">
-              <td>{{ job.clientName }}</td>
-              <td class="profil-request-desc-cell">
-                {{ job.jobTitle || "—" }}
-              </td>
-              <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
-              <td>
-                {{ job.price != null ? job.price + " RSD" : "—" }}
-              </td>
-              <td>
-                @if (job.isEmergency) {
-                <span
-                  class="profil-request-badge profil-request-badge--emergency"
-                >
-                  Hitno
-                </span>
-                } @else {
-                <span class="profil-request-badge profil-request-badge--normal">
-                  Obično
-                </span>
-                }
-              </td>
-              <td>
-                <span class="profil-request-status">
-                  {{ statusLabel(job.status) }}
-                </span>
-              </td>
-              <td class="profil-request-actions-cell">
-                @if (job.status === 'Accepted' || job.status === 'InProgress') {
-                <app-button
-                  [buttonType]="eButtonType.NEUTRAL"
-                  [label]="'Edit'"
-                  (onButtonClick)="openJobEdit(job)"
-                />
-                }
-              </td>
-            </tr>
+          @if ( (user.role === userRole.Master || user.role ===
+          userRole.CompanyWorker) && !masterProfileLoading() && masterProfile()
+          ) {
+          <div
+            class="profil-master-stats"
+            role="group"
+            aria-label="Iskustvo, satnica i ocena"
+          >
+            @if (masterStatsError()) {
+            <p class="profil-stats-error" role="alert">
+              {{ masterStatsError() }}
+            </p>
             }
-          </tbody>
-        </table>
-        } @else {
-        <p class="profil-empty-inline">Nema dodeljenih poslova.</p>
-        }
-      </div>
-
-      <!-- PENDING -->
-      <div class="profil-subsection">
-        <h3 class="profil-subsection-title">Zahtevi na čekanju</h3>
-
-        @if (loadingMyJobs()) {
-        <p class="profil-loading">Učitavanje zahteva...</p>
-        } @else if (pendingRequests().length > 0) {
-        <table class="profil-requests-table">
-          <thead>
-            <tr>
-              <th>Ime</th>
-              <th>Naslov</th>
-              <th>Datum</th>
-              <th>Cena</th>
-              <th>Hitnost</th>
-              <th>Stanje</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (req of pendingRequests(); track req.conversationId) {
-            <tr class="profil-request-row">
-              <td>{{ req.clientName }}</td>
-              <td class="profil-request-desc-cell">
-                {{ req.jobTitle || "—" }}
-              </td>
-              <td>{{ req.date | date : "dd.MM.yyyy." }}</td>
-              <td>
-                {{ req.price != null ? req.price + " RSD" : "—" }}
-              </td>
-              <td>
-                @if (req.isEmergency) {
-                <span
-                  class="profil-request-badge profil-request-badge--emergency"
+            <div class="profil-master-stats-row">
+              <ng-container
+                *ngTemplateOutlet="
+                  masterStatSlot;
+                  context: { kind: 'experience' }
+                "
+              />
+              <ng-container
+                *ngTemplateOutlet="masterStatSlot; context: { kind: 'hourly' }"
+              />
+              <div class="profil-stat-col profil-stat-col--rating">
+                <span class="profil-stat-heading">Ocena</span>
+                <div
+                  class="profil-stat-rating-body"
+                  aria-label="Prosečna ocena"
                 >
-                  Hitno
-                </span>
-                } @else {
-                <span class="profil-request-badge profil-request-badge--normal">
-                  Obično
-                </span>
-                }
-              </td>
-              <td>
-                <span class="profil-request-status"> Na čekanju </span>
-              </td>
-              <td class="profil-request-actions-cell">
-                <div class="profil-request-actions">
-                  <app-button
-                    [buttonType]="eButtonType.POSITIVE"
-                    [label]="'Prihvati'"
-                    [disabled]="actingRequestId() !== null"
-                    (onButtonClick)="acceptRequest(req)"
-                  />
-                  <app-button
-                    [buttonType]="eButtonType.NEUTRAL"
-                    [label]="'Odbij'"
-                    [disabled]="actingRequestId() !== null"
-                    (onButtonClick)="declineRequest(req)"
-                  />
+                  @if (masterProfile()!.rating != null) {
+                  <span class="profil-stat-value"
+                    >{{ masterProfile()!.rating | number : "1.1-1" }} / 5</span
+                  >
+                  @if (masterProfile()!.totalReviews > 0) {
+                  <span class="profil-stat-sub"
+                    >({{ masterProfile()!.totalReviews }} rec.)</span
+                  >
+                  } } @else {
+                  <span class="profil-stat-muted">Još nema ocena</span>
+                  }
                 </div>
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-        } @else {
-        <p class="profil-empty-inline">Nema zahteva na čekanju.</p>
+              </div>
+            </div>
+            <ng-template #masterStatSlot let-kind="kind">
+              <div class="profil-stat-col">
+                @switch (kind) { @case ('experience') {
+                <span class="profil-stat-heading">Iskustvo</span>
+                <div class="profil-stat-stack">
+                  <div
+                    class="profil-stat-slot"
+                    [class.profil-stat-slot--concealed]="
+                      editingMasterStat() === 'experience'
+                    "
+                    [attr.role]="
+                      editingMasterStat() === 'experience' ? null : 'button'
+                    "
+                    [attr.tabindex]="
+                      editingMasterStat() === 'experience' ? -1 : 0
+                    "
+                    (click)="openMasterStatEdit('experience', $event)"
+                    (keydown.enter)="openMasterStatEdit('experience', $event)"
+                  >
+                    @if (masterProfile()!.yearsOfExperience > 0) {
+                    <span class="profil-stat-value"
+                      >{{ masterProfile()!.yearsOfExperience }} god.</span
+                    >
+                    } @else {
+                    <span class="profil-stat-add">Dodaj</span>
+                    }
+                  </div>
+                  <div
+                    class="profil-stat-form-panel"
+                    [class.profil-stat-form-panel--open]="
+                      editingMasterStat() === 'experience'
+                    "
+                    role="group"
+                    [attr.aria-hidden]="
+                      editingMasterStat() !== 'experience' ? true : null
+                    "
+                    (click)="$event.stopPropagation()"
+                  >
+                    <div
+                      class="profil-stat-edit"
+                      (keydown)="$event.stopPropagation()"
+                    >
+                      <input
+                        type="number"
+                        class="profil-stat-input"
+                        min="0"
+                        max="80"
+                        [disabled]="masterStatsSaving()"
+                        [ngModel]="experienceDraft()"
+                        (ngModelChange)="experienceDraft.set($event)"
+                        (keydown.enter)="saveMasterExperience($event)"
+                      />
+                      <button
+                        type="button"
+                        class="profil-stat-save"
+                        [disabled]="masterStatsSaving()"
+                        (click)="saveMasterExperience($event)"
+                      >
+                        Sačuvaj
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                } @case ('hourly') {
+                <span class="profil-stat-heading">Satnica</span>
+                <div class="profil-stat-stack">
+                  <div
+                    class="profil-stat-slot"
+                    [class.profil-stat-slot--concealed]="
+                      editingMasterStat() === 'hourly'
+                    "
+                    [attr.role]="
+                      editingMasterStat() === 'hourly' ? null : 'button'
+                    "
+                    [attr.tabindex]="editingMasterStat() === 'hourly' ? -1 : 0"
+                    (click)="openMasterStatEdit('hourly', $event)"
+                    (keydown.enter)="openMasterStatEdit('hourly', $event)"
+                  >
+                    @if (masterProfile()!.hourlyRateAmount > 0) {
+                    <span class="profil-stat-value"
+                      >{{
+                        masterProfile()!.hourlyRateAmount | number : "1.0-2"
+                      }}
+                      {{ masterProfile()!.hourlyRateCurrency }}</span
+                    >
+                    } @else {
+                    <span class="profil-stat-add">Dodaj</span>
+                    }
+                  </div>
+                  <div
+                    class="profil-stat-form-panel"
+                    [class.profil-stat-form-panel--open]="
+                      editingMasterStat() === 'hourly'
+                    "
+                    role="group"
+                    [attr.aria-hidden]="
+                      editingMasterStat() !== 'hourly' ? true : null
+                    "
+                    (click)="$event.stopPropagation()"
+                  >
+                    <div
+                      class="profil-stat-edit"
+                      (keydown)="$event.stopPropagation()"
+                    >
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="profil-stat-input"
+                        placeholder="npr. 2500"
+                        [disabled]="masterStatsSaving()"
+                        [ngModel]="hourlyDraft()"
+                        (ngModelChange)="hourlyDraft.set($event)"
+                        (keydown.enter)="saveMasterHourly($event)"
+                      />
+                      <span class="profil-stat-currency">{{
+                        masterProfile()!.hourlyRateCurrency
+                      }}</span>
+                      <button
+                        type="button"
+                        class="profil-stat-save"
+                        [disabled]="masterStatsSaving()"
+                        (click)="saveMasterHourly($event)"
+                      >
+                        Sačuvaj
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                } }
+              </div>
+            </ng-template>
+          </div>
+          }
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Vlasnik firme: leva kolona (profil + pozivi) -->
+    <ng-template #profilCompanyOwnerLeftColumn let-user="user">
+      <div class="profil-company-owner-main">
+        <ng-container *ngTemplateOutlet="profilHeroCard; context: { user: user }" />
+        <ng-container *ngTemplateOutlet="profilCompanyOwnerInvite" />
+      </div>
+    </ng-template>
+
+    <!-- Vlasnik firme: pozivi -->
+    <ng-template #profilCompanyOwnerInvite>
+      <div class="profil-invite-block">
+        <h3 class="profil-subsection-title profil-invite-block-title">
+          Pozovi majstore
+        </h3>
+        <div class="profil-invite-input-wrap">
+          <app-input
+            id="master-invite-search"
+            type="search"
+            label="Ime, @korisnik ili e-mail"
+            (onValueChange)="onMasterSearchInput($event ?? '')"
+          />
+        </div>
+        @if (masterInviteLoading()) {
+        <p class="profil-loading">Pretraga…</p>
+        } @if (masterInviteError()) {
+        <p class="profil-error" role="alert">{{ masterInviteError() }}</p>
+        } @if (masterSearchResults().length > 0) {
+        <ul class="profil-master-suggest profil-scroll-area" role="listbox">
+          @for (m of masterSearchResults(); track m.userId) {
+          <li class="profil-master-suggest-item" role="option">
+            <div class="profil-master-suggest-info">
+              <span class="profil-master-suggest-name"
+                >{{ m.firstName }} {{ m.lastName }}</span
+              >
+              <span class="profil-master-suggest-meta"
+                >&#64;{{ m.username }}</span
+              >
+              @if (m.headline) {
+              <span class="profil-master-suggest-headline">{{
+                m.headline
+              }}</span>
+              }
+            </div>
+            <app-button
+              [buttonType]="inviteMasterButtonType(m)"
+              [label]="inviteMasterButtonLabel(m)"
+              [disabled]="inviteMasterButtonDisabled(m)"
+              (onButtonClick)="inviteMasterToCompany(m.userId)"
+            />
+          </li>
+          }
+        </ul>
         }
       </div>
-    </div>
-    } } }
+    </ng-template>
+
+    <!-- Klijent: poslovi -->
+    <ng-template #profilClientJobsColumn>
+      <div class="profil-jobs">
+        <div class="profil-section-head">
+          <span class="profil-section-title">Poslovi</span>
+          <div
+            ngbTooltip="Kreiraj"
+            tooltipClass="tooltip"
+            placement="bottom"
+            class="profil-plus-icon"
+            (click)="onOpenCreateJobModal()"
+          >
+            <svg-icon
+              [src]="sharedSvgRoutes.PLUS_ICON"
+              class="d-flex align-items-center svg-size-18 svg-fill-white"
+            />
+          </div>
+        </div>
+
+        <div class="profil-jobs-container">
+          @if (loadingMyJobs()) {
+          <p class="profil-loading">Učitavanje poslova...</p>
+          } @else if (myJobs().length > 0) {
+          <div class="profil-table-scroll">
+            <table class="profil-requests-table">
+              <thead>
+                <tr>
+                  <th>Majstor</th>
+                  <th>Naslov</th>
+                  <th>Datum</th>
+                  <th>Cena</th>
+                  <th>Hitnost</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (job of myJobs(); track job.jobId) {
+                <tr class="profil-request-row">
+                  <td>{{ job.masterName || "—" }}</td>
+                  <td class="profil-request-desc-cell">
+                    {{ job.jobTitle || "—" }}
+                  </td>
+                  <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
+                  <td>
+                    {{ job.price != null ? job.price + " RSD" : "—" }}
+                  </td>
+                  <td>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        hitnostBadge;
+                        context: { emergency: job.isEmergency }
+                      "
+                    />
+                  </td>
+                  <td>
+                    <span class="profil-request-status">
+                      {{ statusLabel(job.status) }}
+                    </span>
+                  </td>
+                  <td class="profil-request-actions-cell">
+                    @if (job.status === 'Accepted' || job.status ===
+                    'InProgress') {
+                    <app-button
+                      [buttonType]="eButtonType.NEUTRAL"
+                      [label]="'Edit'"
+                      (onButtonClick)="openJobEdit(job)"
+                    />
+                    }
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          } @else {
+          <div class="profil-empty">
+            <p class="profil-empty-text">Nemate kreiranih poslova.</p>
+            <app-button
+              [buttonType]="eButtonType.POSITIVE"
+              [label]="'Pogledaj majstore'"
+              (onButtonClick)="navigateToMasters()"
+            />
+          </div>
+          }
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Vlasnik firme: firma + zaposleni -->
+    <ng-template #profilCompanyOwnerFirma>
+      <div class="profil-card profil-card--company-owner">
+        @if (companyTeam() === undefined) {
+        <div class="profil-section-head">
+          <span class="profil-section-title">Firma</span>
+        </div>
+        <p class="profil-loading">Učitavanje…</p>
+        } @else if (companyTeam() === null) {
+        <div class="profil-section-head">
+          <span class="profil-section-title">Firma</span>
+        </div>
+        <p class="profil-empty-inline">
+          Nemaš registrovanu firmu. Popuni podatke pri prvom prijavljivanju.
+        </p>
+        } @else {
+        <div class="profil-company-owner-body">
+          <div class="profil-company-owner-aside">
+            <div class="profil-section-head profil-section-head--company">
+              <div class="profil-company-title-row">
+                <svg-icon
+                  class="profil-company-title-icon svg-size-30"
+                  [src]="sharedSvgRoutes.COMPANY_ICON"
+                  aria-hidden="true"
+                />
+                <span class="profil-section-title profil-company-name-title">{{
+                  companyTeam()!.name
+                }}</span>
+              </div>
+            </div>
+            <div class="profil-company-details">
+              @if (companyTeam()!.description) {
+              <p class="profil-company-description">
+                {{ companyTeam()!.description }}
+              </p>
+              }
+              <div class="profil-company-contact">
+                <span class="profil-company-contact-line">{{
+                  companyTeam()!.email
+                }}</span>
+                <span class="profil-company-contact-line">{{
+                  companyTeam()!.phoneNumber
+                }}</span>
+              </div>
+            </div>
+
+            <div class="profil-subsection profil-subsection--company-members">
+              <div class="profil-subsection-title">Zaposleni</div>
+              @if (loadingCompanyMembers()) {
+              <p class="profil-loading">Učitavanje…</p>
+              } @else if (companyMembers().length === 0) {
+              <p class="profil-empty-inline">Nema majstora.</p>
+              } @else {
+              <div class="profil-workers-table-wrap profil-scroll-area">
+                <table
+                  class="profil-workers-table profil-workers-table--compact"
+                >
+                  <thead>
+                    <tr>
+                      <th scope="col">Ime i prezime</th>
+                      <th scope="col">Telefon</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Kategorija</th>
+                      <th scope="col">God.</th>
+                      <th scope="col">Satnica</th>
+                      <th scope="col">Ocena</th>
+                      <th scope="col"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (w of companyMembers(); track w.userId) {
+                    <tr
+                      [attr.title]="
+                        w.description?.trim() ? 'Opis: ' + w.description : null
+                      "
+                    >
+                      <td class="profil-workers-cell">
+                        <div class="profil-workers-cell--stack">
+                          <span class="profil-workers-name"
+                            >{{ w.firstName }} {{ w.lastName }}</span
+                          >
+                        </div>
+                      </td>
+                      <td
+                        class="profil-workers-cell profil-workers-cell--small"
+                      >
+                        <div class="profil-workers-cell--stack">
+                          <span>{{ w.phoneNumber || "—" }}</span>
+                        </div>
+                      </td>
+                      <td class="profil-workers-cell">
+                        <div class="profil-workers-cell--stack">
+                          <span>{{ w.email || "—" }}</span>
+                        </div>
+                      </td>
+                      <td
+                        class="profil-workers-cell profil-workers-cell--multiline"
+                        [attr.title]="workerCategoriesLine(w)"
+                      >
+                        {{ workerCategoriesLine(w) }}
+                      </td>
+                      <td>{{ w.yearsOfExperience }}</td>
+                      <td
+                        class="profil-workers-cell profil-workers-cell--nowrap"
+                      >
+                        {{ w.hourlyRateAmount | number : "1.0-2" }}
+                        {{ w.hourlyRateCurrency || "RSD" }}
+                      </td>
+                      <td>
+                        {{
+                          w.averageRating != null
+                            ? (w.averageRating | number : "1.1-1")
+                            : "—"
+                        }}
+                      </td>
+                      <td class="profil-workers-actions">
+                        <div
+                          class="profil-workers-actions-icon"
+                          (click)="onDeleteCompanyWorker()"
+                          ngbTooltip="Obrisi"
+                          tooltipClass="tooltip"
+                          placement="bottom"
+                          container="body"
+                        >
+                          <svg-icon
+                            [src]="sharedSvgRoutes.TRASH_ICON"
+                            class="d-flex align-items-center svg-size-18"
+                          >
+                          </svg-icon>
+                        </div>
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </ng-template>
+
+    <!-- Majstor / majstor u firmi: zahtevi + recenzije -->
+    <ng-template #masterZahteviCard>
+      <div class="profil-master-work-layout">
+        <div class="profil-master-work-primary">
+          @if (requestError()) {
+          <p class="profil-error" role="alert">
+            {{ requestError() }}
+          </p>
+          }
+
+          <!-- MOJI POSLOVI -->
+          <div class="profil-subsection">
+            <h3 class="profil-subsection-title">Moji poslovi</h3>
+
+            @if (loadingMyJobs()) {
+            <p class="profil-loading">Učitavanje poslova...</p>
+            } @else if (assignedJobs().length > 0) {
+            <div class="profil-table-scroll">
+              <table class="profil-requests-table">
+                <thead>
+                  <tr>
+                    <th>Klijent</th>
+                    <th>Naslov</th>
+                    <th>Datum</th>
+                    <th>Cena</th>
+                    <th>Hitnost</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (job of assignedJobs(); track job.jobId) {
+                  <tr class="profil-request-row">
+                    <td>{{ job.clientName }}</td>
+                    <td class="profil-request-desc-cell">
+                      {{ job.jobTitle || "—" }}
+                    </td>
+                    <td>{{ job.date | date : "dd.MM.yyyy." }}</td>
+                    <td>
+                      {{ job.price != null ? job.price + " RSD" : "—" }}
+                    </td>
+                    <td>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          hitnostBadge;
+                          context: { emergency: job.isEmergency }
+                        "
+                      />
+                    </td>
+                    <td>
+                      <span class="profil-request-status">
+                        {{ statusLabel(job.status) }}
+                      </span>
+                    </td>
+                    <td class="profil-request-actions-cell">
+                      @if (job.status === 'Accepted' || job.status ===
+                      'InProgress') {
+                      <app-button
+                        [buttonType]="eButtonType.NEUTRAL"
+                        [label]="'Edit'"
+                        (onButtonClick)="openJobEdit(job)"
+                      />
+                      }
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            } @else {
+            <p class="profil-empty-inline">Nema dodeljenih poslova.</p>
+            }
+          </div>
+
+          <!-- PENDING -->
+          <div class="profil-subsection">
+            <h3 class="profil-subsection-title">Zahtevi na čekanju</h3>
+
+            @if (loadingMyJobs()) {
+            <p class="profil-loading">Učitavanje zahteva...</p>
+            } @else if (pendingRequests().length > 0) {
+            <div class="profil-table-scroll">
+              <table class="profil-requests-table">
+                <thead>
+                  <tr>
+                    <th>Ime</th>
+                    <th>Naslov</th>
+                    <th>Datum</th>
+                    <th>Cena</th>
+                    <th>Hitnost</th>
+                    <th>Stanje</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (req of pendingRequests(); track req.conversationId) {
+                  <tr class="profil-request-row">
+                    <td>{{ req.clientName }}</td>
+                    <td class="profil-request-desc-cell">
+                      {{ req.jobTitle || "—" }}
+                    </td>
+                    <td>{{ req.date | date : "dd.MM.yyyy." }}</td>
+                    <td>
+                      {{ req.price != null ? req.price + " RSD" : "—" }}
+                    </td>
+                    <td>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          hitnostBadge;
+                          context: { emergency: req.isEmergency }
+                        "
+                      />
+                    </td>
+                    <td>
+                      <span class="profil-request-status"> Na čekanju </span>
+                    </td>
+                    <td class="profil-request-actions-cell">
+                      <div class="profil-request-actions">
+                        <app-button
+                          [buttonType]="eButtonType.POSITIVE"
+                          [label]="'Prihvati'"
+                          [disabled]="actingRequestId() !== null"
+                          (onButtonClick)="acceptRequest(req)"
+                        />
+                        <app-button
+                          [buttonType]="eButtonType.NEUTRAL"
+                          [label]="'Odbij'"
+                          [disabled]="actingRequestId() !== null"
+                          (onButtonClick)="declineRequest(req)"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            } @else {
+            <p class="profil-empty-inline">Nema zahteva na čekanju.</p>
+            }
+          </div>
+        </div>
+
+        <aside class="profil-master-reviews-panel">
+          <h3 class="profil-subsection-title profil-master-reviews-heading">
+            Recenzije
+          </h3>
+          @if (masterProfile(); as mp) {
+          <p class="profil-master-reviews-summary">
+            @if (mp.rating != null && mp.totalReviews > 0) {
+            <span class="profil-master-reviews-avg"
+              >{{ mp.rating | number : "1.1-1" }} / 5</span
+            >
+            <span class="profil-master-reviews-count"
+              >({{ mp.totalReviews }})</span
+            >
+            }
+          </p>
+          } @if (masterReviewsError()) {
+          <p class="profil-error" role="alert">{{ masterReviewsError() }}</p>
+          }
+          <div
+            class="profil-master-reviews-scroll profil-scroll-area"
+            tabindex="0"
+            role="region"
+            aria-live="polite"
+          >
+            @if (loadingMasterReviews()) {
+            <p class="profil-loading">Učitavanje…</p>
+            } @else if (masterReviews().length === 0) {
+            <p class="profil-empty-inline profil-master-reviews-placeholder">
+              Nema recenzija.
+            </p>
+            } @else {
+            <ul class="profil-master-review-list">
+              @for (rev of masterReviews(); track rev.id) {
+              <li class="profil-master-review-item">
+                <div class="profil-master-review-top">
+                  <span class="profil-master-review-rating"
+                    >{{ rev.rating | number : "1.0-1" }} / 5</span
+                  >
+                  <span class="profil-master-review-date">{{
+                    rev.createdAtUtc | date : "dd.MM.yyyy."
+                  }}</span>
+                </div>
+                <p class="profil-master-review-author">
+                  {{ rev.reviewerName }}
+                  @if (rev.reviewerUsername) {
+                  <span class="profil-master-review-user"
+                    >&#64;{{ rev.reviewerUsername }}</span
+                  >
+                  }
+                </p>
+                @if (rev.comment?.trim()) {
+                <p class="profil-master-review-comment">{{ rev.comment }}</p>
+                }
+              </li>
+              }
+            </ul>
+            }
+          </div>
+        </aside>
+      </div>
+    </ng-template>
+
+    }
   </div>
+
+  <ng-template #hitnostBadge let-emergency="emergency">
+    @if (emergency) {
+    <span class="profil-request-badge profil-request-badge--emergency"
+      >Hitno</span
+    >
+    } @else {
+    <span class="profil-request-badge profil-request-badge--normal"
+      >Obično</span
+    >
+    }
+  </ng-template>
 
   @if (jobEditModal()) {
   <app-job-edit-modal
@@ -348,9 +843,7 @@
     (closed)="closeJobEdit()"
     (saved)="loadJobs()"
   />
-  }
-
-  @if (showCreateJobModal()) {
+  } @if (showCreateJobModal()) {
   <app-create-job-modal
     (closed)="closeCreateJobModal()"
     (created)="onJobCreated()"

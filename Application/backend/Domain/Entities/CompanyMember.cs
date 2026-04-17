@@ -11,7 +11,7 @@ var member = new CompanyMember(
     DateTime.UtcNow);
 
 I tada u servisu promeniš user-a:
-user.PromoteMasterToCompanyWorker();
+user.PromoteMasterToCompanyWorker(companyId);
 
 Kada majstor napusti firmu
 member.Deactivate(DateTime.UtcNow);

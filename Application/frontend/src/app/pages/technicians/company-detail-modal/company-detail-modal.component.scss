@@ -1,0 +1,115 @@
+@use "../../../../assets/scss/variables" as *;
+
+.company-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.company-detail-modal {
+  width: min(480px, 100%);
+  max-height: min(90vh, 640px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow:
+    0 24px 48px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.company-detail-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.company-detail-modal__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: rgba(17, 24, 39, 0.95);
+  line-height: 1.25;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.company-detail-modal__close {
+  border: none;
+  background: rgba(17, 24, 39, 0.06);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: rgba(17, 24, 39, 0.65);
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(17, 24, 39, 0.1);
+  }
+}
+
+.company-detail-modal__body {
+  padding: 20px;
+}
+
+.company-detail-modal__loading,
+.company-detail-modal__error {
+  margin: 0;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.company-detail-modal__error {
+  color: #b91c1c;
+}
+
+.company-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.company-detail-card__categories {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-blue;
+}
+
+.company-detail-card__desc {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(17, 24, 39, 0.72);
+}
+
+.company-detail-card__meta {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.85);
+
+  .label {
+    display: inline-block;
+    min-width: 72px;
+    font-weight: 700;
+    color: rgba(17, 24, 39, 0.5);
+  }
+}

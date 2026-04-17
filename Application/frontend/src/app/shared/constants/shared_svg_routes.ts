@@ -10,10 +10,12 @@ export class SharedSvgRoutes {
   static LOGOUT_ICON = '/assets/icons/logout.svg';
   static REQUESTS_ICON = '/assets/icons/requests.svg';
   static MARKETPLACE_ICON = '/assets/icons/marketplace.svg';
+  static COMPANY_ICON = '/assets/icons/company-icon.svg';
 
   static BACK_ICON = '/assets/icons/backwards.svg';
   static PHONE_ICON = '/assets/icons/phone-icon.svg';
   static EMAIL_ICON = '/assets/icons/email-icon.svg';
   static ADDRESS_ICON = '/assets/icons/address-icon.svg';
   static PLUS_ICON = '/assets/icons/plus.svg';
+  static TRASH_ICON = '/assets/icons/trash-icon.svg';
 }
