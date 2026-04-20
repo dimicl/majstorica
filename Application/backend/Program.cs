@@ -86,7 +86,14 @@ builder.Services.AddScoped<IAuthServerSessionStore, RedisAuthServerSessionStore>
 
 // Redis OM 
 builder.Services.AddSingleton<RedisConnectionProvider>();
-builder.Services.AddScoped<IMessageRepository, RedisMessageRepository>();
+
+//builder.Services.AddScoped<IMessageRepository, RedisMessageRepository>();
+
+// Poruke se čuvaju u MongoDB (trajno). RedisMessageRepository ostaje registrovan
+// direktno za internu upotrebu (Redis OM indeks), ali IMessageRepository → Mongo.
+builder.Services.AddScoped<IMessageRepository, backend.Infrastructure.Persistence.MongoDb.MessageRepository>();
+builder.Services.AddScoped<RedisMessageRepository>();
+
 builder.Services.AddScoped<ISessionRepository, RedisSessionRepository>();
 
 

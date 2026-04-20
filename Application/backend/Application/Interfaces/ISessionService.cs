@@ -10,6 +10,8 @@ public interface ISessionService
         UserRole role,
         string connectionId);
 
+    Task<UserSession?> GetSessionByUserId(Guid userId);
+
     Task MarkUserInJob(Guid userId, Guid jobId);
 
     Task MarkUserInConversation(Guid userId, Guid conversationId);

@@ -16,6 +16,7 @@ public class UserService : IUserService
     private readonly IUserGraphSync _userGraphSync;
     private readonly IMasterRepository _masterRepository;
     private readonly ICompanyRepository _companyRepository;
+    private readonly IReviewRepository _reviewRepository;
     private readonly IRedisListCache _redisListCache;
     private readonly IGraphQueryRepository _graphQueryRepository;
     private readonly IAccountActivityStore _accountActivity;
@@ -25,6 +26,7 @@ public class UserService : IUserService
         IUserGraphSync userGraphSync,
         IMasterRepository masterRepository,
         ICompanyRepository companyRepository,
+        IReviewRepository reviewRepository,
         IRedisListCache redisListCache,
         IGraphQueryRepository graphQueryRepository,
         IAccountActivityStore accountActivity)
@@ -33,6 +35,7 @@ public class UserService : IUserService
         _userGraphSync = userGraphSync;
         _masterRepository = masterRepository;
         _companyRepository = companyRepository;
+        _reviewRepository = reviewRepository;
         _redisListCache = redisListCache;
         _graphQueryRepository = graphQueryRepository;
         _accountActivity = accountActivity;
@@ -215,10 +218,7 @@ public class UserService : IUserService
 
     private async Task<List<MasterListItemResponse>> GetMasterRowsFromDb()
     {
-        var users = await _userRepository.GetAll();
-        var masterUsers = users
-            .Where(u => u.Role == UserRole.Master && u.IsActive)
-            .ToList();
+        var masterUsers = await _userRepository.GetActiveMasters();
         if (masterUsers.Count == 0)
             return new List<MasterListItemResponse>();
 
@@ -371,11 +371,15 @@ public class UserService : IUserService
         var result = new List<MasterListItemResponse>();
         var masterByUserId = await _masterRepository.GetByUserIds(ids.ToList());
 
+        var users = await _userRepository.GetByIds(ids);
+        var userById = users.ToDictionary(u => u.Id);
+
         foreach (var id in ids)
         {
-            var user = await _userRepository.GetById(id);
-            if (user == null || !user.IsActive || user.Role != UserRole.Master)
+            
+            if (!userById.TryGetValue(id, out var user) || !user.IsActive || user.Role != UserRole.Master)
                 continue;
+
             var master = masterByUserId.GetValueOrDefault(id);
             var cats = master?.ServiceCategories;
             List<string>? catList = cats is { Count: > 0 }
@@ -419,11 +423,14 @@ public class UserService : IUserService
         var result = new List<MasterListItemResponse>();
         var masterByUserId = await _masterRepository.GetByUserIds(ids.ToList());
 
+        var users = await _userRepository.GetByIds(ids);
+        var userById = users.ToDictionary(u => u.Id);
+
         foreach (var id in ids)
-        {
-            var user = await _userRepository.GetById(id);
-            if (user == null || !user.IsActive || user.Role != UserRole.Master)
+        { 
+            if (!userById.TryGetValue(id, out var user) || !user.IsActive || user.Role != UserRole.Master)
                 continue;
+
             var master = masterByUserId.GetValueOrDefault(id);
             var cats = master?.ServiceCategories;
             List<string>? catList = cats is { Count: > 0 }
@@ -443,5 +450,107 @@ public class UserService : IUserService
         }
 
         return result;
+    }
+
+    public async Task<MasterProfileResponse?> GetMasterProfile(Guid userId)
+    {
+        var userDto = await GetProfile(userId);
+        if (userDto == null) return null;
+
+        Guid? employerCompanyId = null;
+        string? employerCompanyName = null;
+        if (userDto.Role == UserRole.CompanyWorker)
+        {
+            var domainUser = await _userRepository.GetById(userId);
+            var cid = domainUser?.EmployerCompanyId;
+            if (cid is { } id && id != Guid.Empty)
+            {
+                employerCompanyId = id;
+                var company = await _companyRepository.GetById(id);
+                employerCompanyName = company?.Name;
+            }
+        }
+
+        var master = await _masterRepository.GetByUserId(userId);
+        return new MasterProfileResponse
+        {
+            User = userDto,
+            Category = master?.ServiceCategories?.FirstOrDefault(),
+            Rating = master?.AverageRating?.Value,
+            EmployerCompanyId = employerCompanyId,
+            EmployerCompanyName = employerCompanyName,
+            YearsOfExperience = master?.YearsOfExperience ?? 0,
+            HourlyRateAmount = master?.HourlyRate?.Amount ?? 0,
+            HourlyRateCurrency = master?.HourlyRate?.Currency ?? "RSD",
+            TotalReviews = master?.TotalReviews ?? 0
+        };
+    }
+
+    public async Task<List<MasterReviewListItemResponse>> GetMasterReviews(Guid masterId)
+    {
+        var reviews = await _reviewRepository.GetByMasterId(masterId);
+        var reviewerIds = reviews.Select(r => r.ReviewerUserId).Distinct().ToList();
+        var reviewers = await _userRepository.GetByIds(reviewerIds);
+        var reviewerById = reviewers.ToDictionary(u => u.Id);
+
+        var result = new List<MasterReviewListItemResponse>(reviews.Count);
+        foreach (var r in reviews)
+        {
+            reviewerById.TryGetValue(r.ReviewerUserId, out var reviewer);
+            var name = reviewer != null
+                ? $"{reviewer.FirstName} {reviewer.LastName}".Trim()
+                : string.Empty;
+            if (string.IsNullOrWhiteSpace(name)) name = "Korisnik";
+
+            result.Add(new MasterReviewListItemResponse
+            {
+                Id = r.Id,
+                JobId = r.JobId,
+                Rating = r.Rating.Value,
+                Comment = r.Comment,
+                CreatedAtUtc = r.CreatedAtUtc,
+                ReviewerName = name,
+                ReviewerUsername = reviewer?.Username
+            });
+        }
+
+        return result;
+    }
+
+    public async Task UpdateMasterProfileStats(Guid userId, int? yearsOfExperience, decimal? hourlyRateAmount, string? hourlyRateCurrency)
+    {
+        var master = await _masterRepository.GetByUserId(userId);
+        if (master is null)
+            throw new NotFoundException("Profil majstora nije pronađen.");
+
+        if (yearsOfExperience.HasValue)
+            master.UpdateYearsOfExperience(yearsOfExperience.Value);
+
+        if (hourlyRateAmount.HasValue)
+        {
+            var cur = string.IsNullOrWhiteSpace(hourlyRateCurrency)
+                ? "RSD"
+                : hourlyRateCurrency.Trim().ToUpperInvariant();
+            master.SetHourlyRate(new Domain.ValueObjects.Money(hourlyRateAmount.Value, cur));
+        }
+
+        await _masterRepository.Save(userId, master);
+        await _userGraphSync.SyncMasterProfile(
+            userId,
+            master.ServiceCategories.FirstOrDefault(),
+            master.AverageRating?.Value,
+            master.YearsOfExperience);
+    }
+
+    public async Task UpdateMasterCategory(Guid userId, string? category)
+    {
+        var master = await _masterRepository.GetByUserId(userId);
+        if (master is null)
+            throw new NotFoundException("Profil majstora nije pronađen.");
+
+        var categoryDisplayName = string.IsNullOrWhiteSpace(category) ? "Ostalo" : category.Trim();
+        master.ReplaceServiceCategories(new[] { categoryDisplayName });
+        await _masterRepository.Save(userId, master);
+        await _userGraphSync.SyncMasterProfile(userId, categoryDisplayName, master.AverageRating?.Value, master.YearsOfExperience);
     }
 }

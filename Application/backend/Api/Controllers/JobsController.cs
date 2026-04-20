@@ -9,6 +9,7 @@ namespace backend.Api.Controllers;
 
 [ApiController]
 [Route("api/jobs")]
+[Authorize]
 public class JobsController : ControllerBase
 {
     private readonly IJobService _jobService;
@@ -46,6 +47,7 @@ public class JobsController : ControllerBase
         return Ok();
     }
 
+    [AllowAnonymous]
     [HttpGet("has-sent-request-to/{masterId:guid}")]
     public async Task<ActionResult<object>> HasSentRequestToMaster(Guid masterId)
     {
@@ -70,6 +72,7 @@ public class JobsController : ControllerBase
         return Ok(list);
     }
 
+    [AllowAnonymous]
     [HttpGet("marketplace")]
     public async Task<ActionResult<List<JobListItemResponse>>> GetMarketplaceJobs(
         [FromQuery] int page = 1,
@@ -93,14 +96,16 @@ public class JobsController : ControllerBase
     [HttpPost("{jobId:guid}/start")]
     public async Task<IActionResult> StartJob(Guid jobId)
     {
-        await _jobService.StartJob(jobId);
+        var userId = User.GetUserId();
+        await _jobService.StartJob(jobId, userId);
         return Ok();
     }
 
     [HttpPost("{jobId:guid}/complete")]
     public async Task<IActionResult> CompleteJob(Guid jobId)
     {
-        await _jobService.CompleteJob(jobId);
+        var userId = User.GetUserId();
+        await _jobService.CompleteJob(jobId, userId);
         return Ok();
     }
 

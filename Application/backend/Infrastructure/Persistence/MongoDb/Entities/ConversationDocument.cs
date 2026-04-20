@@ -16,4 +16,5 @@ public class ConversationDocument
     public ConversationType Type { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public Guid? CompanyId { get; set; }
+    public bool IsClosed { get; set; }
 }

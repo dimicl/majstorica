@@ -121,6 +121,26 @@ public class DocumentHub : Hub
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
+        // Uzmi sesiju pre nego što je obrišemo, da znamo koji posao je korisnik držao
+        try
+        {
+            var (userId, _) = GetUserIdAndRole();
+            var session = await _sessionService.GetSessionByUserId(userId);
+
+            if (session?.CurrentJobId is { } jobId && jobId != Guid.Empty)
+            {
+                var next = await _lockService.ReleaseWriteAccess(jobId, userId);
+                if (next != null)
+                {
+                    await Clients.Group(JobGroup(jobId))
+                        .SendAsync("WriteGranted", jobId, next);
+                }
+            }
+        }
+        catch
+        {
+            // Ne sme da blokira disconnect
+        }
         await _sessionService.HandleDisconnect(Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }
