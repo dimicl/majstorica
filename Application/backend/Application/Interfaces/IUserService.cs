@@ -34,4 +34,16 @@ public interface IUserService
         IReadOnlyList<string>? zoneIds = null,
         decimal? minRating = null,
         int limit = 20);
+
+    /// <summary>Vraća kompletan profil majstora (uključujući employer kompaniju za CompanyWorker).</summary>
+    Task<MasterProfileResponse?> GetMasterProfile(Guid userId);
+
+    /// <summary>Vraća listu recenzija za majstora zajedno sa imenima recenzenata.</summary>
+    Task<List<MasterReviewListItemResponse>> GetMasterReviews(Guid masterId);
+
+    /// <summary>Ažurira iskustvo i/ili satnicu majstora i sinhronizuje sa Neo4j grafom.</summary>
+    Task UpdateMasterProfileStats(Guid userId, int? yearsOfExperience, decimal? hourlyRateAmount, string? hourlyRateCurrency);
+
+    /// <summary>Zamenjuje kategoriju majstora i sinhronizuje sa Neo4j grafom.</summary>
+    Task UpdateMasterCategory(Guid userId, string? category);
 }

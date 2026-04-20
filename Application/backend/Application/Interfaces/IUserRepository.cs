@@ -10,7 +10,10 @@ public interface IUserRepository
 
     Task<List<User>> GetAll();
     Task<List<User>> GetByIds(IEnumerable<Guid> ids);
-
+    
+    /// <summary>Aktivni majstori filtrirani na nivou baze — ne učitava sve korisnike.</summary>
+    Task<List<User>> GetActiveMasters();
+    
     /// <summary>Slobodni majstori (Master, bez firme) za pretragu po imenu/korisničkom imenu.</summary>
     Task<List<User>> SearchMastersForCompanyInvite(string searchText, int limit, Guid excludeUserId);
 

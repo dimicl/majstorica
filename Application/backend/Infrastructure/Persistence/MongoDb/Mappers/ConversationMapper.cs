@@ -15,21 +15,25 @@ public static class ConversationMapper
             MasterId = conversation.MasterUserId,
             CompanyId = conversation.CompanyId,
             Type = conversation.Type,
-            CreatedAtUtc = conversation.CreatedAtUtc
+            CreatedAtUtc = conversation.CreatedAtUtc,
+            IsClosed = conversation.IsClosed
         };
     }
 
     public static Conversation ToDomain(ConversationDocument doc)
     {
-        return new Conversation(
+        var conversation = new Conversation(
             doc.Id,
             doc.ClientId,
             doc.Type,
             doc.CreatedAtUtc,
             doc.MasterId,
             doc.CompanyId,
-            doc.JobId
-            );
-        
+            doc.JobId);
+
+        if (doc.IsClosed)
+            conversation.Close();
+
+        return conversation;
     }
 }

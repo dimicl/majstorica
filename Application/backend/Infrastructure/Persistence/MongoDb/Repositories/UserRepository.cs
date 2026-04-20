@@ -45,6 +45,21 @@ public class UserRepository : IUserRepository
         return doc == null ? null : UserMapper.ToDomain(doc);
     }
 
+    public async Task<List<User>> GetActiveMasters()
+    {
+        var filter = Builders<UserDocument>.Filter.And(
+            Builders<UserDocument>.Filter.Eq(x => x.Role, UserRole.Master),
+            Builders<UserDocument>.Filter.Eq(x => x.IsActive, true));
+ 
+        var docs = await _collection
+            .Find(filter)
+            .SortBy(x => x.LastName)
+            .ThenBy(x => x.FirstName)
+            .ToListAsync();
+ 
+        return docs.Select(UserMapper.ToDomain).ToList();
+    }
+
     public async Task<List<User>> GetAll()
     {
         var docs = await _collection.Find(FilterDefinition<UserDocument>.Empty).ToListAsync();

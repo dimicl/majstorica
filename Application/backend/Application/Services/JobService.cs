@@ -104,6 +104,13 @@ public class JobService : IJobService
     {
         var job = await GetJob(jobId);
 
+        if (job.IsDraft())
+        {
+            job.Publish(DateTime.UtcNow);
+            await _jobRepository.Save(job);
+            await PublishEvents(job);
+        }
+
         var client = await _userRepository.GetById(job.ClientUserId);
         var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
 
@@ -259,11 +266,11 @@ public class JobService : IJobService
 
         foreach (var conv in conversations)
         {
-            if (conv.MasterUserId != masterId || !conv.IsClosed || !conv.JobId.HasValue)
+            if (conv.MasterUserId != masterId || conv.IsClosed || !conv.JobId.HasValue)
                 continue;
 
             var job = await _jobRepository.GetById(conv.JobId!.Value);
-            if (job == null || job.Status != JobStatus.InProgress)
+            if (job == null || job.Status != JobStatus.Published)
                 continue;
 
             var client = await _userRepository.GetById(conv.ClientUserId);
@@ -273,7 +280,7 @@ public class JobService : IJobService
                 job,
                 forcedConversationId: conv.Id,
                 forcedClientName: clientName,
-                forcedStatus: JobStatus.InProgress.ToString()));
+                forcedStatus: JobStatus.Published.ToString()));
         }
 
         return result;
@@ -360,18 +367,24 @@ public class JobService : IJobService
     }
 
 
-    public async Task StartJob(Guid jobId)
+    public async Task StartJob(Guid jobId, Guid requestingUserId)
     {
         var job = await GetJob(jobId);
+
+        if (job.AssignedMasterId != requestingUserId)
+            throw new ForbiddenException("Samo assignovani majstor može da startuje posao.");
 
         job.Start(DateTime.UtcNow);
 
         await SaveAndPublish(job);
     }
 
-    public async Task CompleteJob(Guid jobId)
+    public async Task CompleteJob(Guid jobId, Guid requestingUserId)
     {
         var job = await GetJob(jobId);
+
+        if (job.AssignedMasterId != requestingUserId)
+            throw new ForbiddenException("Samo assignovani majstor može da završi posao.");
 
         job.Complete(DateTime.UtcNow);
 
@@ -388,12 +401,7 @@ public class JobService : IJobService
 
         var job = await GetJob(jobId);
 
-        job.UpdateBasicInfo(
-            job.Title,
-            description,
-            job.ServiceCategory,
-            job.ServiceAddress,
-            job.Budget);
+        job.UpdateDescription(description);
 
         await SaveAndPublish(job);
     }
@@ -408,7 +416,7 @@ public class JobService : IJobService
             ? new Money(price.Value, job.Budget?.Currency ?? "RSD")
             : null;
 
-        job.SetBudget(budget);
+        job.UpdateBudget(budget);
 
         await SaveAndPublish(job);
     }

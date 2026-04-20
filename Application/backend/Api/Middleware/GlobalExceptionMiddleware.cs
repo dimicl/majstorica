@@ -36,6 +36,7 @@ public class GlobalExceptionMiddleware
             InvalidCredentialsException => (HttpStatusCode.Unauthorized, exception.Message),
             UserAlreadyExistsException => (HttpStatusCode.Conflict, exception.Message),
             UnauthorizedException => (HttpStatusCode.Unauthorized, exception.Message),
+            UnauthorizedAccessException => (HttpStatusCode.Forbidden, "Nemate pristup ovom resursu."),
             NotFoundException => (HttpStatusCode.NotFound, exception.Message),
             ForbiddenException => (HttpStatusCode.Forbidden, exception.Message),
             ConflictException => (HttpStatusCode.Conflict, exception.Message),

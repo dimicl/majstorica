@@ -23,8 +23,8 @@ public interface IJobService
 
     Task AcceptJob(Guid jobId, Guid masterId);
 
-    Task StartJob(Guid jobId);
-    Task CompleteJob(Guid jobId);
+    Task StartJob(Guid jobId, Guid requestingUserId);
+    Task CompleteJob(Guid jobId, Guid requestingUserId);
 
     Task ChangeDescription(Guid jobId, Guid userId, string description);
     Task ChangePrice(Guid jobId, Guid userId, decimal? price);
