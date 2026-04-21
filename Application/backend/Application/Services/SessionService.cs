@@ -63,6 +63,11 @@ public class SessionService : ISessionService
         return session != null;
     }
 
+    public Task<UserSession?> GetSessionByUserId(Guid userId)
+    {
+        return _repository.GetByUserId(userId);
+    }
+
     public async Task<DateTime?> GetLastSeenAsync(Guid userId)
     {
         var session = await _repository.GetByUserId(userId);

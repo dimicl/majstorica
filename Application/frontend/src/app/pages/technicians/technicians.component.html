@@ -38,7 +38,7 @@
             *ngFor="let technician of recommendedMasters"
             type="button"
             class="technician-card card-hover"
-            (click)="openDetail(technician.id)"
+            (click)="openCard(technician)"
           >
             <header>
               <app-avatar
@@ -48,7 +48,7 @@
                 [height]="56"
               />
               <div>
-                <h3>{{ fullName(technician) }}</h3>
+                <h3>{{ displayName(technician) }}</h3>
                 <p class="technician-card__location">
                   {{ atUsername(technician) }}
                 </p>
@@ -77,11 +77,30 @@
         <label class="technicians-search">
           <input
             type="search"
-            placeholder="Pretraži po imenu ili korisničkom imenu"
+            placeholder="Pretraži po imenu, korisničkom imenu ili nazivu firme"
             [ngModel]="listParams.search"
             (ngModelChange)="onSearchInput($event)"
           />
         </label>
+        <div
+          class="technicians-search__filter-row"
+          role="group"
+          aria-label="Tip"
+        >
+          <span class="technicians-search__filter-label">Prikaži:</span>
+          <div class="technicians-search__filters">
+            @for (opt of entityFilterOptions; track opt.value) {
+            <button
+              type="button"
+              class="technicians-search__chip"
+              [class.is-active]="listParams.entityType === opt.value"
+              (click)="setEntityType(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
+            }
+          </div>
+        </div>
         <div
           class="technicians-search__filters"
           role="group"
@@ -148,40 +167,103 @@
           *ngFor="let technician of filteredTechnicians"
           type="button"
           class="technician-card card-hover"
-          (click)="openDetail(technician.id)"
+          [class.technician-card--company]="technician.kind === 'company'"
+          (click)="openCard(technician)"
         >
           <header>
+            @if (technician.kind === 'company') {
+            <div class="company-card__icon" aria-hidden="true">
+              <svg-icon
+                [src]="sharedSvgRoutes.COMPANY_ICON"
+                class="d-flex align-items-center svg-size-30"
+              />
+            </div>
+            } @else {
             <app-avatar
               [firstName]="technician.firstName"
               [lastName]="technician.lastName"
               [width]="56"
               [height]="56"
             />
+            }
             <div>
-              <h3>{{ fullName(technician) }}</h3>
-
+              <span
+                class="technician-card__tag"
+                *ngIf="technician.kind === 'company'"
+                >Firma</span
+              >
+              <h3>{{ displayName(technician) }}</h3>
+              @if (technician.kind === 'company') {
+              <p
+                class="technician-card__location"
+                *ngIf="companySubtitle(technician)"
+              >
+                {{ companySubtitle(technician) }}
+              </p>
+              <p
+                class="technician-card__categories"
+                *ngIf="technician.category"
+              >
+                {{ technician.category }}
+              </p>
+              <p
+                class="technician-card__company-desc"
+                *ngIf="companyDescriptionPreview(technician)"
+              >
+                {{ companyDescriptionPreview(technician) }}
+              </p>
+              } @else {
               <p class="technician-card__categories">
-                {{ technician.category || "No category" }}
+                {{ technician.category || "Bez kategorije" }}
               </p>
               @if (technician.rating != null) {
               <p class="technician-card__rating">
                 ★ {{ technician.rating | number : "1.1-1" }}
               </p>
-              }
+              } }
             </div>
           </header>
           <app-button
             [buttonType]="eButtonType.NEUTRAL"
-            [label]="'Pogledaj profil'"
+            [label]="
+              technician.kind === 'company'
+                ? 'Detalji firme'
+                : 'Pogledaj profil'
+            "
             [hasIcon]="false"
-            (onButtonClick)="openDetail(technician.id)"
+            (onButtonClick)="openCard(technician)"
           />
         </div>
         <p class="empty-state" *ngIf="!filteredTechnicians.length">
-          Nema majstora za odabranu pretragu.
+          Nema rezultata za odabranu pretragu.
         </p>
       </div>
-      }
+      @if (totalPages > 1) {
+      <nav class="technicians-pagination" aria-label="Stranice">
+        <button
+          type="button"
+          class="technicians-pagination__btn"
+          [disabled]="listParams.page <= 1"
+          (click)="goPrevPage()"
+        >
+          ← Prethodna
+        </button>
+        <span class="technicians-pagination__info">
+          Strana {{ listParams.page }} od {{ totalPages }}
+          <span class="technicians-pagination__total"
+            >({{ totalCount }} ukupno)</span
+          >
+        </span>
+        <button
+          type="button"
+          class="technicians-pagination__btn"
+          [disabled]="listParams.page >= totalPages"
+          (click)="goNextPage()"
+        >
+          Sledeća →
+        </button>
+      </nav>
+      } }
     </div>
     } @else{
 
@@ -200,16 +282,32 @@
           <button
             *ngFor="let technician of filteredTechnicians"
             type="button"
-            class="technician-card"
-            (click)="openDetail(technician.id)"
+            class="technician-card technician-card--map-row"
+            (click)="openCard(technician)"
           >
+            @if (technician.kind === 'company') {
+            <svg-icon
+              [src]="sharedSvgRoutes.COMPANY_ICON"
+              class="d-flex align-items-center svg-size-30"
+            />
+            } @else {
             <app-avatar
               [firstName]="technician.firstName"
               [lastName]="technician.lastName"
             />
+            }
             <div>
-              <h3>{{ fullName(technician) }}</h3>
-              <p>{{ atUsername(technician) }}</p>
+              <h3>{{ displayName(technician) }}</h3>
+              <p *ngIf="technician.kind !== 'company'">
+                {{ atUsername(technician) }}
+              </p>
+              <p
+                *ngIf="
+                  technician.kind === 'company' && companySubtitle(technician)
+                "
+              >
+                {{ companySubtitle(technician) }}
+              </p>
             </div>
           </button>
         </div>
@@ -222,6 +320,12 @@
   <app-technician-detail-modal
     [masterId]="selectedMasterIdForDetail"
     (closed)="closeDetail()"
+    (openCreateJob)="onOpenCreateJob($event)"
+  />
+  } @if (selectedCompanyIdForDetail) {
+  <app-company-detail-modal
+    [companyId]="selectedCompanyIdForDetail"
+    (closed)="closeCompanyDetail()"
     (openCreateJob)="onOpenCreateJob($event)"
   />
   } @if (showCreateJobModal && createJobMaster) {

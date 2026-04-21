@@ -349,6 +349,26 @@ public class Job
         Touch();
     }
 
+    /// <summary>Menja opis posla koji je već objavljen (Published). Klijent može da precizira zahtev i nakon objave.</summary>
+    public void UpdateDescription(string description)
+    {
+        if (Status != JobStatus.Draft && Status != JobStatus.Published)
+            throw new DomainException("Opis se može menjati samo dok je posao u statusu Draft ili Published.");
+
+        SetDescription(description);
+        Touch();
+    }
+
+    /// <summary>Menja budžet posla koji je već objavljen (Published). Klijent može da koriguje cenu i nakon objave.</summary>
+    public void UpdateBudget(Money? budget)
+    {
+        if (Status != JobStatus.Draft && Status != JobStatus.Published)
+            throw new DomainException("Cena se može menjati samo dok je posao u statusu Draft ili Published.");
+
+        Budget = budget;
+        Touch();
+    }
+
     public void SetPreferredDate(DateTime? preferredDateUtc)
     {
         PreferredDateUtc = preferredDateUtc;

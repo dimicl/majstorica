@@ -17,4 +17,6 @@ export interface User {
   } | null;
   /** Majstor: sinhrono sa GET masters/profile (kategorija usluge). */
   category?: string | null;
+  /** CompanyWorker: naziv firme iz GET masters/profile. */
+  employerCompanyName?: string | null;
 }

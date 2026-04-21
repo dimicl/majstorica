@@ -8,7 +8,49 @@
   <div class="requests-error" role="alert">
     {{ requestError() }}
   </div>
+  } @if (companyInviteError()) {
+  <div class="requests-error" role="alert">
+    {{ companyInviteError() }}
+  </div>
   }
+
+  <div class="company-invites-card">
+    <h2 class="company-invites-title">Pozivi u firmu</h2>
+    @if (loadingCompanyInvites()) {
+    <p class="requests-loading">Učitavanje poziva…</p>
+    } @else if (companyInvitations().length === 0) {
+    <p class="company-invites-empty">Nema aktivnih poziva u firmu.</p>
+    } @else {
+    <ul class="company-invites-list">
+      @for (inv of companyInvitations(); track inv.invitationId) {
+      <li class="company-invite-item">
+        <div class="company-invite-main">
+          <span class="company-invite-firm">{{ inv.companyName }}</span>
+          <span class="company-invite-date">{{
+            inv.createdAtUtc | date : "dd.MM.yyyy. HH:mm"
+          }}</span>
+        </div>
+        <div class="company-invite-actions">
+          <app-button
+            [buttonType]="eButtonType.POSITIVE"
+            [label]="'Prihvati'"
+            [disabled]="
+              actingCompanyInviteId() !== null || actingRequestId() !== null
+            "
+            (onButtonClick)="acceptCompanyInvite(inv)"
+          />
+          <app-button
+            [buttonType]="eButtonType.NEUTRAL"
+            [label]="'Odbij'"
+            [disabled]="actingCompanyInviteId() !== null"
+            (onButtonClick)="declineCompanyInvite(inv)"
+          />
+        </div>
+      </li>
+      }
+    </ul>
+    }
+  </div>
 
   <div class="requests-layout">
     <main class="requests-main">
@@ -161,9 +203,12 @@
         <div class="chart-bars">
           @for (bar of chartData(); track bar.dayKey) {
           <div class="chart-bar-wrap">
-            <span class="chart-value" [style.--value]="bar.value" [class.chart-value--zero]="bar.value === 0">{{
-              bar.value
-            }}</span>
+            <span
+              class="chart-value"
+              [style.--value]="bar.value"
+              [class.chart-value--zero]="bar.value === 0"
+              >{{ bar.value }}</span
+            >
             <div class="chart-bar-outer">
               <div
                 class="chart-bar"

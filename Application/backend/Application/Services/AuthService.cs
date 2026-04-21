@@ -12,15 +12,34 @@ public class AuthService : IAuthService
     private readonly IUserRepository _users;
     private readonly IUserGraphSync _userGraphSync;
     private readonly IConfiguration _config;
+    private readonly IAccountActivityStore _activity;
+    private readonly IAuthServerSessionStore _authServerSession;
 
     public AuthService(
         IUserRepository users,
         IUserGraphSync userGraphSync,
-        IConfiguration config)
+        IConfiguration config,
+        IAccountActivityStore activity,
+        IAuthServerSessionStore authServerSession)
     {
         _users = users;
         _userGraphSync = userGraphSync;
         _config = config;
+        _activity = activity;
+        _authServerSession = authServerSession;
+    }
+
+    private async Task TouchAuthSidecarAsync(Guid userId, string activityType)
+    {
+        try
+        {
+            await _authServerSession.TouchServerSessionAsync(userId);
+            await _activity.RecordAsync(userId, activityType);
+        }
+        catch
+        {
+            // Redis nedostupan — autentikacija i dalje prolazi
+        }
     }
 
     public async Task<AuthResponse> Register(RegisterRequest request)
@@ -51,7 +70,9 @@ public class AuthService : IAuthService
             request.Phone,
             address);
 
-        return AuthHelper.BuildAuthResponse(user, _config);
+        var response = AuthHelper.BuildAuthResponse(user, _config);
+        await TouchAuthSidecarAsync(user.Id, "register");
+        return response;
     }
 
     public async Task<AuthResponse> Login(LoginRequest request)
@@ -70,6 +91,17 @@ public class AuthService : IAuthService
             await _users.Save(user);
         }
 
-        return AuthHelper.BuildAuthResponse(user, _config);
+        var response = AuthHelper.BuildAuthResponse(user, _config);
+        await TouchAuthSidecarAsync(user.Id, "login");
+        return response;
+    }
+
+    public async Task<AuthResponse> RefreshTokenAsync(Guid userId)
+    {
+        var user = await _users.GetById(userId)
+            ?? throw new NotFoundException("Korisnik nije pronađen.");
+        var response = AuthHelper.BuildAuthResponse(user, _config);
+        await TouchAuthSidecarAsync(user.Id, "token_refresh");
+        return response;
     }
 }

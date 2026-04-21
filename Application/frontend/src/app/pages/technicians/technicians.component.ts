@@ -8,22 +8,26 @@ import { firstValueFrom } from 'rxjs';
 import { MasterService } from '../../shared/services/master.service';
 import {
   MasterListItem,
+  type MastersEntityFilter,
   type MastersListParams,
   type MastersListSort,
   DEFAULT_MASTERS_LIST_PARAMS,
   MASTERS_LIST_SORT_OPTIONS,
   MASTERS_LIST_CATEGORY_OPTIONS,
   MASTERS_LIST_RATING_OPTIONS,
+  MASTERS_ENTITY_FILTER_OPTIONS,
 } from '../../shared/interfaces';
-import { mastersListParamsToCacheKey } from '../../shared/helpers/masters-cache-key.helper';
 import { BUTTON_TYPES, TechnicianTab } from '../../shared/types';
 import { TechnicianDetailModalComponent } from './technician-detail-modal/technician-detail-modal.component';
+import { CompanyDetailModalComponent } from './company-detail-modal/company-detail-modal.component';
 import {
   CreateJobModalComponent,
   type CreateJobMaster,
 } from '../../components/create-job-modal/create-job-modal.component';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { ButtonComponent } from '../../components/button/button.component';
+import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
+import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'app-technicians',
@@ -32,9 +36,11 @@ import { ButtonComponent } from '../../components/button/button.component';
     FormsModule,
     MapComponent,
     TechnicianDetailModalComponent,
+    CompanyDetailModalComponent,
     CreateJobModalComponent,
     AvatarComponent,
     ButtonComponent,
+    SvgIconComponent,
   ],
   templateUrl: './technicians.component.html',
   styleUrl: './technicians.component.scss',
@@ -42,13 +48,15 @@ import { ButtonComponent } from '../../components/button/button.component';
 export class TechniciansComponent implements OnInit {
   private masterService = inject(MasterService);
 
-  private searchTimeoutId: any = null;
+  private searchTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   selectedMasterIdForDetail: string | null = null;
+  selectedCompanyIdForDetail: string | null = null;
   showCreateJobModal = false;
   createJobMaster: CreateJobMaster | null = null;
 
   public eButtonType = BUTTON_TYPES;
+  public sharedSvgRoutes = SharedSvgRoutes;
 
   public tabs: Record<'LIST' | 'MAP', TechnicianTab> = {
     LIST: 'list',
@@ -57,16 +65,18 @@ export class TechniciansComponent implements OnInit {
   private readonly defaultCenter: Coordinates = { lat: 45.2671, lng: 19.8335 };
 
   public activeTab: TechnicianTab = this.tabs.LIST;
-  /** Parametri pretrage i filtera – ista struktura za UI i za cache key (keš 5 min). */
   public listParams: MastersListParams = { ...DEFAULT_MASTERS_LIST_PARAMS };
   public readonly sortOptions = MASTERS_LIST_SORT_OPTIONS;
   public readonly categoryOptions = MASTERS_LIST_CATEGORY_OPTIONS;
   public readonly ratingOptions = MASTERS_LIST_RATING_OPTIONS;
+  public readonly entityFilterOptions = MASTERS_ENTITY_FILTER_OPTIONS;
+
   public technicians: MasterListItem[] = [];
+  public totalCount = 0;
+  public totalPages = 0;
   public isLoading = true;
   public loadError: string | null = null;
 
-  /** Preporučeni majstori (Neo4j) – za klijente koji su već angažovali majstore. */
   public recommendedMasters: MasterListItem[] = [];
   public recommendedLoading = false;
 
@@ -76,11 +86,10 @@ export class TechniciansComponent implements OnInit {
       sort: this.listParams.sort,
       category: this.listParams.category.trim(),
       minRating: this.listParams.minRating,
+      entityType: this.listParams.entityType,
+      page: this.listParams.page,
+      pageSize: this.listParams.pageSize,
     };
-  }
-
-  public get mastersListCacheKey(): string {
-    return mastersListParamsToCacheKey(this.mastersListParams);
   }
 
   public get filteredTechnicians(): MasterListItem[] {
@@ -96,17 +105,22 @@ export class TechniciansComponent implements OnInit {
     this.isLoading = true;
     this.loadError = null;
     try {
-      const raw = await firstValueFrom(
+      const page = await firstValueFrom(
         this.masterService.getMasters(this.mastersListParams)
       );
-      this.technicians = raw.map((t) => ({
+      this.technicians = page.items.map((t) => ({
         ...t,
+        kind: t.kind === 'company' ? 'company' : 'master',
         category: t.category ?? null,
         rating: t.rating ?? null,
       }));
+      this.totalCount = page.totalCount;
+      this.totalPages = page.totalPages;
     } catch {
       this.loadError = 'Nije moguće učitati listu majstora.';
       this.technicians = [];
+      this.totalCount = 0;
+      this.totalPages = 0;
     } finally {
       this.isLoading = false;
     }
@@ -120,6 +134,7 @@ export class TechniciansComponent implements OnInit {
       );
       this.recommendedMasters = raw.map((t) => ({
         ...t,
+        kind: 'master' as const,
         category: t.category ?? null,
         rating: t.rating ?? null,
       }));
@@ -135,28 +150,50 @@ export class TechniciansComponent implements OnInit {
   }
 
   public async onSearchInput(value: string): Promise<void> {
-    this.listParams = { ...this.listParams, search: value };
+    this.listParams = { ...this.listParams, search: value, page: 1 };
     if (this.searchTimeoutId) {
       clearTimeout(this.searchTimeoutId);
     }
     this.searchTimeoutId = setTimeout(() => {
-      // Ignorišemo Promise; greške se hvataju unutar loadMasters.
-      this.loadMasters();
+      void this.loadMasters();
     }, 300);
   }
 
   public async setSort(sort: MastersListSort): Promise<void> {
-    this.listParams = { ...this.listParams, sort };
+    this.listParams = { ...this.listParams, sort, page: 1 };
     await this.loadMasters();
   }
 
   public async setCategory(category: string): Promise<void> {
-    this.listParams = { ...this.listParams, category };
+    this.listParams = { ...this.listParams, category, page: 1 };
     await this.loadMasters();
   }
 
   public async setMinRating(rating: number | null): Promise<void> {
-    this.listParams = { ...this.listParams, minRating: rating };
+    this.listParams = { ...this.listParams, minRating: rating, page: 1 };
+    await this.loadMasters();
+  }
+
+  public async setEntityType(entityType: MastersEntityFilter): Promise<void> {
+    this.listParams = { ...this.listParams, entityType, page: 1 };
+    await this.loadMasters();
+  }
+
+  public async goPrevPage(): Promise<void> {
+    if (this.listParams.page <= 1) return;
+    this.listParams = {
+      ...this.listParams,
+      page: this.listParams.page - 1,
+    };
+    await this.loadMasters();
+  }
+
+  public async goNextPage(): Promise<void> {
+    if (this.listParams.page >= this.totalPages) return;
+    this.listParams = {
+      ...this.listParams,
+      page: this.listParams.page + 1,
+    };
     await this.loadMasters();
   }
 
@@ -165,12 +202,10 @@ export class TechniciansComponent implements OnInit {
   }
 
   public get mapMarkers(): MapMarkerData[] {
-    return this.filteredTechnicians.map((_, i) => ({
+    return this.filteredTechnicians.map((t) => ({
       position: this.defaultCenter,
-      title: this.filteredTechnicians[i]
-        ? `${this.filteredTechnicians[i].firstName} ${this.filteredTechnicians[i].lastName}`
-        : '',
-      color: '#f04f4c',
+      title: this.displayName(t),
+      color: t.kind === 'company' ? '#3e7dd7' : '#f04f4c',
     }));
   }
 
@@ -178,20 +213,46 @@ export class TechniciansComponent implements OnInit {
     return this.defaultCenter;
   }
 
-  fullName(t: MasterListItem): string {
+  displayName(t: MasterListItem): string {
+    if (t.kind === 'company') {
+      return (t.companyName ?? '').trim() || 'Firma';
+    }
     return `${t.firstName} ${t.lastName}`.trim() || t.username;
+  }
+
+  companySubtitle(t: MasterListItem): string {
+    const parts: string[] = [];
+    if (t.city?.trim()) parts.push(t.city.trim());
+    if (t.email?.trim()) parts.push(t.email.trim());
+    return parts.join(' · ');
+  }
+
+  companyDescriptionPreview(t: MasterListItem): string | null {
+    const d = t.description?.trim();
+    if (!d) return null;
+    return d.length > 120 ? d.slice(0, 117) + '…' : d;
   }
 
   atUsername(t: MasterListItem): string {
     return '@' + t.username;
   }
 
-  openDetail(masterId: string): void {
-    this.selectedMasterIdForDetail = masterId;
+  openCard(item: MasterListItem): void {
+    if (item.kind === 'company') {
+      this.selectedMasterIdForDetail = null;
+      this.selectedCompanyIdForDetail = item.id;
+      return;
+    }
+    this.selectedCompanyIdForDetail = null;
+    this.selectedMasterIdForDetail = item.id;
   }
 
   closeDetail(): void {
     this.selectedMasterIdForDetail = null;
+  }
+
+  closeCompanyDetail(): void {
+    this.selectedCompanyIdForDetail = null;
   }
 
   onOpenCreateJob(event: { master: CreateJobMaster }): void {

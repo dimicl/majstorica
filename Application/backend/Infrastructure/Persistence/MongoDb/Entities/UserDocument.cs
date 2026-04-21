@@ -31,4 +31,8 @@ public class UserDocument
 
     [BsonIgnoreIfNull]
     public ClientDocument? ClientProfile { get; set; }
+
+    [BsonIgnoreIfNull]
+    [BsonRepresentation(BsonType.String)]
+    public Guid? EmployerCompanyId { get; set; }
 }

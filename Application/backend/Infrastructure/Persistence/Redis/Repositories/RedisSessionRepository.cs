@@ -33,8 +33,21 @@ public class RedisSessionRepository : ISessionRepository
     public async Task Upsert(UserSession session)
     {
         var doc = UserSessionMapper.ToEntity(session);
-        await _sessions.InsertAsync(doc);
-        await _db.KeyExpireAsync(KeyPrefix + doc.Id, _sessionTtl);
+        var existing = _sessions.FirstOrDefault(s => s.UserId == session.UserId);
+        if (existing != null)
+        {
+            existing.ConnectionId = doc.ConnectionId;
+            existing.LastSeen = doc.LastSeen;
+            existing.CurrentJobId = doc.CurrentJobId;
+            existing.CurrentConversationId = doc.CurrentConversationId;
+            await _sessions.UpdateAsync(existing);
+            await _db.KeyExpireAsync(KeyPrefix + existing.Id, _sessionTtl);
+        }
+        else
+        {
+            await _sessions.InsertAsync(doc);
+            await _db.KeyExpireAsync(KeyPrefix + doc.Id, _sessionTtl);
+        }
     }
 
     public Task<UserSession?> GetByUserId(Guid userId)

@@ -1,11 +1,64 @@
 @use "../../../assets/scss/variables" as *;
+@use "../../../assets/scss/scrollbar" as *;
 
+// Zajednička max visina za liste/tabele (ne raste beskonačno; ~1/3 viewporta, max 360px)
 .profil-page {
+  --profil-scroll-max: min(32vh, 360px);
   min-height: 100vh;
   background: #f6f8fc;
   display: flex;
   flex-direction: column;
   padding: 26px 32px 48px;
+}
+
+.profil-scroll-area {
+  max-height: var(--profil-scroll-max);
+  overflow: auto;
+  @include custom-scrollbar;
+}
+
+.profil-table-scroll {
+  max-height: var(--profil-scroll-max);
+  overflow: auto;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid p(0.08);
+  @include custom-scrollbar;
+
+  .profil-requests-table {
+    margin-bottom: 0;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: $color-white;
+    box-shadow: 0 1px 0 p(0.12);
+  }
+}
+
+.profil-workers-table-wrap.profil-scroll-area {
+  border-radius: 8px;
+  border: 1px solid p(0.08);
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: $color-white;
+    box-shadow: 0 1px 0 p(0.12);
+  }
+}
+
+.profil-master-reviews-scroll {
+  border-radius: 8px;
+  border: 1px solid p(0.06);
+  padding: 4px 6px 4px 2px;
+}
+
+.profil-master-suggest.profil-scroll-area {
+  padding-right: 4px;
 }
 
 .profil-toast {
@@ -26,7 +79,238 @@
 .profil-shell {
   width: 100%;
   display: flex;
+  flex-direction: column;
   gap: 24px;
+}
+
+.profil-shell-main {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+}
+
+.profil-shell-main > .profil-card:first-child {
+  flex: 0 1 420px;
+  max-width: 100%;
+}
+
+.profil-shell-main > .profil-jobs,
+.profil-shell-main > .profil-card--master-work {
+  flex: 1 1 480px;
+  min-width: 0;
+}
+
+.profil-shell-main > .profil-company-owner-main {
+  flex: 0 1 420px;
+  max-width: 100%;
+}
+
+.profil-master-work-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+}
+
+.profil-master-work-primary {
+  width: 100%;
+  min-width: 0;
+}
+
+.profil-master-reviews-panel {
+  width: 100%;
+  padding-top: 24px;
+  border-top: 1px solid p(0.08);
+}
+
+// —— Iskustvo / satnica / ocena (majstor) ——
+.profil-master-stats {
+  padding-top: 18px;
+  border-top: 1px solid p(0.08);
+}
+
+.profil-master-stats-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.profil-stat-col {
+  min-width: 0;
+}
+
+.profil-stat-heading {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: p(0.45);
+  margin-bottom: 8px;
+}
+
+.profil-stat-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+.profil-stat-slot {
+  grid-row: 1;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 0px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity 0.22s ease, transform 0.22s ease, border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.profil-stat-slot:hover:not(.profil-stat-slot--concealed) {
+  background: p(0.03);
+  border-color: p(0.1);
+}
+
+.profil-stat-slot--concealed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.profil-stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: p(0.88);
+}
+
+.profil-stat-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  width: auto;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: $color-blue;
+  background: rgba(62, 125, 215, 0.1);
+  border: 1px solid rgba(62, 125, 215, 0.35);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.profil-stat-slot:hover:not(.profil-stat-slot--concealed) .profil-stat-add {
+  background: rgba(62, 125, 215, 0.16);
+  transform: translateY(-1px);
+}
+
+.profil-stat-form-panel {
+  grid-row: 1;
+  grid-column: 1;
+  align-self: start;
+  width: 100%;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  transition: max-height 0.32s ease, opacity 0.26s ease, visibility 0.26s ease;
+}
+
+.profil-stat-form-panel--open {
+  max-height: 140px;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.profil-stat-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.profil-stat-input {
+  flex: 1 1 100px;
+  min-width: 72px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid p(0.2);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: p(0.85);
+}
+
+.profil-stat-currency {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: p(0.55);
+}
+
+.profil-stat-save {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: #fff;
+  background: $color-blue;
+  transition: background 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: $color-blue-dark;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.profil-stats-error {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.profil-stat-col--rating .profil-stat-rating-body {
+  min-height: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.profil-stat-sub {
+  font-size: 0.85rem;
+  color: p(0.55);
+}
+
+.profil-stat-muted {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: p(0.5);
+  font-style: italic;
 }
 
 .profil-header {
@@ -37,16 +321,20 @@
   margin: 0;
   font-size: clamp(1.75rem, 3vw, 2.4rem);
   font-weight: 900;
-  color: rgba(17, 24, 39, 0.95);
+  color: p(0.95);
 }
 
 // —— Kartice (isti jezik kao chat/technicians) ——
 .profil-card {
   background: $color-white;
   border-radius: 6px;
-  border: 1px solid rgba(17, 24, 39, 0.08);
+  border: 1px solid p(0.08);
   padding: 28px 32px;
   flex: 1;
+}
+
+.profile-value {
+  line-height: 18px;
 }
 
 .profil-jobs {
@@ -75,7 +363,7 @@
 .profil-name {
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 900;
-  color: rgba(17, 24, 39, 0.95);
+  color: p(0.95);
   line-height: 1.2;
 }
 
@@ -90,18 +378,18 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(17, 24, 39, 0.45);
+  color: p(0.45);
   margin-bottom: 4px;
 }
 
 .profil-category-placeholder {
-  color: rgba(17, 24, 39, 0.5);
+  color: p(0.5);
   font-style: italic;
 }
 
 .profil-category-value {
   font-weight: 600;
-  color: rgba(17, 24, 39, 0.85);
+  color: p(0.85);
 }
 
 .profil-category-choices {
@@ -112,11 +400,11 @@
   min-width: 200px;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(17, 24, 39, 0.2);
+  border: 1px solid p(0.2);
   background: #fff;
   font-size: 0.9rem;
   font-weight: 500;
-  color: rgba(17, 24, 39, 0.85);
+  color: p(0.85);
   cursor: pointer;
 
   &:disabled {
@@ -128,18 +416,18 @@
 .profil-category-chip {
   padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid rgba(17, 24, 39, 0.2);
+  border: 1px solid p(0.2);
   background: #fff;
   font-size: 0.9rem;
   font-weight: 600;
-  color: rgba(17, 24, 39, 0.75);
+  color: p(0.75);
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .profil-category-chip:hover:not(:disabled) {
-  background: rgba(17, 24, 39, 0.04);
-  border-color: rgba(17, 24, 39, 0.35);
+  background: p(0.04);
+  border-color: p(0.35);
 }
 
 .profil-category-chip--active {
@@ -163,7 +451,7 @@
   margin: 0 0 16px;
   font-size: 1rem;
   font-weight: 600;
-  color: rgba(17, 24, 39, 0.65);
+  color: p(0.65);
 }
 
 .profil-badge {
@@ -202,7 +490,7 @@
 .profil-section-title {
   font-size: 1.35rem;
   font-weight: 900;
-  color: rgba(17, 24, 39, 0.9);
+  color: p(0.9);
   line-height: 18px;
 }
 
@@ -232,16 +520,16 @@
 }
 
 .profil-subsection-title {
-  margin: 0 0 14px;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: rgba(17, 24, 39, 0.85);
+  margin-left: 12px;
+  font-size: 18px;
+  font-weight: 900;
+  color: #1d1d1d;
 }
 
 .profil-empty-text {
   margin: 0 0 16px;
   font-weight: 600;
-  color: rgba(17, 24, 39, 0.65);
+  color: p(0.65);
 }
 
 .profil-cta {
@@ -275,14 +563,14 @@
 .profil-loading {
   margin: 0;
   font-weight: 600;
-  color: rgba(17, 24, 39, 0.6);
+  color: p(0.6);
 }
 
 .profil-empty-inline {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: rgba(17, 24, 39, 0.55);
+  color: p(0.55);
 }
 
 .profil-requests-table {
@@ -293,7 +581,7 @@
 }
 
 .profil-requests-table thead {
-  border-bottom: 2px solid rgba(17, 24, 39, 0.1);
+  border-bottom: 2px solid p(0.1);
 }
 
 .profil-requests-table th {
@@ -303,24 +591,24 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(17, 24, 39, 0.6);
+  color: p(0.6);
 }
 
 .profil-request-row:hover {
-  background: rgba(17, 24, 39, 0.02);
+  background: p(0.02);
 }
 
 .profil-requests-table td {
   padding: 14px 16px;
   vertical-align: middle;
   font-weight: 500;
-  color: rgba(17, 24, 39, 0.85);
+  color: p(0.85);
 }
 
 .profil-request-desc-cell {
   max-width: 220px;
   font-weight: 500;
-  color: rgba(17, 24, 39, 0.75);
+  color: p(0.75);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -328,7 +616,7 @@
 .profil-request-status {
   font-size: 0.85rem;
   font-weight: 600;
-  color: rgba(17, 24, 39, 0.65);
+  color: p(0.65);
 }
 
 .profil-request-actions-cell {
@@ -360,13 +648,13 @@
 }
 
 .profil-request-badge--normal {
-  background: rgba(17, 24, 39, 0.08);
-  color: rgba(17, 24, 39, 0.6);
-  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: p(0.08);
+  color: p(0.6);
+  border: 1px solid p(0.12);
 }
 
 .profile-data {
-  margin-top: 10px;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -376,6 +664,198 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+// --- Company owner: dedicated right-side section styles ---
+.profil-card--company-owner {
+  flex: 1 1 680px;
+  min-width: 0;
+}
+
+.profil-company-owner-body {
+  display: block;
+}
+
+.profil-company-owner-aside,
+.profil-company-owner-main {
+  min-width: 0;
+}
+
+.profil-company-owner-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profil-section-head--company {
+  margin-bottom: 12px;
+  padding-left: 0;
+}
+
+.profil-company-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profil-company-name-title {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profil-company-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.profil-company-description {
+  margin: 0;
+  color: p(0.72);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.profil-company-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profil-company-contact-line {
+  display: block;
+  color: p(0.78);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.profil-invite-block {
+  width: 100%;
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 10px;
+}
+
+.profil-invite-block-title {
+  margin: 0 0 10px;
+}
+
+.profil-invite-input-wrap {
+  margin: 0;
+  text-align: left;
+}
+
+.profil-subsection--company-members {
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid p(0.08);
+}
+
+.profil-workers-table-wrap.profil-scroll-area {
+  max-height: var(--profil-scroll-max);
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.profil-workers-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.profil-workers-table th,
+.profil-workers-table td {
+  display: table-cell;
+  padding: 11px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.profil-workers-table th {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.profil-workers-cell--stack {
+  display: grid;
+  gap: 3px;
+}
+
+.profil-workers-name {
+  font-weight: 700;
+  color: p(0.86);
+}
+
+.profil-workers-cell--small {
+  min-width: 190px;
+}
+
+.profil-workers-cell--nowrap {
+  white-space: nowrap;
+}
+
+.profil-workers-cell--multiline {
+  min-width: 180px;
+  max-width: 260px;
+  word-break: break-word;
+}
+
+.profil-workers-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.profil-workers-trash-btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: rgba(220, 38, 38, 0.16);
+    border-color: rgba(220, 38, 38, 0.5);
+  }
+}
+
+.profil-workers-actions-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 2px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: background-color 0.2s ease;
+
+  svg path {
+    fill: #6a6a6a;
+    transition: fill 0.2s ease;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: #c2c2c2;
+
+    svg path {
+      fill: #d32929;
+    }
+  }
 }
 
 @media (max-width: 600px) {

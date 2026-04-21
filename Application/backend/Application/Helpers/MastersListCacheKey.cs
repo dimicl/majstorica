@@ -9,14 +9,16 @@ public static class RedisListCacheKey
     public static string Create(MastersListQuery query)
     {
         if (query == null)
-            return Prefix + "search=&sort=name-asc&category=&minRating=";
+            return Prefix + "search=&sort=name-asc&category=&minRating=&entityType=all";
 
         var search = (query.Search ?? "").Trim().ToLowerInvariant();
         var sort = string.IsNullOrWhiteSpace(query.Sort) ? "name-asc" : query.Sort.Trim();
         var category = (query.Category ?? "").Trim();
         var minRating = query.MinRating?.ToString() ?? "";
+        var entityType = string.IsNullOrWhiteSpace(query.EntityType) ? "all" : query.EntityType.Trim().ToLowerInvariant();
 
-        var suffix = $"search={Uri.EscapeDataString(search)}&sort={sort}&category={Uri.EscapeDataString(category)}&minRating={minRating}";
+        var suffix =
+            $"search={Uri.EscapeDataString(search)}&sort={sort}&category={Uri.EscapeDataString(category)}&minRating={minRating}&entityType={Uri.EscapeDataString(entityType)}";
         return Prefix + suffix;
     }
 }
