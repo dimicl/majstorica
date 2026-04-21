@@ -1,7 +1,6 @@
 using backend.Domain.Enums;
 using backend.Domain.Exceptions;
 using backend.Domain.ValueObjects;
-using backend.Shared.Helpers;
 
 namespace backend.Domain.Entities;
 
@@ -68,13 +67,13 @@ public class User
     public ClientProfile? ClientProfile { get; private set; }
     public MasterProfile? MasterProfile { get; private set; }
 
+    /// <summary>Firma u kojoj je korisnik zaposlen kao majstor (npr. nakon zaposlenja).</summary>
+    public Guid? EmployerCompanyId { get; private set; }
+
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime UpdatedAtUtc { get; private set; }
     public DateTime? LastLoginAtUtc { get; private set; }
     public DateTime? BlockedAtUtc { get; private set; }
-
-    /// <summary>Kada je majstor zaposlen u firmi (uloga CompanyWorker).</summary>
-    public Guid? EmployerCompanyId { get; private set; }
 
     public bool IsClient() => Role == UserRole.Client;
     public bool IsMaster() => Role == UserRole.Master;
@@ -174,12 +173,13 @@ public class User
         Touch();
     }
 
+    /// <summary>Majstor postaje zaposlen kod firme; čuva se ID poslodavca u dokumentu korisnika.</summary>
     public void PromoteMasterToCompanyWorker(Guid employerCompanyId)
     {
         EnsureNotBlocked();
 
         if (employerCompanyId == Guid.Empty)
-            throw new DomainException("Employer company id is required.");
+            throw new DomainException("Employer company id cannot be empty.");
 
         if (Role != UserRole.Master)
             throw new DomainException("Only user with Master role can become CompanyWorker.");
@@ -202,13 +202,13 @@ public class User
         if (MasterProfile is null)
             throw new DomainException("Master profile must exist when returning to Master.");
 
-        EmployerCompanyId = null;
         Role = UserRole.Master;
+        EmployerCompanyId = null;
         Touch();
     }
 
-    /// <summary>Samo za učitavanje iz baze (Mongo dokument bez polja).</summary>
-    public void RestoreEmployerCompanyFromPersistence(Guid? employerCompanyId)
+    /// <summary>Samo za mapiranje iz Mongo dokumenta; ne menja UpdatedAtUtc.</summary>
+    public void ApplyEmployerCompanyIdFromStorage(Guid? employerCompanyId)
     {
         EmployerCompanyId = employerCompanyId;
     }
@@ -264,16 +264,14 @@ public class User
         Touch();
     }
 
+    /// <summary>
+    /// Dozvoljava sve uloge koje mogu postojati u Mongo dokumentu (npr. CompanyWorker posle zaposlenja).
+    /// Za registraciju dozvoljene uloge proverava aplikacioni sloj (npr. AuthHelper).
+    /// </summary>
     private void ValidateInitialRole(UserRole role)
     {
-        if (role != UserRole.Client &&
-            role != UserRole.Master &&
-            role != UserRole.CompanyOwner &&
-            role != UserRole.CompanyWorker)
-        {
-            throw new DomainException(
-                "User role must be Client, Master, CompanyOwner, or CompanyWorker.");
-        }
+        if (!Enum.IsDefined(typeof(UserRole), role))
+            throw new DomainException("Invalid user role.");
     }
 
     private void SetFirstName(string firstName)

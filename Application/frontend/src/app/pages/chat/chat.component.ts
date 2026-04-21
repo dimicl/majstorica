@@ -6,8 +6,6 @@ import { ButtonComponent } from '../../components/button/button.component';
 import { ChatService } from '../../shared/services/chat.service';
 import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { AuthSelectorService } from '../../shared/services/auth-selector.service';
-import { UserRole } from '../../shared/enums/user-role.enum';
 import { BUTTON_TYPES, SIGNALR_STATUS } from '../../shared/types';
 import { HUB_CHAT_URL } from '../../shared/constants/api.constants';
 import type {
@@ -23,16 +21,13 @@ import type {
   styleUrl: './chat.component.scss',
 })
 export class ChatComponent {
-  private readonly emptyJobId = '00000000-0000-0000-0000-000000000000';
   private chat = inject(ChatService);
   private signalr = inject(SignalrService);
   private auth = inject(AuthService);
-  private authSelector = inject(AuthSelectorService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private ngZone = inject(NgZone);
 
-  readonly hideExploreMastersButton = signal(false);
   realtimeError = this.signalr.lastError;
   eButtonType = BUTTON_TYPES;
   isLoadingThreads = signal(true);
@@ -74,12 +69,6 @@ export class ChatComponent {
       this.ngZone.run(() => this.handleReceiveMessage(payload));
     });
 
-    this.authSelector.userSelector$.subscribe((user) => {
-      this.hideExploreMastersButton.set(
-        user?.role === UserRole.Master || user?.role === UserRole.CompanyWorker
-      );
-    });
-
     void this.loadThreads();
   }
 
@@ -88,11 +77,23 @@ export class ChatComponent {
   };
 
   private handleReceiveMessage(payload: ReceiveMessagePayload): void {
-    const id = payload.id;
-    const convId = payload.conversationId;
-    const senderId = payload.senderId;
-    const content = payload.content;
-    const sentAt = payload.sentAt;
+    const id = payload.id ?? payload.Id ?? '';
+    const convId = String(
+      payload.conversationId ?? payload.ConversationId ?? ''
+    );
+    const senderId =
+      payload.senderUserId ??
+      payload.SenderUserId ??
+      payload.senderId ??
+      payload.SenderId ??
+      '';
+    const content = payload.content ?? payload.Content ?? '';
+    const sentAt =
+      payload.sentAtUtc ??
+      payload.SentAtUtc ??
+      payload.sentAt ??
+      payload.SentAt ??
+      new Date().toISOString();
 
     const currentUserId = this.auth.getUserIdFromStorage() ?? '';
     const isFromMe = senderId === currentUserId;
@@ -126,8 +127,9 @@ export class ChatComponent {
         updatedAt: this.formatTimeOrDate(sentAt),
         unreadCount: t.unreadCount + addUnread,
       };
-      const reordered = [updated, ...threads.filter((x) => x.id !== convId)];
-      this.threads.set(reordered);
+      this.threads.set(
+        threads.slice(0, idx).concat(updated, threads.slice(idx + 1))
+      );
       if (addUnread > 0) {
         this.chat.setHasNewMessages(true);
       }
@@ -147,7 +149,9 @@ export class ChatComponent {
   }
 
   private formatTimeOnly(iso: string): string {
+    if (!iso) return '--:--';
     const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '--:--';
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;
@@ -202,7 +206,7 @@ export class ChatComponent {
       title: 'Razgovor',
       subtitle: 'Razgovor',
       lastMessage: '',
-      updatedAt: '',
+      updatedAt: '--:--',
       unreadCount: 0,
       presence: 'offline',
     };
@@ -234,7 +238,7 @@ export class ChatComponent {
       lastMessage: conv.lastMessageText ?? '',
       updatedAt: conv.lastMessageAt
         ? this.formatTimeOrDate(conv.lastMessageAt)
-        : '',
+        : '--:--',
       unreadCount: conv.unreadCount ?? list[idx].unreadCount,
       presence: isOnline ? 'online' : 'offline',
       lastSeenText,
@@ -320,7 +324,8 @@ export class ChatComponent {
     }
 
     const conversationId = threadId;
-    const jobId = thread.jobId || this.emptyJobId;
+    const emptyJobId = '00000000-0000-0000-0000-000000000000';
+    const jobId = thread.jobId ?? emptyJobId;
 
     const optId = `opt-${Date.now()}`;
     const sentAt = new Date().toISOString();

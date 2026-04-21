@@ -1,7 +1,9 @@
 using backend.Api.DTOs.Master;
 using backend.Api.Extensions;
 using backend.Application.Interfaces;
+using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,14 +15,21 @@ namespace backend.Api.Controllers;
 public class MastersController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IMasterRepository _masterRepository;
+    private readonly IUserGraphSync _userGraphSync;
 
-    public MastersController(IUserService userService)
+    public MastersController(
+        IUserService userService,
+        IMasterRepository masterRepository,
+        IUserGraphSync userGraphSync)
     {
         _userService = userService;
+        _masterRepository = masterRepository;
+        _userGraphSync = userGraphSync;
     }
 
     [HttpGet]
-    public async Task<ActionResult<MastersListPageResponse>> GetMasters([FromQuery] MastersListQuery? query = null)
+    public async Task<ActionResult<List<MasterListItemResponse>>> GetMasters([FromQuery] MastersListQuery? query = null)
     {
         var result = await _userService.GetMastersList(query);
         return Ok(result);
@@ -54,57 +63,55 @@ public class MastersController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Profil trenutnog majstora (user + kategorija, ocena). Master i CompanyWorker.</summary>
+    /// <summary>Profil trenutnog majstora (user + kategorija, ocena). Samo Master (CompanyWorker isključen).</summary>
     [HttpGet("profile")]
     public async Task<ActionResult<MasterProfileResponse>> GetMyProfile()
     {
         var (userId, role) = User.GetUserIdAndRole();
-        if (role != UserRole.Master && role != UserRole.CompanyWorker)
+        // Samo Master; za CompanyWorker vratiti: (role != Master && role != CompanyWorker) → Forbid
+        if (role != UserRole.Master)
             return Forbid();
 
-        var response = await _userService.GetMasterProfile(userId);
-        if (response == null)
+        var user = await _userService.GetProfile(userId);
+        if (user == null)
             return NotFound();
 
+        var master = await _masterRepository.GetByUserId(userId);
+        var response = new MasterProfileResponse
+        {
+            User = user,
+            Category = master?.ServiceCategories?.FirstOrDefault(),
+            Rating = master?.AverageRating?.Value
+        };
         return Ok(response);
-    }
-
-    /// <summary>Recenzije gde je trenutni korisnik ocenjen kao majstor (Master / CompanyWorker).</summary>
-    [HttpGet("profile/reviews")]
-    public async Task<ActionResult<List<MasterReviewListItemResponse>>> GetMyReviews()
-    {
-        var (userId, role) = User.GetUserIdAndRole();
-        if (role != UserRole.Master && role != UserRole.CompanyWorker)
-            return Forbid();
-
-        var result = await _userService.GetMasterReviews(userId);
-        return Ok(result);
-    }
-
-    [HttpPatch("profile/stats")]
-    public async Task<IActionResult> PatchProfileStats([FromBody] UpdateMasterProfileStatsRequest body)
-    {
-        var (userId, role) = User.GetUserIdAndRole();
-        if (role != UserRole.Master && role != UserRole.CompanyWorker)
-            return Forbid();
-
-        if (body is null ||
-            (!body.YearsOfExperience.HasValue && !body.HourlyRateAmount.HasValue))
-            return BadRequest("Pošalji bar jedno polje za izmenu.");
-
-        await _userService.UpdateMasterProfileStats(userId, body.YearsOfExperience, body.HourlyRateAmount, body.HourlyRateCurrency);
-        return NoContent();
     }
 
     [HttpPatch("category")]
     public async Task<IActionResult> UpdateCategory([FromBody] UpdateMasterCategoryRequest request)
     {
         var (userId, role) = User.GetUserIdAndRole();
-        if (role != UserRole.Master && role != UserRole.CompanyWorker)
+        // Samo Master; za CompanyWorker vratiti proveru sa CompanyWorker
+        if (role != UserRole.Master)
             return Forbid();
 
-        await _userService.UpdateMasterCategory(userId, request?.Category);
+        var master = await _masterRepository.GetByUserId(userId);
+        if (master == null)
+            return NotFound();
+
+        var categoryDisplayName = string.IsNullOrWhiteSpace(request?.Category) ? "Ostalo" : request.Category!.Trim();
+        master.ReplaceServiceCategories(new[] { categoryDisplayName });
+        await _masterRepository.Save(userId, master);
+        await _userGraphSync.SyncMasterProfile(userId, categoryDisplayName, master.AverageRating?.Value, master.YearsOfExperience);
         return NoContent();
+    }
+
+    private static List<int> ParseIntList(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return new List<int>();
+        return value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => int.TryParse(s, out _))
+            .Select(int.Parse)
+            .ToList();
     }
 
     private static List<string> ParseStringList(string? value)

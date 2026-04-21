@@ -28,7 +28,7 @@ public class MasterRepository : IMasterRepository
         if (user == null)
             return null;
 
-        if ((user.Role == UserRole.Master || user.Role == UserRole.CompanyWorker) &&
+        if ((user.Role == UserRole.Master /* || user.Role == UserRole.CompanyWorker */) &&
             user.MasterProfile == null)
         {
             user.SetMasterProfile(MasterProfile.CreateDefaultShell());

@@ -1,5 +1,4 @@
 using backend.Api.Extensions;
-using backend.Api.DTOs.Conversation;
 using backend.Application.Interfaces;
 using backend.Domain.Enums;
 using backend.Shared.Exceptions;
@@ -11,20 +10,17 @@ public class DocumentHub : Hub
 {
     private readonly IJobService _jobService;
     private readonly IChatService _chatService;
-    private readonly IConversationService _conversationService;
     private readonly ISessionService _sessionService;
     private readonly IRedisLockService _lockService;
 
     public DocumentHub(
         IJobService jobService,
         IChatService chatService,
-        IConversationService conversationService,
         ISessionService sessionService,
         IRedisLockService lockService)
     {
         _jobService = jobService;
         _chatService = chatService;
-        _conversationService = conversationService;
         _sessionService = sessionService;
         _lockService = lockService;
     }
@@ -90,7 +86,8 @@ public class DocumentHub : Hub
         );
     }
 
-    public async Task SendMessage(Guid conversationId, Guid jobId, string content)
+    /// <param name="jobId">Opciono; za chat bez posla klijent šalje null ili prazan GUID.</param>
+    public async Task SendMessage(Guid conversationId, Guid? jobId, string content)
     {
         var userId = GetUserId();
 
@@ -100,47 +97,14 @@ public class DocumentHub : Hub
             userId,
             content);
 
-        var response = new ChatMessageResponse
-        {
-            Id = message.Id,
-            ConversationId = message.ConversationId,
-            JobId = jobId == Guid.Empty ? null : jobId,
-            SenderId = message.SenderUserId,
-            Content = message.Content,
-            SentAt = message.SentAtUtc,
-            IsSystemMessage = message.Type == MessageType.System
-        };
-
+        // Samo grupa: oba učesnika su u chat:{conversationId} posle JoinConversation.
+        // Ne šalji i preko Clients.User — primalac bi dobio istu poruku dva puta.
         await Clients.Group(ConversationGroup(conversationId))
-            .SendAsync("ReceiveMessage", response);
-
-        var recipientId = await _conversationService.GetRecipientId(conversationId, userId);
-        if (recipientId.HasValue)
-            await Clients.User(recipientId.Value.ToString()).SendAsync("ReceiveMessage", response);
+            .SendAsync("ReceiveMessage", message);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        // Uzmi sesiju pre nego što je obrišemo, da znamo koji posao je korisnik držao
-        try
-        {
-            var (userId, _) = GetUserIdAndRole();
-            var session = await _sessionService.GetSessionByUserId(userId);
-
-            if (session?.CurrentJobId is { } jobId && jobId != Guid.Empty)
-            {
-                var next = await _lockService.ReleaseWriteAccess(jobId, userId);
-                if (next != null)
-                {
-                    await Clients.Group(JobGroup(jobId))
-                        .SendAsync("WriteGranted", jobId, next);
-                }
-            }
-        }
-        catch
-        {
-            // Ne sme da blokira disconnect
-        }
         await _sessionService.HandleDisconnect(Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }

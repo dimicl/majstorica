@@ -1,18 +1,20 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { catchError, map, of, switchMap, take } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { ButtonComponent } from '../../components/button/button.component';
-import { CompanySetupModalComponent } from '../../components/company-setup-modal/company-setup-modal.component';
 import { BUTTON_TYPES } from '../../shared/types';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 import { SERVICE_CATEGORIES } from '../../shared/constants/service-categories.constants';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
-import { CompanyService } from '../../shared/services/company.service';
 import { ClientActions } from '../../shared/store/client/client.actions';
 import { MasterActions } from '../../shared/store/master/master.actions';
 import { UserRole } from '../../shared/enums';
+import {
+  isClientUserRole,
+  isMasterLikeUserRole,
+} from '../../shared/utils/user-role.util';
 
 @Component({
   selector: 'app-main',
@@ -21,48 +23,29 @@ import { UserRole } from '../../shared/enums';
   imports: [
     CommonModule,
     RouterLink,
-    ButtonComponent,
-    CompanySetupModalComponent,
-  ],
+    ButtonComponent
+  ]
 })
 export class MainComponent implements OnInit {
   readonly auth = inject(AuthSelectorService);
   private store = inject(Store);
-  private companyService = inject(CompanyService);
   readonly userRole = UserRole;
-
-  readonly showCompanySetupModal = signal(false);
 
   public eButtonType = BUTTON_TYPES;
   public sharedSvgRoutes = SharedSvgRoutes;
 
   ngOnInit(): void {
+    // Iz auth state izvučeš user (id, role) i na osnovu toga dispatch-uješ get za klijenta ili majstora
     this.auth.userSelector$
-      .pipe(
-        take(1),
-        switchMap((user) => {
-          if (!user) return of(false);
-          if (user.role === UserRole.Client) {
-            this.store.dispatch(ClientActions.loadProfile());
-          } else if (user.role === UserRole.Master) {
-            this.store.dispatch(MasterActions.loadProfile());
-          }
-          if (user.role === UserRole.CompanyOwner) {
-            return this.companyService.getMyCompany().pipe(
-              map((company) => company === null),
-              catchError(() => of(false))
-            );
-          }
-          return of(false);
-        })
-      )
-      .subscribe((needsCompanySetup) => {
-        this.showCompanySetupModal.set(needsCompanySetup);
+      .pipe(take(1))
+      .subscribe((user) => {
+        if (!user) return;
+        if (isClientUserRole(user.role)) {
+          this.store.dispatch(ClientActions.loadProfile());
+        } else if (isMasterLikeUserRole(user.role)) {
+          this.store.dispatch(MasterActions.loadProfile());
+        }
       });
-  }
-
-  onCompanySetupCompleted(): void {
-    this.showCompanySetupModal.set(false);
   }
 
   categories = SERVICE_CATEGORIES;

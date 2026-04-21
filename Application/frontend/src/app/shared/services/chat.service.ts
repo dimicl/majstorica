@@ -13,7 +13,6 @@ import { SignalrService } from './signalr.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private readonly emptyJobId = '00000000-0000-0000-0000-000000000000';
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   private signalr = inject(SignalrService);
@@ -24,18 +23,17 @@ export class ChatService {
     const list = await firstValueFrom(
       this.http.get<ConversationListItemApi[]>(`${API_BASE_URL}/conversations`)
     );
+    const emptyJobId = '00000000-0000-0000-0000-000000000000';
     return list.map((c) => {
       const isOnline = c.isOnline ?? c.IsOnline ?? false;
       const lastSeenIso = c.otherPartyLastSeen ?? c.OtherPartyLastSeen ?? null;
-      const normalizedJobId = c.jobId ?? this.emptyJobId;
       return {
         id: c.id,
-        jobId: normalizedJobId,
+        // API šalje jobId: null za chat bez posla – SignalR SendMessage mora uvek dobiti validan Guid string
+        jobId: c.jobId ?? emptyJobId,
         title: c.otherPartyName,
         subtitle:
-          normalizedJobId === this.emptyJobId
-            ? 'Razgovor'
-            : c.jobDescription ?? 'Posao',
+          c.jobId === emptyJobId ? 'Razgovor' : c.jobDescription ?? 'Posao',
         lastMessage: c.lastMessageText ?? '',
         updatedAt: this.formatTimeOrDate(c.lastMessageAt),
         unreadCount: c.unreadCount ?? c.UnreadCount ?? 0,
@@ -111,9 +109,9 @@ export class ChatService {
   registerRealtimeHandlers(): void {
     if (this.realtimeHandlersRegistered) return;
     this.realtimeHandlersRegistered = true;
-    this.signalr.on<ReceiveMessagePayload>('ReceiveMessage', (p) => {
+    this.signalr.on<ReceiveMessagePayload>('ReceiveMessage', (payload) => {
       const me = this.auth.getUserIdFromStorage() ?? '';
-      const senderId = p.senderId;
+      const senderId = payload.senderId ?? payload.SenderId ?? '';
       if (senderId && senderId !== me) {
         this.ngZone.run(() => this.setHasNewMessages(true));
       }
@@ -158,17 +156,20 @@ export class ChatService {
         `${API_BASE_URL}/conversations/${conversationId}/messages`
       )
     );
-    return list.map((m) => ({
-      sentAt: m.sentAt,
-      id: m.id,
-      from: m.isSystemMessage
-        ? ('system' as const)
-        : m.senderId === currentUserId
-        ? ('me' as const)
-        : ('them' as const),
-      text: m.content,
-      time: this.formatTimeOnly(m.sentAt),
-    }));
+    return list.map((m) => {
+      const sentIso = m.sentAtUtc ?? m.sentAt ?? '';
+      return {
+        id: m.id,
+        from: m.isSystemMessage
+          ? ('system' as const)
+          : m.senderId === currentUserId
+          ? ('me' as const)
+          : ('them' as const),
+        text: m.content,
+        time: this.formatTimeOnly(sentIso),
+        sentAt: sentIso,
+      };
+    });
   }
 
   async markRead(conversationId: string): Promise<void> {
@@ -186,6 +187,7 @@ export class ChatService {
 
   /** Samo vreme (HH:mm) za poruke u chatu */
   private formatTimeOnly(iso: string): string {
+    if (!iso) return '--:--';
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '--:--';
     const hh = String(d.getHours()).padStart(2, '0');
@@ -195,7 +197,7 @@ export class ChatService {
 
   /** Danas: vreme (HH:mm), inače: datum (dd.MM.yyyy.) – za thread listu */
   private formatTimeOrDate(isoOrNull: string | null): string {
-    if (!isoOrNull) return '';
+    if (!isoOrNull) return '--:--';
     const d = new Date(isoOrNull);
     const now = new Date();
     const isToday =

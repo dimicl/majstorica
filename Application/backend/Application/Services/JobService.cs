@@ -11,9 +11,6 @@ namespace backend.Application.Services;
 
 public class JobService : IJobService
 {
-    private static readonly TimeSpan JobUserListCacheTtl = TimeSpan.FromMinutes(2);
-    private static readonly TimeSpan MarketplaceJobsCacheTtl = TimeSpan.FromMinutes(2);
-
     private readonly IJobRepository _jobRepository;
     private readonly IConversationRepository _conversationRepository;
     private readonly IUserRepository _userRepository;
@@ -21,8 +18,6 @@ public class JobService : IJobService
     private readonly IRedisLockService _lockService;
     private readonly IMessagePublisher _messagePublisher;
     private readonly IJobRequestNotifier _jobRequestNotifier;
-    private readonly IRedisJsonCache _redisJsonCache;
-    private readonly IAccountActivityStore _accountActivity;
 
     public JobService(
         IJobRepository jobRepository,
@@ -31,9 +26,7 @@ public class JobService : IJobService
         IMessageRepository messageRepository,
         IRedisLockService lockService,
         IMessagePublisher messagePublisher,
-        IJobRequestNotifier jobRequestNotifier,
-        IRedisJsonCache redisJsonCache,
-        IAccountActivityStore accountActivity)
+        IJobRequestNotifier jobRequestNotifier)
     {
         _jobRepository = jobRepository;
         _conversationRepository = conversationRepository;
@@ -42,8 +35,6 @@ public class JobService : IJobService
         _lockService = lockService;
         _messagePublisher = messagePublisher;
         _jobRequestNotifier = jobRequestNotifier;
-        _redisJsonCache = redisJsonCache;
-        _accountActivity = accountActivity;
     }
 
 
@@ -88,15 +79,6 @@ public class JobService : IJobService
         await _jobRepository.Save(job);
         await PublishEvents(job);
 
-        try
-        {
-            await _accountActivity.RecordAsync(clientId, "job_created", job.Id.ToString());
-            await InvalidateJobListCachesAsync(job);
-        }
-        catch
-        {
-        }
-
         return job.Id;
     }
 
@@ -104,12 +86,9 @@ public class JobService : IJobService
     {
         var job = await GetJob(jobId);
 
+        // Prihvat (AssignToMaster) dozvoljen je iz Published, ne iz Draft — inače CanAssign baca.
         if (job.IsDraft())
-        {
             job.Publish(DateTime.UtcNow);
-            await _jobRepository.Save(job);
-            await PublishEvents(job);
-        }
 
         var client = await _userRepository.GetById(job.ClientUserId);
         var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
@@ -126,8 +105,8 @@ public class JobService : IJobService
                 conversation = existing;
 
                 var jobRequestMessage = new Message(
-                    Guid.NewGuid(),
                     conversation.Id,
+                    job.Id,
                     job.ClientUserId,
                     MessageType.System,
                     $"{clientName} ti je poslao zahtev za posao.",
@@ -148,8 +127,8 @@ public class JobService : IJobService
                 await _conversationRepository.Save(conversation);
 
                 var jobRequestMessage = new Message(
-                    Guid.NewGuid(),
                     conversation.Id,
+                    job.Id,
                     job.ClientUserId,
                     MessageType.System,
                     $"{clientName} ti je poslao zahtev za posao.",
@@ -172,7 +151,7 @@ public class JobService : IJobService
         }
 
         await _jobRepository.InviteMasters(jobId, masterIds);
-        await SaveAndPublish(job, masterIds);
+        await SaveAndPublish(job);
     }
 
     /// <summary>Da li klijent ima posao/zahtev ka tom majstoru (samo ako posao još postoji u bazi).</summary>
@@ -195,65 +174,24 @@ public class JobService : IJobService
 
     public async Task<List<JobListItemResponse>> GetJobsForUser(Guid userId, UserRole role)
     {
-        var cacheKey = JobListCacheKey.ForUser(userId, role);
-        try
-        {
-            var cached = await _redisJsonCache.GetAsync<List<JobListItemResponse>>(cacheKey);
-            if (cached != null)
-                return cached;
-        }
-        catch
-        {
-        }
-
-        List<JobListItemResponse> list;
-        if (role == UserRole.Master)
+        if (role == UserRole.Master /* || role == UserRole.CompanyWorker */)
         {
             var pending = await GetPendingRequestsForMaster(userId);
             var assigned = await GetJobsForMaster(userId);
-            list = pending.Concat(assigned).OrderByDescending(j => j.UpdatedAt).ToList();
-        }
-        else
-            list = await GetJobsForClient(userId);
-
-        try
-        {
-            await _redisJsonCache.SetAsync(cacheKey, list, JobUserListCacheTtl);
-        }
-        catch
-        {
+            return pending.Concat(assigned).OrderByDescending(j => j.UpdatedAt).ToList();
         }
 
-        return list;
+        return await GetJobsForClient(userId);
     }
 
     public async Task<List<JobListItemResponse>> GetMarketplaceJobs(int page, int pageSize)
     {
-        var cacheKey = JobListCacheKey.Marketplace(page, pageSize);
-        try
-        {
-            var cached = await _redisJsonCache.GetAsync<List<JobListItemResponse>>(cacheKey);
-            if (cached != null)
-                return cached;
-        }
-        catch
-        {
-        }
-
         var jobs = await _jobRepository.GetAllPaginated(page, pageSize);
         var result = new List<JobListItemResponse>();
 
         foreach (var job in jobs)
         {
             result.Add(await BuildJobListItem(job, includeAssignedMasterName: true));
-        }
-
-        try
-        {
-            await _redisJsonCache.SetAsync(cacheKey, result, MarketplaceJobsCacheTtl);
-        }
-        catch
-        {
         }
 
         return result;
@@ -266,11 +204,14 @@ public class JobService : IJobService
 
         foreach (var conv in conversations)
         {
+            // Otvorena konverzacija + posao još uvek nije dodeljen (Published ili stariji Draft).
             if (conv.MasterUserId != masterId || conv.IsClosed || !conv.JobId.HasValue)
                 continue;
 
             var job = await _jobRepository.GetById(conv.JobId!.Value);
-            if (job == null || job.Status != JobStatus.Published)
+            if (job is null || job.AssignedMasterId.HasValue)
+                continue;
+            if (job.Status != JobStatus.Published && job.Status != JobStatus.Draft)
                 continue;
 
             var client = await _userRepository.GetById(conv.ClientUserId);
@@ -280,7 +221,7 @@ public class JobService : IJobService
                 job,
                 forcedConversationId: conv.Id,
                 forcedClientName: clientName,
-                forcedStatus: JobStatus.Published.ToString()));
+                forcedStatus: "Pending"));
         }
 
         return result;
@@ -335,6 +276,10 @@ public class JobService : IJobService
     {
         var job = await GetJob(jobId);
 
+        // Stariji zapisi: zahtev poslat dok je posao bio Draft — mora u Published pre dodele.
+        if (job.IsDraft())
+            job.Publish(DateTime.UtcNow);
+
         job.AssignToMaster(masterId, DateTime.UtcNow);
 
         var conversations = await _conversationRepository.GetByJobId(jobId);
@@ -367,24 +312,18 @@ public class JobService : IJobService
     }
 
 
-    public async Task StartJob(Guid jobId, Guid requestingUserId)
+    public async Task StartJob(Guid jobId)
     {
         var job = await GetJob(jobId);
-
-        if (job.AssignedMasterId != requestingUserId)
-            throw new ForbiddenException("Samo assignovani majstor može da startuje posao.");
 
         job.Start(DateTime.UtcNow);
 
         await SaveAndPublish(job);
     }
 
-    public async Task CompleteJob(Guid jobId, Guid requestingUserId)
+    public async Task CompleteJob(Guid jobId)
     {
         var job = await GetJob(jobId);
-
-        if (job.AssignedMasterId != requestingUserId)
-            throw new ForbiddenException("Samo assignovani majstor može da završi posao.");
 
         job.Complete(DateTime.UtcNow);
 
@@ -401,7 +340,12 @@ public class JobService : IJobService
 
         var job = await GetJob(jobId);
 
-        job.UpdateDescription(description);
+        job.UpdateBasicInfo(
+            job.Title,
+            description,
+            job.ServiceCategory,
+            job.ServiceAddress,
+            job.Budget);
 
         await SaveAndPublish(job);
     }
@@ -416,7 +360,7 @@ public class JobService : IJobService
             ? new Money(price.Value, job.Budget?.Currency ?? "RSD")
             : null;
 
-        job.UpdateBudget(budget);
+        job.SetBudget(budget);
 
         await SaveAndPublish(job);
     }
@@ -431,33 +375,10 @@ public class JobService : IJobService
         return job;
     }
 
-    private async Task SaveAndPublish(Job job, IReadOnlyCollection<Guid>? extraMasterIdsForCache = null)
+    private async Task SaveAndPublish(Job job)
     {
         await _jobRepository.Save(job);
-        try
-        {
-            await InvalidateJobListCachesAsync(job, extraMasterIdsForCache);
-        }
-        catch
-        {
-        }
-
         await PublishEvents(job);
-    }
-
-    private async Task InvalidateJobListCachesAsync(Job job, IReadOnlyCollection<Guid>? extraMasterIds = null)
-    {
-        await _redisJsonCache.RemoveAsync(JobListCacheKey.ForUser(job.ClientUserId, UserRole.Client));
-        if (job.AssignedMasterId.HasValue)
-            await _redisJsonCache.RemoveAsync(JobListCacheKey.ForUser(job.AssignedMasterId.Value, UserRole.Master));
-
-        if (extraMasterIds is { Count: > 0 })
-        {
-            foreach (var id in extraMasterIds)
-                await _redisJsonCache.RemoveAsync(JobListCacheKey.ForUser(id, UserRole.Master));
-        }
-
-        // Marketplace keš: kratki TTL (GetMarketplaceJobs) — bez masovnog SCAN/brisanja stranica.
     }
 
     private async Task PublishEvents(Job job)

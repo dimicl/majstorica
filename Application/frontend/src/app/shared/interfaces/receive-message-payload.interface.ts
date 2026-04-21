@@ -1,8 +1,20 @@
+/** Payload od SignalR – backend može slati camelCase ili PascalCase */
 export interface ReceiveMessagePayload {
-  id: string;
-  conversationId: string;
-  jobId: string | null;
-  senderId: string;
-  content: string;
-  sentAt: string;
+  id?: string;
+  Id?: string;
+  conversationId?: string;
+  ConversationId?: string;
+  jobId?: string;
+  JobId?: string;
+  senderId?: string;
+  SenderId?: string;
+  /** Domen Message.SenderUserId → JSON camelCase */
+  senderUserId?: string;
+  SenderUserId?: string;
+  content?: string;
+  Content?: string;
+  sentAt?: string;
+  SentAt?: string;
+  sentAtUtc?: string;
+  SentAtUtc?: string;
 }

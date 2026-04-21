@@ -1,7 +1,8 @@
 /** Odgovor API-ja za listu konverzacija / jednu konverzaciju. */
 export interface ConversationListItemApi {
   id: string;
-  jobId: string;
+  /** null kada nema povezanog posla (slobodan chat) */
+  jobId: string | null;
   jobDescription: string | null;
   otherPartyName: string;
   otherPartyId: string;

@@ -34,9 +34,9 @@ public static class UserMapper
             Address = user.Address?.ToString(),
             CreatedAtUtc = user.CreatedAtUtc,
             UpdatedAtUtc = user.UpdatedAtUtc,
+            EmployerCompanyId = user.EmployerCompanyId,
             MasterProfile = masterProfile,
-            ClientProfile = clientProfile,
-            EmployerCompanyId = user.EmployerCompanyId
+            ClientProfile = clientProfile
         };
     }
 
@@ -86,7 +86,7 @@ public static class UserMapper
             user.SetClientProfile(client);
         }
 
-        user.RestoreEmployerCompanyFromPersistence(doc.EmployerCompanyId);
+        user.ApplyEmployerCompanyIdFromStorage(doc.EmployerCompanyId);
 
         return user;
     }
