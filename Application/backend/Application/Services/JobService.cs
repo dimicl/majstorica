@@ -86,6 +86,10 @@ public class JobService : IJobService
     {
         var job = await GetJob(jobId);
 
+        // Prihvat (AssignToMaster) dozvoljen je iz Published, ne iz Draft — inače CanAssign baca.
+        if (job.IsDraft())
+            job.Publish(DateTime.UtcNow);
+
         var client = await _userRepository.GetById(job.ClientUserId);
         var clientName = UserDisplayNameHelper.GetDisplayName(client, "Klijent");
 
@@ -170,7 +174,7 @@ public class JobService : IJobService
 
     public async Task<List<JobListItemResponse>> GetJobsForUser(Guid userId, UserRole role)
     {
-        if (role == UserRole.Master)
+        if (role == UserRole.Master /* || role == UserRole.CompanyWorker */)
         {
             var pending = await GetPendingRequestsForMaster(userId);
             var assigned = await GetJobsForMaster(userId);
@@ -200,11 +204,14 @@ public class JobService : IJobService
 
         foreach (var conv in conversations)
         {
-            if (conv.MasterUserId != masterId || !conv.IsClosed || !conv.JobId.HasValue)
+            // Otvorena konverzacija + posao još uvek nije dodeljen (Published ili stariji Draft).
+            if (conv.MasterUserId != masterId || conv.IsClosed || !conv.JobId.HasValue)
                 continue;
 
             var job = await _jobRepository.GetById(conv.JobId!.Value);
-            if (job == null || job.Status != JobStatus.InProgress)
+            if (job is null || job.AssignedMasterId.HasValue)
+                continue;
+            if (job.Status != JobStatus.Published && job.Status != JobStatus.Draft)
                 continue;
 
             var client = await _userRepository.GetById(conv.ClientUserId);
@@ -214,7 +221,7 @@ public class JobService : IJobService
                 job,
                 forcedConversationId: conv.Id,
                 forcedClientName: clientName,
-                forcedStatus: JobStatus.InProgress.ToString()));
+                forcedStatus: "Pending"));
         }
 
         return result;
@@ -268,6 +275,10 @@ public class JobService : IJobService
     public async Task AcceptJob(Guid jobId, Guid masterId)
     {
         var job = await GetJob(jobId);
+
+        // Stariji zapisi: zahtev poslat dok je posao bio Draft — mora u Published pre dodele.
+        if (job.IsDraft())
+            job.Publish(DateTime.UtcNow);
 
         job.AssignToMaster(masterId, DateTime.UtcNow);
 

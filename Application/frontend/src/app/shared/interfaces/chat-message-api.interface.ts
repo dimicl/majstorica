@@ -5,6 +5,8 @@ export interface ChatMessageApi {
   jobId: string;
   senderId: string;
   content: string;
-  sentAt: string;
+  /** ASP.NET šalje SentAtUtc → JSON camelCase */
+  sentAtUtc?: string;
+  sentAt?: string;
   isSystemMessage?: boolean;
 }

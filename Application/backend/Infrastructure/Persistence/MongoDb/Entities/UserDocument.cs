@@ -21,6 +21,11 @@ public class UserDocument
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
 
+    /// <summary>Firma u kojoj je majstor zaposlen (CompanyWorker); opciono.</summary>
+    [BsonIgnoreIfNull]
+    [BsonRepresentation(BsonType.String)]
+    public Guid? EmployerCompanyId { get; set; }
+
     [BsonIgnoreIfNull]
     public MasterProfileDocument? MasterProfile { get; set; }
 

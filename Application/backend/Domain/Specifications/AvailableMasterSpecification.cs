@@ -10,7 +10,7 @@ public class AvailableMasterSpecification : ISpecification<User>
         if (user is null)
             return false;
 
-        var isMasterRole = user.Role == UserRole.Master || user.Role == UserRole.CompanyWorker;
+        var isMasterRole = user.Role == UserRole.Master /* || user.Role == UserRole.CompanyWorker */;
 
         return user.IsActive
                && !user.IsBlocked

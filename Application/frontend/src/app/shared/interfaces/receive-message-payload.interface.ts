@@ -8,8 +8,13 @@ export interface ReceiveMessagePayload {
   JobId?: string;
   senderId?: string;
   SenderId?: string;
+  /** Domen Message.SenderUserId → JSON camelCase */
+  senderUserId?: string;
+  SenderUserId?: string;
   content?: string;
   Content?: string;
   sentAt?: string;
   SentAt?: string;
+  sentAtUtc?: string;
+  SentAtUtc?: string;
 }

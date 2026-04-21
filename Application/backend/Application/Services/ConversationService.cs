@@ -187,7 +187,11 @@ public class ConversationService : IConversationService
     {
         var conversation = await _conversationRepository.GetById(conversationId);
         if (conversation == null) return null;
-        return conversation.ClientUserId == currentUserId ? conversation.MasterUserId : conversation.ClientUserId;
+        var other = conversation.ClientUserId == currentUserId
+            ? conversation.MasterUserId
+            : conversation.ClientUserId;
+        if (other == Guid.Empty) return null;
+        return other;
     }
 }
 

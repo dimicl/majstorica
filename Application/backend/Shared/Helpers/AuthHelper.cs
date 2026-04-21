@@ -3,6 +3,7 @@ using backend.Api.DTOs.User;
 using backend.Application.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Exceptions;
 using backend.Domain.ValueObjects;
 using backend.Shared.Exceptions;
 
@@ -28,10 +29,14 @@ internal static class AuthHelper
         if (await users.GetByUsername(username) != null)
             throw new UserAlreadyExistsException("Username", username);
 
+        if (role != UserRole.Client && role != UserRole.Master && role != UserRole.CompanyOwner)
+            throw new DomainException(
+                "At registration, user role must be Client, Master, or CompanyOwner.");
+
         var passwordHash = PasswordHasher.Hash(password);
         var user = new User(Guid.NewGuid(), firstName, lastName, email, username, phone ?? string.Empty, deliveryAddress, passwordHash, role, DateTime.UtcNow);
 
-        if (role == UserRole.Master || role == UserRole.CompanyWorker)
+        if (role == UserRole.Master)
             user.SetMasterProfile(MasterProfile.CreateDefaultShell());
 
         await users.Save(user);

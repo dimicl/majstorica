@@ -10,20 +10,17 @@ public class DocumentHub : Hub
 {
     private readonly IJobService _jobService;
     private readonly IChatService _chatService;
-    private readonly IConversationService _conversationService;
     private readonly ISessionService _sessionService;
     private readonly IRedisLockService _lockService;
 
     public DocumentHub(
         IJobService jobService,
         IChatService chatService,
-        IConversationService conversationService,
         ISessionService sessionService,
         IRedisLockService lockService)
     {
         _jobService = jobService;
         _chatService = chatService;
-        _conversationService = conversationService;
         _sessionService = sessionService;
         _lockService = lockService;
     }
@@ -89,7 +86,8 @@ public class DocumentHub : Hub
         );
     }
 
-    public async Task SendMessage(Guid conversationId, Guid jobId, string content)
+    /// <param name="jobId">Opciono; za chat bez posla klijent šalje null ili prazan GUID.</param>
+    public async Task SendMessage(Guid conversationId, Guid? jobId, string content)
     {
         var userId = GetUserId();
 
@@ -99,12 +97,10 @@ public class DocumentHub : Hub
             userId,
             content);
 
+        // Samo grupa: oba učesnika su u chat:{conversationId} posle JoinConversation.
+        // Ne šalji i preko Clients.User — primalac bi dobio istu poruku dva puta.
         await Clients.Group(ConversationGroup(conversationId))
             .SendAsync("ReceiveMessage", message);
-
-        var recipientId = await _conversationService.GetRecipientId(conversationId, userId);
-        if (recipientId.HasValue)
-            await Clients.User(recipientId.Value.ToString()).SendAsync("ReceiveMessage", message);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

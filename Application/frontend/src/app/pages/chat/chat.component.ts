@@ -81,9 +81,19 @@ export class ChatComponent {
     const convId = String(
       payload.conversationId ?? payload.ConversationId ?? ''
     );
-    const senderId = payload.senderId ?? payload.SenderId ?? '';
+    const senderId =
+      payload.senderUserId ??
+      payload.SenderUserId ??
+      payload.senderId ??
+      payload.SenderId ??
+      '';
     const content = payload.content ?? payload.Content ?? '';
-    const sentAt = payload.sentAt ?? payload.SentAt ?? new Date().toISOString();
+    const sentAt =
+      payload.sentAtUtc ??
+      payload.SentAtUtc ??
+      payload.sentAt ??
+      payload.SentAt ??
+      new Date().toISOString();
 
     const currentUserId = this.auth.getUserIdFromStorage() ?? '';
     const isFromMe = senderId === currentUserId;
@@ -139,7 +149,9 @@ export class ChatComponent {
   }
 
   private formatTimeOnly(iso: string): string {
+    if (!iso) return '--:--';
     const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '--:--';
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;
@@ -312,7 +324,8 @@ export class ChatComponent {
     }
 
     const conversationId = threadId;
-    const jobId = thread.jobId;
+    const emptyJobId = '00000000-0000-0000-0000-000000000000';
+    const jobId = thread.jobId ?? emptyJobId;
 
     const optId = `opt-${Date.now()}`;
     const sentAt = new Date().toISOString();

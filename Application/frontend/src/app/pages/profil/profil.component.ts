@@ -6,6 +6,10 @@ import { AuthSelectorService } from '../../shared/services/auth-selector.service
 import { selectUser } from '../../shared/store/auth/auth.selectors';
 import { UserRole } from '../../shared/enums/user-role.enum';
 import {
+  isClientUserRole,
+  isMasterLikeUserRole,
+} from '../../shared/utils/user-role.util';
+import {
   JobService,
   type JobListItem,
 } from '../../shared/services/job.service';
@@ -61,6 +65,15 @@ export class ProfilComponent implements OnInit, OnDestroy {
 
   user$ = this.auth.userSelector$;
   public userRole = UserRole;
+
+  /** Za šablon: majstor ili company worker – isti UI kao Master. */
+  masterLikeProfile(role: unknown): boolean {
+    return isMasterLikeUserRole(role);
+  }
+
+  clientProfile(role: unknown): boolean {
+    return isClientUserRole(role);
+  }
   public eButtonType = BUTTON_TYPES;
   public sharedSvgRoutes = SharedSvgRoutes;
 
@@ -117,11 +130,12 @@ export class ProfilComponent implements OnInit, OnDestroy {
         distinctUntilChanged((a, b) => a?.id === b?.id && a?.role === b?.role)
       )
       .subscribe((ctx) => {
-        if (ctx?.role === UserRole.Master) {
+        if (!ctx) return;
+        if (isMasterLikeUserRole(ctx.role)) {
           this.ensureSignalR();
           void this.loadJobs();
           this.loadMasterProfile();
-        } else if (ctx?.role === UserRole.Client) {
+        } else if (isClientUserRole(ctx.role)) {
           void this.loadJobs();
         } else {
           this.masterProfile.set(null);

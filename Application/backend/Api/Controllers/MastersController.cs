@@ -63,11 +63,12 @@ public class MastersController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Profil trenutnog majstora (user + kategorija, ocena). Samo za ulogu Master.</summary>
+    /// <summary>Profil trenutnog majstora (user + kategorija, ocena). Samo Master (CompanyWorker isključen).</summary>
     [HttpGet("profile")]
     public async Task<ActionResult<MasterProfileResponse>> GetMyProfile()
     {
         var (userId, role) = User.GetUserIdAndRole();
+        // Samo Master; za CompanyWorker vratiti: (role != Master && role != CompanyWorker) → Forbid
         if (role != UserRole.Master)
             return Forbid();
 
@@ -89,7 +90,8 @@ public class MastersController : ControllerBase
     public async Task<IActionResult> UpdateCategory([FromBody] UpdateMasterCategoryRequest request)
     {
         var (userId, role) = User.GetUserIdAndRole();
-        if (role != UserRole.Master && role != UserRole.CompanyWorker)
+        // Samo Master; za CompanyWorker vratiti proveru sa CompanyWorker
+        if (role != UserRole.Master)
             return Forbid();
 
         var master = await _masterRepository.GetByUserId(userId);

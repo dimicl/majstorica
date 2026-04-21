@@ -34,6 +34,7 @@ public static class UserMapper
             Address = user.Address?.ToString(),
             CreatedAtUtc = user.CreatedAtUtc,
             UpdatedAtUtc = user.UpdatedAtUtc,
+            EmployerCompanyId = user.EmployerCompanyId,
             MasterProfile = masterProfile,
             ClientProfile = clientProfile
         };
@@ -84,6 +85,8 @@ public static class UserMapper
             var client = ClientMapper.ToDomain(doc.ClientProfile);
             user.SetClientProfile(client);
         }
+
+        user.ApplyEmployerCompanyIdFromStorage(doc.EmployerCompanyId);
 
         return user;
     }

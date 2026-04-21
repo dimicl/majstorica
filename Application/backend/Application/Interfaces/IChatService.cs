@@ -6,7 +6,7 @@ public interface IChatService
 {
     Task<Message> SendMessage(
         Guid conversationId,
-        Guid jobId,
+        Guid? jobId,
         Guid senderId,
         string content);
 

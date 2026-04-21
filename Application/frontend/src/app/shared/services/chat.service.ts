@@ -29,7 +29,8 @@ export class ChatService {
       const lastSeenIso = c.otherPartyLastSeen ?? c.OtherPartyLastSeen ?? null;
       return {
         id: c.id,
-        jobId: c.jobId,
+        // API šalje jobId: null za chat bez posla – SignalR SendMessage mora uvek dobiti validan Guid string
+        jobId: c.jobId ?? emptyJobId,
         title: c.otherPartyName,
         subtitle:
           c.jobId === emptyJobId ? 'Razgovor' : c.jobDescription ?? 'Posao',
@@ -155,17 +156,20 @@ export class ChatService {
         `${API_BASE_URL}/conversations/${conversationId}/messages`
       )
     );
-    return list.map((m) => ({
-      id: m.id,
-      from: m.isSystemMessage
-        ? ('system' as const)
-        : m.senderId === currentUserId
-        ? ('me' as const)
-        : ('them' as const),
-      text: m.content,
-      time: this.formatTimeOnly(m.sentAt),
-      sentAt: m.sentAt,
-    }));
+    return list.map((m) => {
+      const sentIso = m.sentAtUtc ?? m.sentAt ?? '';
+      return {
+        id: m.id,
+        from: m.isSystemMessage
+          ? ('system' as const)
+          : m.senderId === currentUserId
+          ? ('me' as const)
+          : ('them' as const),
+        text: m.content,
+        time: this.formatTimeOnly(sentIso),
+        sentAt: sentIso,
+      };
+    });
   }
 
   async markRead(conversationId: string): Promise<void> {
@@ -183,7 +187,9 @@ export class ChatService {
 
   /** Samo vreme (HH:mm) za poruke u chatu */
   private formatTimeOnly(iso: string): string {
+    if (!iso) return '--:--';
     const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '--:--';
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;

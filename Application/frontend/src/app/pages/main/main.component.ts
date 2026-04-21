@@ -11,6 +11,10 @@ import { AuthSelectorService } from '../../shared/services/auth-selector.service
 import { ClientActions } from '../../shared/store/client/client.actions';
 import { MasterActions } from '../../shared/store/master/master.actions';
 import { UserRole } from '../../shared/enums';
+import {
+  isClientUserRole,
+  isMasterLikeUserRole,
+} from '../../shared/utils/user-role.util';
 
 @Component({
   selector: 'app-main',
@@ -36,9 +40,9 @@ export class MainComponent implements OnInit {
       .pipe(take(1))
       .subscribe((user) => {
         if (!user) return;
-        if (user.role === UserRole.Client) {
+        if (isClientUserRole(user.role)) {
           this.store.dispatch(ClientActions.loadProfile());
-        } else if (user.role === UserRole.Master) {
+        } else if (isMasterLikeUserRole(user.role)) {
           this.store.dispatch(MasterActions.loadProfile());
         }
       });

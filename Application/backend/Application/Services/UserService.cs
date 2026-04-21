@@ -151,7 +151,8 @@ public class UserService : IUserService
     {
         var users = await _userRepository.GetAll();
         var masterUsers = users
-            .Where(u => u.Role == UserRole.Master && u.IsActive)
+            .Where(u =>
+                (u.Role == UserRole.Master /* || u.Role == UserRole.CompanyWorker */) && u.IsActive)
             .ToList();
         if (masterUsers.Count == 0)
             return new List<MasterListItemResponse>();
@@ -234,7 +235,8 @@ public class UserService : IUserService
         foreach (var id in ids)
         {
             var user = await _userRepository.GetById(id);
-            if (user == null || !user.IsActive || user.Role != UserRole.Master)
+            if (user == null || !user.IsActive ||
+                (user.Role != UserRole.Master /* && user.Role != UserRole.CompanyWorker */))
                 continue;
             var master = masterByUserId.GetValueOrDefault(id);
             result.Add(new MasterListItemResponse
@@ -276,7 +278,8 @@ public class UserService : IUserService
         foreach (var id in ids)
         {
             var user = await _userRepository.GetById(id);
-            if (user == null || !user.IsActive || user.Role != UserRole.Master)
+            if (user == null || !user.IsActive ||
+                (user.Role != UserRole.Master /* && user.Role != UserRole.CompanyWorker */))
                 continue;
             var master = masterByUserId.GetValueOrDefault(id);
             result.Add(new MasterListItemResponse

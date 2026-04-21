@@ -15,8 +15,8 @@ import { SvgIconComponent } from 'angular-svg-icon';
 import { SharedSvgRoutes } from '../../shared/constants/shared_svg_routes';
 import { NavbarItem } from '../../shared/interfaces';
 import { NavbarItemUserType, NavbarItemString } from '../../shared/enums';
-import { UserRole } from '../../shared/enums/user-role.enum';
 import { NavbarHelper } from './utils/helpers';
+import { resolveNavbarItemUserTypeFromRole } from '../../shared/utils/navbar-user-type.util';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -65,10 +65,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private initItems(): void {
     this.auth.userSelector$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
-      const userType =
-        user?.role === UserRole.Master
-          ? NavbarItemUserType.MASTER
-          : NavbarItemUserType.CLIENT;
+      const userType = resolveNavbarItemUserTypeFromRole(user?.role);
       this.getNavbarItems(userType);
       this.syncNavbarWithRoute(this.router.url);
     });

@@ -20,7 +20,7 @@ public class ChatService : IChatService
 
     public async Task<Message> SendMessage(
         Guid conversationId,
-        Guid jobId,
+        Guid? jobId,
         Guid senderId,
         string content)
     {
@@ -28,11 +28,19 @@ public class ChatService : IChatService
         if (conversation == null || conversation.IsClosed)
             throw new ConflictException("Chat je zatvoren.");
 
-        var message = new Message(conversationId, jobId, senderId, MessageType.Text, content, DateTime.UtcNow);
+        // Message konstruktor: (id, conversationId, senderUserId, ...). jobId na poruci nije modelovan; SignalR ga šalje radi kompatibilnosti.
+        var message = new Message(
+            Guid.NewGuid(),
+            conversationId,
+            senderId,
+            MessageType.Text,
+            content,
+            DateTime.UtcNow);
         await _messageRepository.Save(message);
 
         var recipientId = conversation.ClientUserId == senderId ? conversation.MasterUserId : conversation.ClientUserId;
-        await _conversationRepository.IncrementUnreadAsync(conversationId, recipientId);
+        if (recipientId != Guid.Empty)
+            await _conversationRepository.IncrementUnreadAsync(conversationId, recipientId);
 
         return message;
     }

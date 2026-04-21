@@ -1,15 +1,17 @@
 import {
   Component,
   computed,
+  DestroyRef,
   inject,
   NgZone,
   OnInit,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthSelectorService } from '../../shared/services/auth-selector.service';
-import { UserRole } from '../../shared/enums/user-role.enum';
+import { isMasterLikeUserRole } from '../../shared/utils/user-role.util';
 import {
   JobService,
   type JobListItem,
@@ -52,6 +54,7 @@ export class RequestsComponent implements OnInit {
   private authService = inject(AuthService);
   private ngZone = inject(NgZone);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   readonly eButtonType = BUTTON_TYPES;
   readonly weekdays = REQUESTS_WEEKDAYS;
@@ -81,11 +84,15 @@ export class RequestsComponent implements OnInit {
   monthLabel = computed(() => getMonthLabel(this.currentMonth()));
 
   ngOnInit(): void {
-    this.auth.userSelector$.subscribe((user) => this.onUserSelected(user));
+    this.auth.userSelector$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((user) => this.onUserSelected(user));
   }
 
-  private onUserSelected(user: { role?: UserRole } | null): void {
-    if (user?.role !== UserRole.Master) {
+  private onUserSelected(user: { role?: unknown } | null): void {
+    // Dok je user null (pre loadUser), ne redirectuj – inače majstor odmah ide na /home.
+    if (!user) return;
+    if (!isMasterLikeUserRole(user.role)) {
       this.router.navigate(['/home']);
       return;
     }

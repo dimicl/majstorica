@@ -24,7 +24,7 @@
           >
         </div>
 
-        @if (user.role === userRole.Master) {
+        @if (masterLikeProfile(user.role)) {
         <div
           class="profil-category-choices"
           role="group"
@@ -64,8 +64,8 @@
 
         <span
           class="profil-badge"
-          [class.profil-badge--client]="user.role === userRole.Client"
-          [class.profil-badge--master]="user.role === userRole.Master"
+          [class.profil-badge--client]="clientProfile(user.role)"
+          [class.profil-badge--master]="masterLikeProfile(user.role)"
         >
           {{ user.role }}
         </span>
@@ -101,8 +101,8 @@
       </div>
     </div>
 
-    <!-- ROLE SWITCH -->
-    @switch (user.role) { @case (userRole.Client) {
+    <!-- ROLE: klijent vs majstor / zaposleni majstor -->
+    @if (clientProfile(user.role)) {
     <div class="profil-jobs">
       <div class="profil-section-head">
         <span class="profil-section-title">Poslovi</span>
@@ -190,7 +190,7 @@
         }
       </div>
     </div>
-    } @case (userRole.Master) {
+    } @else if (masterLikeProfile(user.role)) {
     <div class="profil-card">
       <div class="profil-section-head">
         <span class="profil-section-title">Zahtevi i poslovi</span>
@@ -339,7 +339,8 @@
         }
       </div>
     </div>
-    } } }
+    }
+    }
   </div>
 
   @if (jobEditModal()) {
