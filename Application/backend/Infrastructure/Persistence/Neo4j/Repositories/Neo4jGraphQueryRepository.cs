@@ -20,8 +20,9 @@ public class Neo4jGraphQueryRepository : IGraphQueryRepository
             WHERE other.id <> used.id
               AND NOT (c)-[:HIRED]->(other)
               AND ($minRating IS NULL OR other.rating >= $minRating)
-            RETURN DISTINCT other.id AS id
-            ORDER BY other.rating DESC
+            WITH other, max(other.rating) AS r
+            RETURN other.id AS id
+            ORDER BY coalesce(r, -1.0) DESC
             LIMIT $limit
         ";
         var parameters = new { clientId = clientId.ToString(), minRating = minRating.HasValue ? (double?)minRating.Value : null, limit };
@@ -57,7 +58,7 @@ public class Neo4jGraphQueryRepository : IGraphQueryRepository
             WHERE (size($categoryNames) = 0 OR size([x IN skills WHERE x IN $categoryNames]) > 0)
               AND (size($zoneIds) = 0 OR size([x IN zones WHERE x IN $zoneIds]) > 0)
             RETURN m.id AS id
-            ORDER BY m.rating DESC
+            ORDER BY coalesce(m.rating, -1.0) DESC
             LIMIT $limit
         ";
         var parameters = new
