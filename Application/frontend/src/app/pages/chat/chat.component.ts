@@ -56,6 +56,8 @@ export class ChatComponent {
     return id ? this.messagesByThread()[id] ?? null : null;
   });
 
+  hideExploreMastersButton = computed(() => false);
+
   constructor() {
     const token = this.auth.getToken();
     if (token && this.signalr.status() !== SIGNALR_STATUS.CONNECTED) {

@@ -19,7 +19,7 @@ export const NAVBAR_ITEMS: NavbarItem[] = [
     id: NavbarItemString.MARKETPLACE,
     icon: SharedSvgRoutes.MARKETPLACE_ICON,
     label: NavbarItemString.MARKETPLACE_LABEL,
-    userType: [NavbarItemUserType.MASTER, NavbarItemUserType.COMPANY],
+    userType: [NavbarItemUserType.MASTER, NavbarItemUserType.COMPANY_OWNER],
     isBottomPinned: false,
   },
   {
