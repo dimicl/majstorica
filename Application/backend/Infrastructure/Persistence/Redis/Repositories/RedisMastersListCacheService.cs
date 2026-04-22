@@ -24,7 +24,7 @@ public class RedisMastersListCache : IRedisListCache
         var value = await _db.StringGetAsync(key);
         if (value.IsNullOrEmpty)
             return null;
-
+        
         try
         {
             return JsonSerializer.Deserialize<List<MasterListItemResponse>>(value!, JsonOptions);
