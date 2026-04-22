@@ -259,10 +259,13 @@ public class UserService : IUserService
         foreach (var id in ids)
         {
             var user = await _userRepository.GetById(id);
-            if (user == null || !user.IsActive ||
-                (user.Role != UserRole.Master /* && user.Role != UserRole.CompanyWorker */))
+            if (user == null || !user.IsActive)
+                continue;
+            if (user.Role != UserRole.Master && user.Role != UserRole.CompanyWorker)
                 continue;
             var master = masterByUserId.GetValueOrDefault(id);
+            if (user.Role == UserRole.CompanyWorker && master == null)
+                continue;
             result.Add(new MasterListItemResponse
             {
                 Id = user.Id,
@@ -302,10 +305,13 @@ public class UserService : IUserService
         foreach (var id in ids)
         {
             var user = await _userRepository.GetById(id);
-            if (user == null || !user.IsActive ||
-                (user.Role != UserRole.Master /* && user.Role != UserRole.CompanyWorker */))
+            if (user == null || !user.IsActive)
+                continue;
+            if (user.Role != UserRole.Master && user.Role != UserRole.CompanyWorker)
                 continue;
             var master = masterByUserId.GetValueOrDefault(id);
+            if (user.Role == UserRole.CompanyWorker && master == null)
+                continue;
             result.Add(new MasterListItemResponse
             {
                 Id = user.Id,
