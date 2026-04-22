@@ -139,7 +139,7 @@
           <tbody>
             @for (job of myJobs(); track job.jobId) {
             <tr class="profil-request-row">
-              <td>{{ job.masterName || "—" }}</td>
+              <td>{{ job.masterName || "Marketplace" }}</td>
               <td class="profil-request-desc-cell">
                 {{ job.jobTitle || "—" }}
               </td>
@@ -166,13 +166,11 @@
                 </span>
               </td>
               <td class="profil-request-actions-cell">
-                @if (job.status === 'Accepted' || job.status === 'InProgress') {
                 <app-button
                   [buttonType]="eButtonType.NEUTRAL"
                   [label]="'Edit'"
                   (onButtonClick)="openJobEdit(job)"
                 />
-                }
               </td>
             </tr>
             }
@@ -251,13 +249,11 @@
                 </span>
               </td>
               <td class="profil-request-actions-cell">
-                @if (job.status === 'Accepted' || job.status === 'InProgress') {
                 <app-button
                   [buttonType]="eButtonType.NEUTRAL"
                   [label]="'Edit'"
                   (onButtonClick)="openJobEdit(job)"
                 />
-                }
               </td>
             </tr>
             }
@@ -339,8 +335,7 @@
         }
       </div>
     </div>
-    }
-    }
+    } }
   </div>
 
   @if (jobEditModal()) {
@@ -349,9 +344,7 @@
     (closed)="closeJobEdit()"
     (saved)="loadJobs()"
   />
-  }
-
-  @if (showCreateJobModal()) {
+  } @if (showCreateJobModal()) {
   <app-create-job-modal
     (closed)="closeCreateJobModal()"
     (created)="onJobCreated()"

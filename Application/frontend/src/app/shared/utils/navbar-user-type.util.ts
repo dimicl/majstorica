@@ -19,7 +19,7 @@ export function resolveNavbarItemUserTypeFromRole(
       case 2:
         return NavbarItemUserType.MASTER;
       case 3:
-        return NavbarItemUserType.COMPANY;
+        return NavbarItemUserType.COMPANY_OWNER;
       case 4:
         // CompanyWorker – tretira se kao klijent u navbaru dok je worker isključen iz „majstorske“ grupe
         // return NavbarItemUserType.MASTER;
@@ -35,7 +35,7 @@ export function resolveNavbarItemUserTypeFromRole(
 
   if (s === UserRole.Master) return NavbarItemUserType.MASTER;
   // if (s === UserRole.CompanyWorker) return NavbarItemUserType.MASTER;
-  if (s === UserRole.CompanyOwner) return NavbarItemUserType.COMPANY;
+  if (s === UserRole.CompanyOwner) return NavbarItemUserType.COMPANY_OWNER;
   if (s === UserRole.Admin) return NavbarItemUserType.ADMIN;
   if (s === UserRole.Client) return NavbarItemUserType.CLIENT;
 

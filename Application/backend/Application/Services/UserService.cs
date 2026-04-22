@@ -15,6 +15,8 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IUserGraphSync _userGraphSync;
     private readonly IMasterRepository _masterRepository;
+    private readonly IReviewRepository _reviewRepository;
+    private readonly ICompanyRepository _companyRepository;
     private readonly IRedisListCache _redisListCache;
     private readonly IGraphQueryRepository _graphQueryRepository;
 
@@ -22,12 +24,16 @@ public class UserService : IUserService
         IUserRepository userRepository,
         IUserGraphSync userGraphSync,
         IMasterRepository masterRepository,
+        IReviewRepository reviewRepository,
+        ICompanyRepository companyRepository,
         IRedisListCache redisListCache,
         IGraphQueryRepository graphQueryRepository)
     {
         _userRepository = userRepository;
         _userGraphSync = userGraphSync;
         _masterRepository = masterRepository;
+        _reviewRepository = reviewRepository;
+        _companyRepository = companyRepository;
         _redisListCache = redisListCache;
         _graphQueryRepository = graphQueryRepository;
     }
@@ -116,35 +122,53 @@ public class UserService : IUserService
         await _userGraphSync.SyncUserNode(user.Id, user.Role);
     }
 
-    public async Task<List<MasterListItemResponse>> GetMastersList(MastersListQuery? query = null)
+    public async Task<MastersListPageResponse> GetMastersList(MastersListQuery? query = null)
     {
         query ??= new MastersListQuery();
+        var page = query.Page <= 0 ? 1 : query.Page;
+        var pageSize = query.PageSize <= 0 ? 12 : query.PageSize;
         var key = RedisListCacheKey.Create(query);
 
+        List<MasterListItemResponse>? filtered = null;
         try
         {
             var cached = await _redisListCache.GetAsync(key);
             if (cached != null)
-                return cached;
+                filtered = cached;
         }
         catch
         {
             // Redis nedostupan – nastavljamo bez keša
         }
 
-        var list = await GetMastersListFromDb();
-        var filtered = ApplyFilterAndSort(list, query);
-
-        try
+        if (filtered == null)
         {
-            await _redisListCache.SetAsync(key, filtered, RedisListCacheTtl);
-        }
-        catch
-        {
-            // Redis nedostupan – ignorišemo, podaci su već učitani
+            var list = await GetMastersListFromDb();
+            filtered = ApplyFilterAndSort(list, query);
+
+            try
+            {
+                await _redisListCache.SetAsync(key, filtered, RedisListCacheTtl);
+            }
+            catch
+            {
+                // Redis nedostupan – ignorišemo, podaci su već učitani
+            }
         }
 
-        return filtered;
+        var totalCount = filtered.Count;
+        var items = filtered
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return new MastersListPageResponse
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     private async Task<List<MasterListItemResponse>> GetMastersListFromDb()
@@ -294,5 +318,110 @@ public class UserService : IUserService
         }
 
         return result;
+    }
+
+    public async Task<MasterProfileResponse?> GetMasterProfile(Guid userId)
+    {
+        var user = await _userRepository.GetById(userId);
+        if (user == null)
+            return null;
+
+        var profile = await GetProfile(userId);
+        if (profile == null)
+            return null;
+
+        var master = await _masterRepository.GetByUserId(userId);
+        string? employerCompanyName = null;
+        if (user.EmployerCompanyId.HasValue)
+        {
+            var company = await _companyRepository.GetById(user.EmployerCompanyId.Value);
+            employerCompanyName = company?.Name;
+        }
+
+        return new MasterProfileResponse
+        {
+            User = profile,
+            Category = master?.ServiceCategories?.FirstOrDefault(),
+            Rating = master?.AverageRating?.Value,
+            EmployerCompanyId = user.EmployerCompanyId,
+            EmployerCompanyName = employerCompanyName,
+            YearsOfExperience = master?.YearsOfExperience ?? 0,
+            HourlyRateAmount = master?.HourlyRate?.Amount ?? 0m,
+            HourlyRateCurrency = master?.HourlyRate?.Currency ?? "RSD",
+            TotalReviews = master?.TotalReviews ?? 0
+        };
+    }
+
+    public async Task<List<MasterReviewListItemResponse>> GetMasterReviews(Guid masterId)
+    {
+        var reviews = await _reviewRepository.GetByMasterId(masterId);
+        var items = new List<MasterReviewListItemResponse>();
+
+        foreach (var review in reviews)
+        {
+            var reviewer = await _userRepository.GetById(review.ReviewerUserId);
+            items.Add(new MasterReviewListItemResponse
+            {
+                Id = review.Id,
+                JobId = review.JobId,
+                Rating = review.Rating.Value,
+                Comment = review.Comment,
+                CreatedAtUtc = review.CreatedAtUtc,
+                ReviewerName = reviewer != null
+                    ? UserDisplayNameHelper.GetDisplayName(reviewer, "Korisnik")
+                    : "Korisnik",
+                ReviewerUsername = reviewer?.Username
+            });
+        }
+
+        return items;
+    }
+
+    public async Task UpdateMasterProfileStats(
+        Guid userId,
+        int? yearsOfExperience,
+        decimal? hourlyRateAmount,
+        string? hourlyRateCurrency)
+    {
+        var user = await _userRepository.GetById(userId)
+            ?? throw new NotFoundException("Korisnik nije pronađen.");
+        var master = await _masterRepository.GetByUserId(userId)
+            ?? throw new NotFoundException("Profil majstora nije pronađen.");
+
+        if (yearsOfExperience.HasValue)
+            master.UpdateYearsOfExperience(yearsOfExperience.Value);
+        if (hourlyRateAmount.HasValue)
+            master.SetHourlyRate(new Domain.ValueObjects.Money(
+                hourlyRateAmount.Value,
+                string.IsNullOrWhiteSpace(hourlyRateCurrency) ? "RSD" : hourlyRateCurrency.Trim()));
+
+        user.SetMasterProfile(master);
+        await _userRepository.Save(user);
+        await _userGraphSync.SyncMasterProfile(
+            user.Id,
+            master.ServiceCategories.FirstOrDefault(),
+            master.AverageRating?.Value,
+            master.YearsOfExperience);
+    }
+
+    public async Task UpdateMasterCategory(Guid userId, string? category)
+    {
+        var user = await _userRepository.GetById(userId)
+            ?? throw new NotFoundException("Korisnik nije pronađen.");
+        var master = await _masterRepository.GetByUserId(userId)
+            ?? throw new NotFoundException("Profil majstora nije pronađen.");
+
+        var categoryDisplayName = string.IsNullOrWhiteSpace(category)
+            ? "Ostalo"
+            : category.Trim();
+        master.ReplaceServiceCategories(new[] { categoryDisplayName });
+
+        user.SetMasterProfile(master);
+        await _userRepository.Save(user);
+        await _userGraphSync.SyncMasterProfile(
+            user.Id,
+            categoryDisplayName,
+            master.AverageRating?.Value,
+            master.YearsOfExperience);
     }
 }

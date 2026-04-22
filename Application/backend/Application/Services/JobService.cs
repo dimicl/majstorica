@@ -312,7 +312,7 @@ public class JobService : IJobService
     }
 
 
-    public async Task StartJob(Guid jobId)
+    public async Task StartJob(Guid jobId, Guid requestingUserId)
     {
         var job = await GetJob(jobId);
 
@@ -321,7 +321,7 @@ public class JobService : IJobService
         await SaveAndPublish(job);
     }
 
-    public async Task CompleteJob(Guid jobId)
+    public async Task CompleteJob(Guid jobId, Guid requestingUserId)
     {
         var job = await GetJob(jobId);
 

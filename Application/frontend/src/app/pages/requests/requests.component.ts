@@ -23,6 +23,9 @@ import { BUTTON_TYPES } from '../../shared/types';
 import { NewJobRequestPayload } from '../../shared/interfaces';
 import { HUB_CHAT_URL } from '../../shared/constants/api.constants';
 import { SIGNALR_STATUS } from '../../shared/types';
+import { CompanyService } from '../../shared/services/company.service';
+import { CompanyInvitationPending } from '../../shared/interfaces/company.interface';
+import { firstValueFrom } from 'rxjs';
 import {
   type CalendarDay,
   REQUESTS_WEEKDAYS,
@@ -55,6 +58,7 @@ export class RequestsComponent implements OnInit {
   private ngZone = inject(NgZone);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private companyService = inject(CompanyService);
 
   readonly eButtonType = BUTTON_TYPES;
   readonly weekdays = REQUESTS_WEEKDAYS;
@@ -63,6 +67,10 @@ export class RequestsComponent implements OnInit {
   loadingRequests = signal(false);
   requestError = signal<string | null>(null);
   actingRequestId = signal<string | null>(null);
+  companyInvitations = signal<CompanyInvitationPending[]>([]);
+  loadingCompanyInvites = signal(false);
+  companyInviteError = signal<string | null>(null);
+  actingCompanyInviteId = signal<string | null>(null);
   currentMonth = signal<Date>(new Date());
   selectedDate = signal<string | null>(null);
 
@@ -99,6 +107,7 @@ export class RequestsComponent implements OnInit {
     this.ensureSignalR();
     this.registerNewJobRequestHandlerOnce();
     void this.loadRequests();
+    void this.loadCompanyInvitations();
   }
 
   private registerNewJobRequestHandlerOnce(): void {
@@ -130,6 +139,22 @@ export class RequestsComponent implements OnInit {
       this.requests.set([]);
     } finally {
       this.loadingRequests.set(false);
+    }
+  }
+
+  async loadCompanyInvitations(): Promise<void> {
+    this.loadingCompanyInvites.set(true);
+    this.companyInviteError.set(null);
+    try {
+      const invites = await firstValueFrom(
+        this.companyService.getMyPendingCompanyInvitations()
+      );
+      this.companyInvitations.set(invites);
+    } catch {
+      this.companyInvitations.set([]);
+      this.companyInviteError.set('Nije moguće učitati pozive u firmu.');
+    } finally {
+      this.loadingCompanyInvites.set(false);
     }
   }
 
@@ -177,6 +202,47 @@ export class RequestsComponent implements OnInit {
       this.requestError.set('Nije moguće odbiti zahtev.');
     } finally {
       this.actingRequestId.set(null);
+    }
+  }
+
+  async acceptCompanyInvite(invitation: CompanyInvitationPending): Promise<void> {
+    if (this.actingCompanyInviteId() || this.actingRequestId()) return;
+    this.actingCompanyInviteId.set(invitation.invitationId);
+    this.companyInviteError.set(null);
+    try {
+      const authResponse = await firstValueFrom(
+        this.companyService.acceptCompanyInvitation(invitation.invitationId)
+      );
+      this.authService.saveToken(authResponse.token);
+      this.authService.saveUserId(authResponse.user.id);
+      this.auth.dispatchLoadUser();
+      this.companyInvitations.update((list) =>
+        list.filter((x) => x.invitationId !== invitation.invitationId)
+      );
+    } catch {
+      this.companyInviteError.set('Nije moguće prihvatiti poziv u firmu.');
+    } finally {
+      this.actingCompanyInviteId.set(null);
+    }
+  }
+
+  async declineCompanyInvite(
+    invitation: CompanyInvitationPending
+  ): Promise<void> {
+    if (this.actingCompanyInviteId()) return;
+    this.actingCompanyInviteId.set(invitation.invitationId);
+    this.companyInviteError.set(null);
+    try {
+      await firstValueFrom(
+        this.companyService.declineCompanyInvitation(invitation.invitationId)
+      );
+      this.companyInvitations.update((list) =>
+        list.filter((x) => x.invitationId !== invitation.invitationId)
+      );
+    } catch {
+      this.companyInviteError.set('Nije moguće odbiti poziv u firmu.');
+    } finally {
+      this.actingCompanyInviteId.set(null);
     }
   }
 

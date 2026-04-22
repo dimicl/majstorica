@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -15,6 +15,9 @@ import {
   isClientUserRole,
   isMasterLikeUserRole,
 } from '../../shared/utils/user-role.util';
+import { CompanySetupModalComponent } from '../../components/company-setup-modal/company-setup-modal.component';
+import { CompanyService } from '../../shared/services/company.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-main',
@@ -23,16 +26,19 @@ import {
   imports: [
     CommonModule,
     RouterLink,
-    ButtonComponent
+    ButtonComponent,
+    CompanySetupModalComponent
   ]
 })
 export class MainComponent implements OnInit {
   readonly auth = inject(AuthSelectorService);
   private store = inject(Store);
+  private companyService = inject(CompanyService);
   readonly userRole = UserRole;
 
   public eButtonType = BUTTON_TYPES;
   public sharedSvgRoutes = SharedSvgRoutes;
+  showCompanySetupModal = signal(false);
 
   ngOnInit(): void {
     // Iz auth state izvučeš user (id, role) i na osnovu toga dispatch-uješ get za klijenta ili majstora
@@ -44,6 +50,8 @@ export class MainComponent implements OnInit {
           this.store.dispatch(ClientActions.loadProfile());
         } else if (isMasterLikeUserRole(user.role)) {
           this.store.dispatch(MasterActions.loadProfile());
+        } else if (user.role === UserRole.CompanyOwner) {
+          void this.evaluateCompanySetupModal();
         }
       });
   }
@@ -52,5 +60,18 @@ export class MainComponent implements OnInit {
 
   public onButtonClick(event: MouseEvent): void {
     console.log('Button clicked', event);
+  }
+
+  async onCompanySetupCompleted(): Promise<void> {
+    this.showCompanySetupModal.set(false);
+  }
+
+  private async evaluateCompanySetupModal(): Promise<void> {
+    try {
+      const company = await firstValueFrom(this.companyService.getMyCompany());
+      this.showCompanySetupModal.set(!company);
+    } catch {
+      this.showCompanySetupModal.set(false);
+    }
   }
 }
