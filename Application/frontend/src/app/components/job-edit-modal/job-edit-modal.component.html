@@ -45,9 +45,9 @@
               [(ngModel)]="description"
               name="description"
               rows="3"
-              [readOnly]="!canEdit()"
+              [readOnly]="!canChangeJobDetails()"
             ></textarea>
-            @if (canEdit()) {
+            @if (canChangeJobDetails()) {
               <button
                 type="button"
                 class="job-edit-modal__btn job-edit-modal__btn--primary"
@@ -68,9 +68,9 @@
               name="price"
               min="0"
               step="1"
-              [readOnly]="!canEdit()"
+              [readOnly]="!canChangeJobDetails()"
             />
-            @if (canEdit()) {
+            @if (canChangeJobDetails()) {
               <button
                 type="button"
                 class="job-edit-modal__btn job-edit-modal__btn--primary"
@@ -81,6 +81,16 @@
               </button>
             }
           </div>
+          @if (canCompleteJob()) {
+            <div class="job-edit-modal__actions">
+              <app-button
+                [buttonType]="eButtonType.POSITIVE"
+                [label]="finishingJob() ? 'ZAVRSAVANJE...' : 'ZAVRSI'"
+                [disabled]="finishingJob()"
+                (onButtonClick)="completeJob()"
+              />
+            </div>
+          }
         </div>
       }
     </div>

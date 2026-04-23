@@ -19,6 +19,7 @@ import { SignalrService } from '../../shared/services/signalr.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { SIGNALR_STATUS } from '../../shared/types';
 import { HUB_CHAT_URL } from '../../shared/constants/api.constants';
+import { BUTTON_TYPES } from '../../shared/types/button.type';
 
 @Component({
   selector: 'app-job-edit-modal',
@@ -43,7 +44,9 @@ export class JobEditModalComponent implements OnInit, OnDestroy {
   lockLoading = signal(true);
   savingDescription = signal(false);
   savingPrice = signal(false);
+  finishingJob = signal(false);
   saveError = signal<string | null>(null);
+  public eButtonType = BUTTON_TYPES;
 
   description = '';
   price: number | null = null;
@@ -157,7 +160,7 @@ export class JobEditModalComponent implements OnInit, OnDestroy {
   }
 
   async saveDescription(): Promise<void> {
-    if (!this.canEdit()) return;
+    if (!this.canChangeJobDetails()) return;
     this.saveError.set(null);
     this.savingDescription.set(true);
     try {
@@ -175,7 +178,7 @@ export class JobEditModalComponent implements OnInit, OnDestroy {
   }
 
   async savePrice(): Promise<void> {
-    if (!this.canEdit()) return;
+    if (!this.canChangeJobDetails()) return;
     this.saveError.set(null);
     this.savingPrice.set(true);
     try {
@@ -189,6 +192,33 @@ export class JobEditModalComponent implements OnInit, OnDestroy {
       this.saveError.set(msg);
     } finally {
       this.savingPrice.set(false);
+    }
+  }
+
+  canCompleteJob(): boolean {
+    return this.job.status === 'InProgress' && this.canEdit();
+  }
+
+  canChangeJobDetails(): boolean {
+    return this.canEdit() && !this.canCompleteJob();
+  }
+
+  async completeJob(): Promise<void> {
+    if (!this.canCompleteJob() || this.finishingJob()) return;
+    this.saveError.set(null);
+    this.finishingJob.set(true);
+    try {
+      await this.jobService.completeJob(this.job.jobId);
+      this.saved.emit();
+      this.close();
+    } catch (err: unknown) {
+      const msg =
+        (err as { error?: { message?: string } })?.error?.message ??
+        (err as Error)?.message ??
+        'Greška pri završavanju posla.';
+      this.saveError.set(msg);
+    } finally {
+      this.finishingJob.set(false);
     }
   }
 }

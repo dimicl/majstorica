@@ -57,7 +57,8 @@ export class JobService {
         scheduledDate: payload.scheduledDate ?? null,
         price: payload.price ?? null,
         isEmergency: payload.isEmergency,
-        ...(payload.serviceCategory != null && payload.serviceCategory.trim() !== ''
+        ...(payload.serviceCategory != null &&
+        payload.serviceCategory.trim() !== ''
           ? { serviceCategory: payload.serviceCategory.trim() }
           : {}),
       })
@@ -80,8 +81,10 @@ export class JobService {
     return list ?? [];
   }
 
-  /** Marketplace poslovi iz baze, paginirano. */
-  async getMarketplaceJobs(page: number, pageSize: number): Promise<JobListItem[]> {
+  async getMarketplaceJobs(
+    page: number,
+    pageSize: number
+  ): Promise<JobListItem[]> {
     const list = await firstValueFrom(
       this.http.get<JobListItem[]>(
         `${API_URL}/jobs/marketplace?page=${page}&pageSize=${pageSize}`
@@ -93,6 +96,13 @@ export class JobService {
   /** Majstor prihvata posao. */
   async acceptJob(jobId: string): Promise<void> {
     await firstValueFrom(this.http.post(`${API_URL}/jobs/${jobId}/accept`, {}));
+  }
+
+  /** Završava posao. */
+  async completeJob(jobId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${API_URL}/jobs/${jobId}/complete`, {})
+    );
   }
 
   /** Majstor odbija zahtev (zatvara konverzaciju). */
