@@ -76,6 +76,9 @@ public class JobService : IJobService
             preferredTimeNote: null,
             budget: budget);
 
+        // Novi poslovi odmah prelaze iz Draft u Published da ne ostanu u početnom stanju.
+        job.Publish(now);
+
         await _jobRepository.Save(job);
         await PublishEvents(job);
 
@@ -281,6 +284,7 @@ public class JobService : IJobService
             job.Publish(DateTime.UtcNow);
 
         job.AssignToMaster(masterId, DateTime.UtcNow);
+        job.Start(DateTime.UtcNow);
 
         var conversations = await _conversationRepository.GetByJobId(jobId);
 

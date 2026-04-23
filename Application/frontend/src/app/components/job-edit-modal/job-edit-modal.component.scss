@@ -149,6 +149,12 @@
   min-height: 72px;
 }
 
+.job-edit-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
 .job-edit-modal__btn {
   padding: 8px 14px;
   font-size: 0.85rem;
