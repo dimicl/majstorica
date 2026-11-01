@@ -19,3 +19,9 @@
 # Node modules
 **/node_modules/
 
+# Build verification and archives
+**/_build_verify/
+*.zip
+
+# Office temp files
+~$*
