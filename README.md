@@ -184,4 +184,4 @@ majstorica/
 ## Team
 
 - **Petar Nikolić** – [@petarNi](https://github.com/petarNi) – backend and databases (MongoDB, Redis, Neo4j, RabbitMQ)
-- **Luka Dimić** – [@dimicl](https://github.com/dimicl)
+- **Luka Dimić** – [@dimicl](https://github.com/dimicl) – frontend and databases (MongoDB, Redis, Neo4j, RabbitMQ)
